@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>白蛇传 · 文脉全息博物馆</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            /* 动态基准值，由 JS 设置 */
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: #0a0705;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            font-size: 0.9rem;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        .dashboard {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .sidebar {
+            width: 40%;
+            background: rgba(10, 8, 6, 0.85);
+            backdrop-filter: blur(18px);
+            border-right: 2px solid rgba(255, 215, 150, 0.7);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            background: #14100c;
+        }
+
+        .museum-header {
+            padding: 1rem 1.5rem 0.8rem;
+            border-bottom: 2px solid #ffd966;
+            background: linear-gradient(135deg, #2a1e12, #0f0b07);
+        }
+
+        .museum-header h1 {
+            font-size: 1.6rem;
+            background: linear-gradient(45deg, #ffe6b3, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .sub {
+            font-size: 0.7rem;
+            color: #ffda99;
+            border-left: 3px solid #ffaa66;
+            padding-left: 0.75rem;
+            margin-top: 0.3rem;
+        }
+
+        .viz-grid {
+            display: flex;
+            gap: 0.8rem;
+            padding: 0.8rem 1rem;
+            flex-wrap: wrap;
+        }
+
+        .viz-card {
+            flex: 1;
+            background: rgba(25, 20, 15, 0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 1.75rem;
+            padding: 0.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 180, 80, 0.5);
+        }
+
+        .viz-title {
+            font-size: 0.65rem;
+            color: #ffdd99;
+        }
+
+        .stat-number {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffcc88;
+        }
+
+        .locations-cloud {
+            padding: 0.6rem 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-bottom: 1px solid #ffb34755;
+        }
+
+        .loc-badge {
+            background: linear-gradient(145deg, #3d2e1e, #2a1f12);
+            padding: 0.25rem 0.9rem;
+            border-radius: 2.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #ffe1b3;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #ffbf6e;
+        }
+
+        .loc-badge:hover,
+        .loc-badge.active {
+            background: linear-gradient(145deg, #f3a257, #d9742c);
+            color: #1f150b;
+            transform: scale(1.02);
+            box-shadow: 0 0 0.6rem #ffaa44;
+        }
+
+        .chart-card {
+            background: rgba(20, 16, 12, 0.7);
+            margin: 0.6rem 0.8rem;
+            border-radius: 1.5rem;
+            padding: 0.6rem;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 190, 80, 0.4);
+        }
+
+        .chart-title {
+            color: #ffdfaa;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .chart-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+        }
+
+        #stackedBarChart {
+            aspect-ratio: 2 / 1;
+        }
+
+        #sankeyChart {
+            aspect-ratio: 1 / 3;
+        }
+
+        #sunburstChart {
+            aspect-ratio: 1 / 1;
+        }
+
+        #chordChart {
+            aspect-ratio: 1 / 2;
+        }
+
+        #graphChart {
+            aspect-ratio: 1 / 1;
+        }
+
+        .detail-panel {
+            margin: 0.6rem 0.8rem 0.8rem;
+            background: rgba(20, 16, 12, 0.85);
+            border-radius: 1.75rem;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 190, 80, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1;
+            min-height: 17.5rem;
+        }
+
+        .detail-header {
+            padding: 0.5rem 1rem;
+            background: rgba(30, 24, 18, 0.95);
+            border-radius: 1.75rem 1.75rem 0 0;
+            border-bottom: 1px solid #ffbb66;
+        }
+
+        .detail-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffdd99, #ffbb66);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .stat-badge {
+            display: flex;
+            gap: 0.9rem;
+            font-size: 0.7rem;
+            color: #ffdd99;
+            margin-top: 0.3rem;
+        }
+
+        .data-table-wrapper {
+            padding: 0.5rem 1rem 1rem;
+            overflow: auto;
+            flex: 1;
+            max-height: 20rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem;
+            background: #1f1a14cc;
+            border-radius: 1.25rem;
+        }
+
+        .data-table th {
+            background: #7a4c2e;
+            color: #fff2df;
+            padding: 0.5rem 0.3rem;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table td {
+            border-bottom: 1px solid #ffb86c55;
+            padding: 0.35rem;
+            color: #ffefcf;
+        }
+
+        .text-preview {
+            max-width: 15rem;
+            white-space: normal;
+            line-height: 1.3;
+        }
+
+        .relation-note {
+            font-size: 0.65rem;
+            margin: 0.5rem 1rem;
+            padding: 0.4rem 0.75rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 1.25rem;
+            color: #ffddbb;
+        }
+
+        .lit-card {
+            background: #2b211a;
+            border-radius: 1.25rem;
+            padding: 0.6rem 0.9rem;
+            margin: 0.5rem 1rem;
+            border-left: 4px solid #e3b074;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .lit-card:hover {
+            background: #3a2c22;
+        }
+
+        .lit-card.hidden-by-search {
+            display: none;
+        }
+
+        .lit-card.search-match {
+            border-left-color: #ff9d3c;
+            box-shadow: 0 0 0.75rem rgba(255, 150, 40, 0.35);
+            animation: pulseMatch 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseMatch {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0.5rem rgba(255, 150, 40, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 1.1rem rgba(255, 170, 60, 0.65);
+            }
+        }
+
+        .lit-title {
+            font-weight: bold;
+            color: #ffdaaa;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+
+        .lit-content {
+            font-size: 0.7rem;
+            color: #ecdbba;
+            margin-top: 0.5rem;
+            line-height: 1.4;
+            display: none;
+            white-space: pre-wrap;
+            max-height: 16.25rem;
+            overflow-y: auto;
+        }
+
+        .lit-card.open .lit-content {
+            display: block;
+        }
+
+        .lit-content mark {
+            background: #ff9d3c;
+            color: #1a0f04;
+            padding: 1px 4px;
+            border-radius: 0.25rem;
+            font-weight: 700;
+            box-shadow: 0 0 0.4rem rgba(255, 140, 30, 0.7);
+        }
+
+        .search-bar-wrap {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.4rem 0.6rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 8.75rem;
+            padding: 0.5rem 0.9rem;
+            border-radius: 1.4rem;
+            border: 1.5px solid #ffbb66;
+            background: rgba(20, 14, 8, 0.8);
+            color: #ffe1b3;
+            font-size: 0.75rem;
+            outline: none;
+            transition: 0.25s;
+        }
+
+        .search-input:focus {
+            border-color: #ff9d3c;
+            box-shadow: 0 0 0.75rem rgba(255, 150, 40, 0.55);
+            background: rgba(30, 20, 10, 0.9);
+        }
+
+        .search-input::placeholder {
+            color: #b8936a;
+            font-style: italic;
+        }
+
+        .search-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 1.4rem;
+            border: 1.5px solid #ffbb66;
+            background: linear-gradient(135deg, #b85c1e, #8b3a0f);
+            color: #ffe1b3;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .search-btn:hover {
+            background: linear-gradient(135deg, #d9742c, #a8481a);
+            box-shadow: 0 0 0.6rem #ffaa55;
+        }
+
+        .search-clear-btn {
+            padding: 0.5rem 0.75rem;
+            border-radius: 1.4rem;
+            border: 1px solid #ff8866;
+            background: rgba(60, 30, 15, 0.7);
+            color: #ffbb99;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .search-info {
+            font-size: 0.6rem;
+            color: #c69c6d;
+            padding: 0.1rem 0.6rem 0.4rem;
+            text-align: center;
+        }
+
+        .loc-search-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            padding: 0.25rem 0.6rem 0.5rem;
+        }
+
+        .loc-search-tag {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.9rem;
+            background: rgba(40, 25, 15, 0.7);
+            border: 1px solid #ff9d5c;
+            color: #ffcc99;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .loc-search-tag:hover {
+            background: #b85c1e;
+            color: #fff;
+            border-color: #ffbb66;
+        }
+
+        .loc-search-tag.active-search-tag {
+            background: #ff8c3a;
+            color: #1a0b02;
+            font-weight: 700;
+            border-color: #ffbb66;
+            box-shadow: 0 0 0.5rem #ff8844;
+        }
+
+        footer {
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.6rem;
+            color: #c69c6d;
+        }
+
+        .info-legend {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.3rem 0.6rem;
+            border-radius: 1.5rem;
+            font-size: 0.55rem;
+            color: #ffddbb;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2a1f15;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ffaa55;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="particle-canvas"></canvas>
+    <div class="dashboard">
+        <div class="sidebar">
+            <div class="museum-header">
+                <h1>🐉 白蛇传 · 文脉全息</h1>
+                <div class="sub">11个地点 + 历代文献 | 点击左侧标签查看数据 | 🗺️ 点击地图标记打开全景</div>
+            </div>
+            <div class="viz-grid">
+                <div class="viz-card">
+                    <div class="viz-title">📊 总匹配词量</div>
+                    <div class="stat-number" id="totalMatchSum">--</div>
+                </div>
+                <div class="viz-card">
+                    <div class="viz-title">📖 总文献字数</div>
+                    <div class="stat-number" id="totalWordsSum">--</div>
+                </div>
+                <div class="viz-card">
+                    <div class="viz-title">🏯 文化地标</div>
+                    <div class="stat-number" id="locationCount">--</div>
+                </div>
+            </div>
+            <div class="locations-cloud" id="quickLocations"></div>
+
+            <div class="chart-card">
+                <div class="chart-title">📊 各地点切词段分布 (匹配词权重)</div>
+                <div id="stackedBarChart" class="chart-container"></div>
+            </div>
+
+            <div class="chart-card" id="literatureCard">
+                <div class="chart-title">📜 白蛇传文献集锦 · 点击展开 <span style="font-size:0.6rem;color:#c69c6d;">| 🔍
+                        支持搜索</span></div>
+                <div class="search-bar-wrap">
+                    <input type="text" class="search-input" id="litSearchInput" placeholder="搜索文献…  支持空格多词 | 试试：金山寺 白娘子"
+                        autocomplete="off">
+                    <button class="search-btn" id="litSearchBtn">🔍 搜索</button>
+                    <button class="search-clear-btn" id="litSearchClearBtn">✕ 清除</button>
+                </div>
+                <div class="loc-search-tags" id="locSearchTags">
+                    <span style="font-size:0.6rem;color:#b8936a;">📍 快捷搜地点：</span>
+                </div>
+                <div class="search-info" id="searchInfo"></div>
+                <div id="literatureList"></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">🌀 地点 → 关键词 桑基图</div>
+                <div id="sankeyChart" class="chart-container"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">☀️ 地点 → 关键词 旭日图</div>
+                <div id="sunburstChart" class="chart-container"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">🔥 地点 × 关键词 和弦热力图</div>
+                <div id="chordChart" class="chart-container"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">🧭 地点—关键词 知识图谱</div>
+                <div id="graphChart" class="chart-container"></div>
+            </div>
+
+            <div class="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-title" id="dynamicTitle">灵境卷轴</div>
+                    <div class="stat-badge" id="statBadge"></div>
+                    <button id="litTraceBtn"
+                        style="display:none;margin-top:0.4rem;padding:0.3rem 0.9rem;border-radius:1rem;border:1px solid #ffbb66;background:rgba(40,22,10,0.8);color:#ffcc88;font-size:0.7rem;cursor:pointer;transition:0.2s;"
+                        title="在文献中搜索此地点">📖 文献溯源 · 搜索此地</button>
+                </div>
+                <div id="fullDataContainer" style="overflow-y: auto; flex:1;">
+                    <div class="relation-note">✨ 点击上方地点标签，查看完整Excel分词明细 ✨</div>
+                </div>
+            </div>
+            <footer>数据源: excel_data 全部分词表格 | 文献选自《太平广记》《西湖三塔记》等 | 🔍 搜索框支持文献全文检索</footer>
+        </div>
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 坐标系转换 (WGS84 -> GCJ-02) ==========
+        function wgs84ToGcj02(lng, lat) {
+            const a = 6378245.0;
+            const ee = 0.00669342162296594323;
+            function transformLat(x, y) {
+                let ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+                ret += (20.0 * Math.sin(6.0 * x * Math.PI) + 20.0 * Math.sin(2.0 * x * Math.PI)) * 2.0 / 3.0;
+                ret += (20.0 * Math.sin(y * Math.PI) + 40.0 * Math.sin(y / 3.0 * Math.PI)) * 2.0 / 3.0;
+                ret += (160.0 * Math.sin(y / 12.0 * Math.PI) + 320 * Math.sin(y * Math.PI / 30.0)) * 2.0 / 3.0;
+                return ret;
+            }
+            function transformLng(x, y) {
+                let ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+                ret += (20.0 * Math.sin(6.0 * x * Math.PI) + 20.0 * Math.sin(2.0 * x * Math.PI)) * 2.0 / 3.0;
+                ret += (20.0 * Math.sin(x * Math.PI) + 40.0 * Math.sin(x / 3.0 * Math.PI)) * 2.0 / 3.0;
+                ret += (150.0 * Math.sin(x / 12.0 * Math.PI) + 300.0 * Math.sin(x / 30.0 * Math.PI)) * 2.0 / 3.0;
+                return ret;
+            }
+            const dLat = transformLat(lng - 105.0, lat - 35.0);
+            const dLng = transformLng(lng - 105.0, lat - 35.0);
+            const radLat = lat / 180.0 * Math.PI;
+            let magic = Math.sin(radLat);
+            magic = 1 - ee * magic * magic;
+            const sqrtMagic = Math.sqrt(magic);
+            const dLatFinal = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * Math.PI);
+            const dLngFinal = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * Math.PI);
+            return [lng + dLngFinal, lat + dLatFinal];
+        }
+
+        // ========== 强烈缩放补偿：平方反比 + 边界保护 ==========
+        function getBrowserZoomLevel() {
+            const dpr = window.devicePixelRatio || 1;
+            const mqString = '(resolution: ' + dpr + 'dppx)';
+            const isMatch = window.matchMedia(mqString).matches;
+            if (isMatch) return 1;
+            const screenWidth = window.screen.width;
+            const innerW = window.innerWidth;
+            if (screenWidth && innerW) {
+                const estimated = screenWidth / innerW;
+                if (estimated > 0.8 && estimated < 2) return Math.round(estimated * 10) / 10;
+            }
+            return 1;
+        }
+
+        function setBaseFontSize() {
+            const zoom = getBrowserZoomLevel();
+            // 平方反比补偿：缩放倍数的平方倒数，让变化更夸张
+            const rawSize = 16 / (zoom * zoom);
+            // 限制在 12px 到 80px 之间，防止极端情况
+            const baseSize = Math.min(80, Math.max(12, rawSize));
+            document.documentElement.style.fontSize = baseSize + 'px';
+            return baseSize;
+        }
+
+        function getBaseFontSizePx() {
+            return parseFloat(getComputedStyle(document.documentElement).fontSize);
+        }
+
+        // ========== 修正后的坐标（GCJ-02） ==========
+        const rawCoords = {
+            "峨眉山": [29.564, 103.388],
+            "青城山": [30.918, 103.607],
+            "西湖": [30.2741, 120.1551],
+            "金山寺": [32.2106, 119.4485],
+            "雷峰塔": [30.2409, 120.1512],
+            "断桥": [30.2608, 120.1442],
+            "承天寺": [38.467, 106.273],
+            "卧佛寺": [25.112, 99.169],
+            "望江楼": [30.628, 104.089],
+            "龙虎山": [28.108, 117.016],
+            "灵隐寺": [30.2408, 120.0957],
+            "西子湖": [30.26, 120.16]
+        };
+
+        const coords = {};
+        for (const [name, [lat, lng]] of Object.entries(rawCoords)) {
+            const [gcjLng, gcjLat] = wgs84ToGcj02(lng, lat);
+            coords[name] = [gcjLat, gcjLng];
+        }
+
+        const panoramaUrls = {
+            "金山寺": "https://www.720yun.com/t/24vktepm5fw?scene_id=69856263",
+            "西子湖": "https://www.720yun.com/t/2cdjvptntn1?scene_id=19436745",
+            "西湖": "https://www.720yun.com/t/51vkOlqldfq?scene_id=51248758",
+            "峨眉山": "https://www.720yun.com/t/f2vkbh79g7y?scene_id=95860074",
+            "青城山": "https://www.720yun.com/t/b0vkObdmgpy?scene_id=58663613",
+            "雷峰塔": "https://www.720yun.com/t/6a8jOrwkuv3?scene_id=2082123",
+            "承天寺": "https://www.720yun.com/t/78akn7dq58q?scene_id=116153811",
+            "卧佛寺": "https://www.720yun.com/t/9dcjvOmf5a9?scene_id=20690149",
+            "望江楼": "https://www.720yun.com/t/0e4jt5unzO5?scene_id=13200053",
+            "龙虎山": "https://www.720yun.com/t/0232fjO8wea?scene_id=422669",
+            "灵隐寺": "https://www.720yun.com/t/de328ur6cts?scene_id=1773977",
+            "断桥": "https://www.720yun.com/t/96vk6li9r87?scene_id=98633220"
+        };
+
+        const storySegments = [
+            ["峨眉山", "青城山"],
+            ["青城山", "西湖"],
+            ["西湖", "金山寺"],
+            ["金山寺", "雷峰塔"],
+            ["西湖", "断桥"],
+            ["承天寺", "西湖"],
+            ["卧佛寺", "西湖"],
+            ["龙虎山", "西湖"],
+            ["灵隐寺", "金山寺"],
+            ["望江楼", "金山寺"],
+            ["西子湖", "西湖"]
+        ];
+
+        let map = null,
+            barChart = null,
+            locationDataMap = new Map();
+        let allChapters = [];
+        let currentSearchQuery = '';
+        let currentActiveLocation = null;
+        let initialDataLoadDone = false;
+        let currentBaseFontSize = 16;
+
+        const canvasP = document.getElementById('particle-canvas');
+        const ctxP = canvasP.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvasP.width = window.innerWidth;
+            canvasP.height = window.innerHeight;
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: Math.random() * canvasP.width,
+                    y: Math.random() * canvasP.height,
+                    radius: Math.random() * 3 + 1,
+                    speedX: (Math.random() - 0.5) * 0.2,
+                    speedY: (Math.random() - 0.5) * 0.2,
+                    color: `hsla(${Math.random() * 40 + 20}, 85%, 65%, ${Math.random() * 0.5 + 0.2})`,
+                });
+            }
+        }
+
+        function drawParticles() {
+            if (!ctxP) return;
+            ctxP.clearRect(0, 0, canvasP.width, canvasP.height);
+            particles.forEach(p => {
+                ctxP.beginPath();
+                ctxP.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctxP.fillStyle = p.color;
+                ctxP.fill();
+                p.x += p.speedX;
+                p.y += p.speedY;
+                if (p.x < 0) p.x = canvasP.width;
+                if (p.x > canvasP.width) p.x = 0;
+                if (p.y < 0) p.y = canvasP.height;
+                if (p.y > canvasP.height) p.y = 0;
+            });
+            requestAnimationFrame(drawParticles);
+        }
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+            updateResponsiveLayout();
+        });
+        resizeCanvas();
+        initParticles();
+        drawParticles();
+
+        function updateResponsiveLayout() {
+            currentBaseFontSize = setBaseFontSize();
+            if (map && locationDataMap.size) {
+                updateMap();
+            }
+            if (locationDataMap.size) {
+                renderBarChart(Array.from(locationDataMap.values()));
+                renderCharts(locationDataMap);
+            }
+        }
+
+        function initMap() {
+            if (map) return;
+            map = L.map('map').setView([30.5, 114.5], 6.8);
+            L.tileLayer(
+                'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+                subdomains: ['1', '2', '3', '4'],
+                attribution: '高德地图'
+            }).addTo(map);
+            storySegments.forEach(seg => {
+                const [a, b] = seg,
+                    p1 = coords[a],
+                    p2 = coords[b];
+                if (p1 && p2) L.polyline([p1, p2], {
+                    color: '#ffbb77',
+                    weight: 2,
+                    opacity: 0.5,
+                    dashArray: '5,6'
+                }).addTo(map);
+            });
+            L.control({ position: 'bottomright' }).onAdd = () => {
+                const div = L.DomUtil.create('div', 'info-legend');
+                div.innerHTML = '✨ 12个真实数据地点 ✨<br>🐍 仙道场 &nbsp; 🏯 佛门境<br>⚡ 气泡=匹配词浓度<br>🖱️ 点击标记→720全景';
+                return div;
+            };
+        }
+
+        function updateMap() {
+            if (!map) initMap();
+            map.eachLayer(layer => {
+                if (layer instanceof L.Marker || layer instanceof L.CircleMarker) map.removeLayer(layer);
+            });
+            storySegments.forEach(seg => {
+                const [a, b] = seg,
+                    p1 = coords[a],
+                    p2 = coords[b];
+                if (p1 && p2) L.polyline([p1, p2], {
+                    color: '#ffbb77',
+                    weight: 2,
+                    opacity: 0.5,
+                    dashArray: '5,6'
+                }).addTo(map);
+            });
+
+            const locs = Array.from(locationDataMap.values());
+            if (!locs.length) return;
+            const maxM = Math.max(...locs.map(l => l.totalMatch), 1);
+            const minM = Math.min(...locs.map(l => l.totalMatch), 1);
+            const baseSize = currentBaseFontSize;
+
+            locs.forEach(loc => {
+                const ll = coords[loc.name];
+                if (!ll) return;
+                const radius = 6 + (loc.totalMatch - minM) / (maxM - minM) * 24;
+                L.circleMarker(ll, {
+                    radius: radius * (baseSize / 16),
+                    fillColor: '#f5a65a',
+                    color: '#ffdd99',
+                    weight: 1.5,
+                    fillOpacity: 0.7
+                }).addTo(map).bindTooltip(`${loc.name} · ${loc.totalMatch}`, { sticky: true }).on('click', () => {
+                    const url = panoramaUrls[loc.name];
+                    if (url) window.open(url, '_blank');
+                });
+
+                const iconSize = Math.round(baseSize * 2);
+                const icon = L.divIcon({
+                    html: `<div style="background: radial-gradient(circle at 30% 30%, #ffbc77, #c2712e); width:${iconSize}px;height:${iconSize}px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:${baseSize}px;border:2px solid #fff0b5;box-shadow:0 0 8px #ffaa55;">${loc.name.includes('寺') || loc.name.includes('塔') ? '🏯' : '🐉'}</div>`,
+                    iconSize: [iconSize, iconSize],
+                    popupAnchor: [0, -iconSize / 2]
+                });
+                L.marker(ll, { icon }).addTo(map)
+                    .bindTooltip(
+                        `<b>${loc.name}</b><br>📊${loc.totalMatch}<br>📄${loc.totalWords}<br>🧩${loc.records.length}<br><small>🖱️点击打开720全景</small>`
+                    )
+                    .on('click', () => {
+                        const url = panoramaUrls[loc.name];
+                        if (url) window.open(url, '_blank');
+                    });
+            });
+
+            const bounds = locs.map(l => coords[l.name]).filter(c => c);
+            if (bounds.length) map.fitBounds(L.latLngBounds(bounds).pad(0.25));
+        }
+
+        function renderBarChart(locations) {
+            const names = locations.map(l => l.name),
+                low = [],
+                mid = [],
+                high = [];
+            locations.forEach(loc => {
+                let l = 0,
+                    m = 0,
+                    h = 0;
+                loc.records.forEach(r => {
+                    const t = r.切词数 || 0;
+                    if (t <= 5) l += r.匹配词数;
+                    else if (t <= 10) m += r.匹配词数;
+                    else h += r.匹配词数;
+                });
+                low.push(l);
+                mid.push(m);
+                high.push(h);
+            });
+            if (barChart) barChart.dispose();
+            barChart = echarts.init(document.getElementById('stackedBarChart'));
+            const fontSize = Math.round(currentBaseFontSize * 0.7);
+            barChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['切词≤5', '切词6-10', '切词>10'], textStyle: { color: '#ffdd99', fontSize } },
+                xAxis: {
+                    type: 'category',
+                    data: names,
+                    axisLabel: { rotate: 35, color: '#ffdd99', fontSize: fontSize - 2 }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: '匹配词总量',
+                    nameTextStyle: { color: '#ffdd99', fontSize },
+                    axisLabel: { color: '#ffcc88', fontSize }
+                },
+                series: [
+                    { name: '切词≤5', type: 'bar', stack: 'total', data: low, itemStyle: { color: '#e6aa76' } },
+                    { name: '切词6-10', type: 'bar', stack: 'total', data: mid, itemStyle: { color: '#dd9666' } },
+                    { name: '切词>10', type: 'bar', stack: 'total', data: high, itemStyle: { color: '#c56a3a' } }
+                ]
+            });
+        }
+
+        function escapeHtml(s) {
+            return s?.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) || '';
+        }
+
+        function highlightText(text, queryWords) {
+            if (!queryWords || queryWords.length === 0) return escapeHtml(text);
+            let escaped = escapeHtml(text);
+            queryWords.forEach(qw => {
+                const escapedQw = escapeHtml(qw);
+                if (escapedQw.length === 0) return;
+                const regex = new RegExp(`(${escapedQw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                escaped = escaped.replace(regex, '<mark class="search-highlight">$1</mark>');
+            });
+            return escaped;
+        }
+
+        function renderLiterature(filterQuery = '') {
+            const container = document.getElementById('literatureList');
+            const searchInfoEl = document.getElementById('searchInfo');
+            if (!container) return;
+
+            if (!allChapters || allChapters.length === 0) {
+                container.innerHTML = '<div style="color:#ffddbb;text-align:center;padding:1rem;">⏳ 文献加载中，请稍候…</div>';
+                return;
+            }
+
+            const queryWords = filterQuery.trim().split(/\s+/).filter(w => w.length > 0);
+            currentSearchQuery = filterQuery.trim();
+            let totalMatches = 0;
+            let matchedChapterCount = 0;
+
+            const htmlParts = allChapters.map((ch, idx) => {
+                const titleHighlighted = highlightText(ch.title, queryWords);
+                const contentHighlighted = highlightText(ch.content, queryWords);
+                const hasMatch = queryWords.length > 0 && queryWords.some(qw => {
+                    const escapedQw = escapeHtml(qw).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(escapedQw, 'gi');
+                    return regex.test(escapeHtml(ch.title)) || regex.test(escapeHtml(ch.content));
+                });
+                if (hasMatch) {
+                    totalMatches += (contentHighlighted.match(/<mark/g) || []).length;
+                    totalMatches += (titleHighlighted.match(/<mark/g) || []).length;
+                    matchedChapterCount++;
+                }
+                const hiddenClass = (queryWords.length > 0 && !hasMatch) ? ' hidden-by-search' : '';
+                const matchClass = hasMatch ? ' search-match' : '';
+                const openClass = hasMatch ? ' open' : '';
+                return `
+                    <div class="lit-card${hiddenClass}${matchClass}${openClass}" data-chapter-index="${idx}">
+                        <div class="lit-title">
+                            <span>📖 ${titleHighlighted}</span>
+                            <span>${hasMatch ? '🔍' : '▼'}</span>
+                        </div>
+                        <div class="lit-content">${contentHighlighted}</div>
+                    </div>`;
+            });
+            container.innerHTML = htmlParts.join('');
+
+            if (queryWords.length > 0) {
+                searchInfoEl.innerHTML = `🔎 搜索 "<span class="match-count">${escapeHtml(currentSearchQuery)}</span>" — 匹配 <span class="match-count">${matchedChapterCount}</span> 个章节，共 <span class="match-count">${totalMatches}</span> 处高亮`;
+            } else {
+                searchInfoEl.innerHTML = '';
+            }
+
+            container.querySelectorAll('.lit-card').forEach(card => {
+                card.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'MARK') return;
+                    this.classList.toggle('open');
+                });
+            });
+
+            if (queryWords.length > 0 && matchedChapterCount > 0) {
+                const firstMatch = container.querySelector('.lit-card.search-match');
+                if (firstMatch) {
+                    setTimeout(() => firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+                }
+            }
+            updateLocSearchTagsActive();
+        }
+
+        function updateLocSearchTagsActive() {
+            const tags = document.querySelectorAll('.loc-search-tag');
+            tags.forEach(tag => {
+                const locName = tag.getAttribute('data-loc');
+                if (locName && currentSearchQuery.includes(locName)) {
+                    tag.classList.add('active-search-tag');
+                } else {
+                    tag.classList.remove('active-search-tag');
+                }
+            });
+        }
+
+        async function loadLiteratureData() {
+            const container = document.getElementById('literatureList');
+            if (container) container.innerHTML = '<div style="color:#ffddbb;text-align:center">⏳ 加载文献中...</div>';
+            try {
+                const res = await fetch('/api/literature');
+                if (!res.ok) throw new Error('文献加载失败');
+                allChapters = await res.json();
+                renderLiterature('');
+                populateLocSearchTags();
+            } catch (e) {
+                if (container) container.innerHTML = '<div style="color:#ffbb77;padding:1rem">❌ 文献文件未找到，请放置"白蛇传文献选集.txt"</div>';
+                allChapters = [];
+            }
+        }
+
+        function populateLocSearchTags() {
+            const container = document.getElementById('locSearchTags');
+            if (!container) return;
+            const locNames = Array.from(locationDataMap.keys()).sort();
+            let html = '<span style="font-size:0.6rem;color:#b8936a;">📍 快捷搜地点：</span>';
+            locNames.forEach(name => {
+                html += `<span class="loc-search-tag" data-loc="${escapeHtml(name)}" title="在文献中搜索「${escapeHtml(name)}」">${escapeHtml(name)}</span>`;
+            });
+            container.innerHTML = html;
+            container.querySelectorAll('.loc-search-tag').forEach(tag => {
+                tag.addEventListener('click', () => {
+                    const locName = tag.getAttribute('data-loc');
+                    if (locName) {
+                        document.getElementById('litSearchInput').value = locName;
+                        performLiteratureSearch(locName);
+                        document.getElementById('literatureCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+        }
+
+        function performLiteratureSearch(query) {
+            const q = query || document.getElementById('litSearchInput')?.value || '';
+            renderLiterature(q);
+            const input = document.getElementById('litSearchInput');
+            if (input && query) input.value = query;
+        }
+
+        function clearLiteratureSearch() {
+            const input = document.getElementById('litSearchInput');
+            if (input) input.value = '';
+            renderLiterature('');
+            document.getElementById('searchInfo').innerHTML = '';
+        }
+
+        function updateBadges() {
+            const cont = document.getElementById('quickLocations');
+            cont.innerHTML = '';
+            Array.from(locationDataMap.keys()).sort().forEach(name => {
+                const b = document.createElement('span');
+                b.className = 'loc-badge';
+                b.innerText = name;
+                b.addEventListener('click', () => showLocationDetail(name));
+                cont.appendChild(b);
+            });
+            populateLocSearchTags();
+        }
+
+        function showLocationDetail(name) {
+            const loc = locationDataMap.get(name);
+            if (!loc) return;
+            currentActiveLocation = name;
+            document.getElementById('dynamicTitle').innerHTML = `🌟 ${name} · 完整分词数据`;
+            document.getElementById('statBadge').innerHTML =
+                `📿总匹配词:${loc.totalMatch} |📜总字数:${loc.totalWords} |🧩记录数:${loc.records.length}`;
+
+            const traceBtn = document.getElementById('litTraceBtn');
+            if (traceBtn) {
+                traceBtn.style.display = 'inline-block';
+                traceBtn.textContent = `📖 文献溯源 · 搜索「${name}」`;
+                traceBtn.onclick = () => {
+                    document.getElementById('litSearchInput').value = name;
+                    performLiteratureSearch(name);
+                    document.getElementById('literatureCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                };
+            }
+
+            let html =
+                '<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>切词数</th><th>匹配词数</th><th>文本字数</th><th>原文摘要</th></tr></thead><tbody>';
+            loc.records.forEach(r => {
+                const s = (r.摘要 || '').length > 140 ? r.摘要.substring(0, 140) + '…' : (r.摘要 || '');
+                html +=
+                    `<tr><td>${r.切词数 || '-'}</td><td>${r.匹配词数 || 1}</td><td>${r.文本字数 || '-'}</td><td class="text-preview">${escapeHtml(s)}</td></tr>`;
+            });
+            html += '</tbody></table></div>';
+            document.getElementById('fullDataContainer').innerHTML = html +
+                `<div class="relation-note">✨ 共${loc.records.length}条记录 | 💡 点击上方「📖 文献溯源」在古籍中搜索此地</div>`;
+            document.querySelectorAll('.loc-badge').forEach(b => b.classList.toggle('active', b.innerText === name));
+            const coord = coords[name];
+            if (coord && map) map.setView(coord, 11);
+
+            if (allChapters.length > 0 && initialDataLoadDone) {
+                document.getElementById('litSearchInput').value = name;
+                renderLiterature(name);
+            }
+        }
+
+        function buildSankeyData(locDataMap) {
+            const nodes = [],
+                links = [];
+            const siteNames = new Set(locDataMap.keys());
+            const usedWords = new Set();
+            locDataMap.forEach((loc, site) => {
+                if (!loc.keywords || !loc.keywords.length) return;
+                nodes.push({ name: site });
+                loc.keywords.forEach(kw => {
+                    const uniqueWord = siteNames.has(kw.word) ? kw.word + '·词' : kw.word;
+                    if (!usedWords.has(uniqueWord)) {
+                        nodes.push({ name: uniqueWord });
+                        usedWords.add(uniqueWord);
+                    }
+                    links.push({ source: site, target: uniqueWord, value: kw.weight });
+                });
+            });
+            const nodeMap = new Map();
+            nodes.forEach(n => nodeMap.set(n.name, n));
+            return { nodes: Array.from(nodeMap.values()), links };
+        }
+
+        function buildSunburstData(locDataMap) {
+            const data = [];
+            const siteNames = new Set(locDataMap.keys());
+            locDataMap.forEach((loc, site) => {
+                const children = (loc.keywords || []).map(kw => ({
+                    name: siteNames.has(kw.word) ? kw.word + '·词' : kw.word,
+                    value: kw.weight
+                }));
+                if (children.length) data.push({ name: site, children });
+            });
+            return data;
+        }
+
+        function buildChordData(locDataMap) {
+            if (!locDataMap.size) return { xAxis: [], yAxis: [], data: [] };
+            const sites = Array.from(locDataMap.keys());
+            const wordSet = new Set();
+            const data = [];
+            locDataMap.forEach((loc, site) => {
+                (loc.keywords || []).forEach(kw => {
+                    wordSet.add(kw.word);
+                    data.push([site, kw.word, kw.weight]);
+                });
+            });
+            return { xAxis: sites, yAxis: Array.from(wordSet), data };
+        }
+
+        function buildGraphData(locDataMap) {
+            const nodes = [],
+                links = [],
+                nameSet = new Set();
+            const siteNames = new Set(locDataMap.keys());
+            const baseSize = currentBaseFontSize;
+            locDataMap.forEach((loc, site) => {
+                if (!nameSet.has(site)) {
+                    nodes.push({
+                        name: site,
+                        category: 0,
+                        symbolSize: Math.round(baseSize * 2.5) // 地点节点更大
+                    });
+                    nameSet.add(site);
+                }
+                (loc.keywords || []).forEach(kw => {
+                    const uniqueWord = siteNames.has(kw.word) ? kw.word + '·词' : kw.word;
+                    if (!nameSet.has(uniqueWord)) {
+                        nodes.push({
+                            name: uniqueWord,
+                            category: 1,
+                            symbolSize: Math.round(baseSize * 1.2) // 关键词节点稍小
+                        });
+                        nameSet.add(uniqueWord);
+                    }
+                    links.push({ source: site, target: uniqueWord, value: kw.weight });
+                });
+            });
+            return { nodes, links };
+        }
+
+        function renderCharts(locDataMap) {
+            setTimeout(() => {
+                if (!locDataMap.size) {
+                    ['sankeyChart', 'sunburstChart', 'chordChart', 'graphChart'].forEach(id => {
+                        const dom = document.getElementById(id);
+                        if (dom) dom.innerHTML = '<div style="color:#ffdd99;text-align:center;padding-top:80px;">暂无数据</div>';
+                    });
+                    return;
+                }
+                ['sankeyChart', 'sunburstChart', 'chordChart', 'graphChart'].forEach(id => {
+                    const dom = document.getElementById(id);
+                    if (dom) {
+                        const inst = echarts.getInstanceByDom(dom);
+                        if (inst) inst.dispose();
+                        dom.innerHTML = '';
+                    }
+                });
+
+                const labelFont = Math.round(currentBaseFontSize * 0.7);
+
+                try {
+                    const sankey = buildSankeyData(locDataMap);
+                    if (sankey.nodes.length && sankey.links.length) {
+                        const dom = document.getElementById('sankeyChart');
+                        if (dom && dom.clientHeight) {
+                            const chart = echarts.init(dom);
+                            chart.setOption({
+                                tooltip: { trigger: 'item', triggerOn: 'mousemove' },
+                                series: [{
+                                    type: 'sankey',
+                                    layout: 'none',
+                                    emphasis: { focus: 'adjacency' },
+                                    nodeAlign: 'left',
+                                    data: sankey.nodes,
+                                    links: sankey.links,
+                                    label: { show: true, fontSize: labelFont, color: '#ffddbb' },
+                                    lineStyle: { color: 'gradient', curveness: 0.5 }
+                                }]
+                            });
+                        }
+                    }
+                } catch (e) { }
+
+                try {
+                    const data = buildSunburstData(locDataMap);
+                    if (data.length) {
+                        const dom = document.getElementById('sunburstChart');
+                        if (dom && dom.clientHeight) echarts.init(dom).setOption({
+                            tooltip: { trigger: 'item' },
+                            series: [{
+                                type: 'sunburst',
+                                data,
+                                radius: [0, '90%'],
+                                label: { rotate: 'radial', fontSize: labelFont, color: '#ffddbb' },
+                                itemStyle: { borderRadius: 5, borderWidth: 1 }
+                            }]
+                        });
+                    }
+                } catch (e) { }
+
+                try {
+                    const chord = buildChordData(locDataMap);
+                    if (chord.data.length) {
+                        const dom = document.getElementById('chordChart');
+                        if (dom && dom.clientHeight) {
+                            const maxV = Math.max(...chord.data.map(d => d[2]), 1);
+                            echarts.init(dom).setOption({
+                                tooltip: { position: 'top' },
+                                grid: { left: '15%', bottom: '15%', containLabel: true },
+                                xAxis: { type: 'category', data: chord.xAxis, axisLabel: { rotate: 45, fontSize: labelFont - 1, color: '#ffdd99' } },
+                                yAxis: { type: 'category', data: chord.yAxis, axisLabel: { fontSize: labelFont - 1, color: '#ffdd99' } },
+                                visualMap: { min: 0, max: maxV, calculable: true, orient: 'horizontal', left: 'center', bottom: '0%', textStyle: { color: '#ffdd99', fontSize: labelFont } },
+                                series: [{ type: 'heatmap', data: chord.data, label: { show: false }, emphasis: { itemStyle: { shadowBlur: 5 } } }]
+                            });
+                        }
+                    }
+                } catch (e) { }
+
+                try {
+                    const graph = buildGraphData(locDataMap);
+                    if (graph.nodes.length && graph.links.length) {
+                        const dom = document.getElementById('graphChart');
+                        if (dom && dom.clientHeight) {
+                            echarts.init(dom).setOption({
+                                tooltip: { show: true },
+                                legend: { data: ['地点', '关键词'], textStyle: { color: '#ffdd99', fontSize: labelFont } },
+                                series: [{
+                                    type: 'graph',
+                                    layout: 'force',
+                                    force: { repulsion: 200, edgeLength: 100 },
+                                    roam: true,
+                                    data: graph.nodes,
+                                    links: graph.links,
+                                    categories: [{ name: '地点' }, { name: '关键词' }],
+                                    label: { show: true, fontSize: labelFont, color: '#ffddbb' },
+                                    edgeSymbol: ['none', 'none'],
+                                    lineStyle: { opacity: 0.5 }
+                                }]
+                            });
+                        }
+                    }
+                } catch (e) { }
+            }, 150);
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch('/api/locations');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const locations = await res.json();
+                locationDataMap.clear();
+                let totalM = 0,
+                    totalW = 0;
+                locations.forEach(loc => {
+                    const recs = loc.records.map(r => ({
+                        切词数: r.切词数 || 0,
+                        匹配词数: r.匹配词数 || 1,
+                        文本字数: r.文本字数 || 0,
+                        摘要: r.摘要 || ''
+                    }));
+                    locationDataMap.set(loc.name, {
+                        name: loc.name,
+                        totalMatch: loc.totalMatch,
+                        totalWords: loc.totalWords,
+                        records: recs,
+                        keywords: loc.keywords || []
+                    });
+                    totalM += loc.totalMatch;
+                    totalW += loc.totalWords;
+                });
+
+                document.getElementById('totalMatchSum').innerText = totalM;
+                document.getElementById('totalWordsSum').innerText = totalW.toLocaleString();
+                document.getElementById('locationCount').innerText = locationDataMap.size;
+
+                updateBadges();
+                renderBarChart(Array.from(locationDataMap.values()));
+                initMap();
+                updateMap();
+                await loadLiteratureData();
+                renderCharts(locationDataMap);
+                const def = locationDataMap.has('金山寺') ? '金山寺' : Array.from(locationDataMap.keys())[0];
+                if (def) showLocationDetail(def);
+                initialDataLoadDone = true;
+            } catch (e) {
+                console.error(e);
+                const container = document.getElementById('fullDataContainer');
+                if (container) container.innerHTML = '<div class="relation-note">❌ 后端连接失败</div>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateResponsiveLayout(); // 初始设置夸张补偿
+
+            const searchBtn = document.getElementById('litSearchBtn');
+            const searchInput = document.getElementById('litSearchInput');
+            const clearBtn = document.getElementById('litSearchClearBtn');
+
+            if (searchBtn) searchBtn.addEventListener('click', () => performLiteratureSearch());
+            if (searchInput) {
+                searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') performLiteratureSearch();
+                });
+                let debounceTimer;
+                searchInput.addEventListener('input', () => {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => performLiteratureSearch(searchInput.value), 350);
+                });
+            }
+            if (clearBtn) clearBtn.addEventListener('click', clearLiteratureSearch);
+        });
+
+        loadData();
+    </script>
+</body>
+
+</html>

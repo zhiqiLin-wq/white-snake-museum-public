@@ -1,0 +1,373 @@
+{
+  "meta": {
+    "name": "D2 提取评测集",
+    "total": 60,
+    "type_breakdown": {
+      "Entity": 20,
+      "Archival": 20,
+      "System": 20
+    }
+  },
+  "facts": [
+    {
+      "id": "f01",
+      "memory_type": "Entity",
+      "gold_fact": "用户的名字是知知",
+      "statement": "我叫知知，你就这么叫我就行。"
+    },
+    {
+      "id": "f02",
+      "memory_type": "Entity",
+      "gold_fact": "用户的研究方向是宋代江南民间信仰与文学互动",
+      "statement": "我主要研究宋代江南那边的民间信仰，还有它们跟文学之间是怎么相互影响的。"
+    },
+    {
+      "id": "f03",
+      "memory_type": "Entity",
+      "gold_fact": "用户最喜欢的文学人物是法海",
+      "statement": "我特别喜欢的文学人物，就是法海。"
+    },
+    {
+      "id": "f04",
+      "memory_type": "Entity",
+      "gold_fact": "用户偏好文本细读与宏观历史分析相结合",
+      "statement": "我比较喜欢把文本细读和宏观的历史分析结合起来看。"
+    },
+    {
+      "id": "f05",
+      "memory_type": "Entity",
+      "gold_fact": "用户最关注《西湖三塔记》的三怪母题",
+      "statement": "我最近特别关注《西湖三塔记》里的三怪母题，感觉这个点特别有意思。"
+    },
+    {
+      "id": "f06",
+      "memory_type": "Entity",
+      "gold_fact": "用户认为《白娘子永镇雷峰塔》是白蛇传定型的标志",
+      "statement": "我觉得《白娘子永镇雷峰塔》这部作品，就是白蛇传故事定型的标志。"
+    },
+    {
+      "id": "f07",
+      "memory_type": "Entity",
+      "gold_fact": "用户偏好用母题流变视角分析版本演变",
+      "statement": "我分析版本演变的时候，比较喜欢从母题流变的角度来看。"
+    },
+    {
+      "id": "f08",
+      "memory_type": "Entity",
+      "gold_fact": "用户关注雷峰塔意象从镇妖到镇人的变迁",
+      "statement": "我一直在琢磨雷峰塔这个意象，它一开始是镇妖的，后来怎么就变成镇人的了，这个变迁挺有意思的。"
+    },
+    {
+      "id": "f09",
+      "memory_type": "Entity",
+      "gold_fact": "用户认为田汉京剧版是白蛇传现代化的重要节点",
+      "statement": "我觉得田汉那个京剧版，算是白蛇传走向现代化挺关键的一步。"
+    },
+    {
+      "id": "f10",
+      "memory_type": "Entity",
+      "gold_fact": "用户是专门研究白蛇传文献的学者",
+      "statement": "我主要就是专门研究白蛇传文献的，算是个学者吧。"
+    },
+    {
+      "id": "f11",
+      "memory_type": "Entity",
+      "gold_fact": "用户认为法海形象有卫道者和悲剧推动者的双重性",
+      "statement": "我觉得法海这个角色吧，挺复杂的，他一方面是个卫道者，另一方面又可以说是整个悲剧的推动者，这两种身份在他身上都有。"
+    },
+    {
+      "id": "f12",
+      "memory_type": "Entity",
+      "gold_fact": "用户觉得白娘子从《西湖三塔记》到《白娘子永镇雷峰塔》经历了从妖性到人性的转变",
+      "statement": "我觉得白娘子这个角色，从《西湖三塔记》到《白娘子永镇雷峰塔》，明显是从一开始那种妖性十足，慢慢转变成了有血有肉的人性，这个变化挺有意思的。"
+    },
+    {
+      "id": "f13",
+      "memory_type": "Entity",
+      "gold_fact": "用户认为小青从青鱼精演变为青蛇反映了民间想象的流变",
+      "statement": "我觉得吧，小青最开始是青鱼精，后来慢慢变成青蛇了，这其实挺能说明民间想象是怎么流变的。"
+    },
+    {
+      "id": "f14",
+      "memory_type": "Entity",
+      "gold_fact": "用户评价许仙形象在不同版本中从懦弱到重情的转变",
+      "statement": "我觉得许仙这个角色在不同版本里差别挺大的，以前感觉他挺懦弱的，后来再看又觉得他其实特别重情重义。"
+    },
+    {
+      "id": "f15",
+      "memory_type": "Entity",
+      "gold_fact": "用户认为雷峰塔倒塌象征旧秩序的解体",
+      "statement": "我觉得雷峰塔一倒，就说明以前那种旧秩序也跟着塌了。"
+    },
+    {
+      "id": "f16",
+      "memory_type": "Entity",
+      "gold_fact": "用户觉得水漫金山情节凸显了白娘子的反抗性",
+      "statement": "我觉得水漫金山那段特别能凸显出白娘子的反抗劲儿。"
+    },
+    {
+      "id": "f17",
+      "memory_type": "Entity",
+      "gold_fact": "用户认为《白娘子永镇雷峰塔》的悲剧结局比大团圆结局更有文学价值",
+      "statement": "我觉得吧，《白娘子永镇雷峰塔》那个悲剧结尾比大团圆版更有味道，文学价值也高多了。"
+    },
+    {
+      "id": "f18",
+      "memory_type": "Entity",
+      "gold_fact": "用户看重版本年代考订在母题流变研究中的作用",
+      "statement": "我特别看重版本年代考订，因为它在研究母题流变的时候特别管用。"
+    },
+    {
+      "id": "f19",
+      "memory_type": "Entity",
+      "gold_fact": "用户主张研究白蛇传必须回到宋代话本源头",
+      "statement": "研究白蛇传啊，那肯定得回到宋代话本那个源头才行。"
+    },
+    {
+      "id": "f20",
+      "memory_type": "Entity",
+      "gold_fact": "用户认为田汉京剧版强化了反封建主题",
+      "statement": "我觉得田汉那个京剧版本，把反封建的主题搞得更加突出了。"
+    },
+    {
+      "id": "f21",
+      "memory_type": "Archival",
+      "gold_fact": "《太平广记》卷四五八《李黄》中李黄遇白衣女子后化水而亡",
+      "statement": "你看《太平广记》卷四百五十八那个《李黄》的故事，里头李黄碰见个穿白衣服的姑娘，后来整个人化成一滩水，就这么没了。"
+    },
+    {
+      "id": "f22",
+      "memory_type": "Archival",
+      "gold_fact": "《西湖三塔记》中奚真人将白蛇、乌鸡、獭三怪镇压于三石塔",
+      "statement": "在《西湖三塔记》里头啊，奚真人把白蛇、乌鸡、獭这三个妖怪都压到三座石塔底下去了。"
+    },
+    {
+      "id": "f23",
+      "memory_type": "Archival",
+      "gold_fact": "《白娘子永镇雷峰塔》是冯梦龙《警世通言》所收的拟话本",
+      "statement": "《白娘子永镇雷峰塔》不就是冯梦龙《警世通言》里收的那篇拟话本嘛。"
+    },
+    {
+      "id": "f24",
+      "memory_type": "Archival",
+      "gold_fact": "方成培《雷峰塔传奇》是清乾隆时期的戏曲",
+      "statement": "方成培那部《雷峰塔传奇》啊，是清朝乾隆年间的戏。"
+    },
+    {
+      "id": "f25",
+      "memory_type": "Archival",
+      "gold_fact": "陈遇乾《义妖传》是苏州弹词",
+      "statement": "陈遇乾那部《义妖传》，是苏州弹词。"
+    },
+    {
+      "id": "f26",
+      "memory_type": "Archival",
+      "gold_fact": "田汉《白蛇传》是京剧",
+      "statement": "田汉写的那个《白蛇传》，是京剧。"
+    },
+    {
+      "id": "f27",
+      "memory_type": "Archival",
+      "gold_fact": "白蛇传核心人物包括白娘子、许仙、法海、小青",
+      "statement": "白蛇传嘛，主要就是白娘子、许仙、法海，还有小青这几个人物。"
+    },
+    {
+      "id": "f28",
+      "memory_type": "Archival",
+      "gold_fact": "雷峰塔位于杭州西湖边",
+      "statement": "雷峰塔就在杭州西湖边上。"
+    },
+    {
+      "id": "f29",
+      "memory_type": "Archival",
+      "gold_fact": "金山寺是白蛇传中水漫金山情节的发生地",
+      "statement": "金山寺就是白蛇传里水漫金山那个情节的发生地。"
+    },
+    {
+      "id": "f30",
+      "memory_type": "Archival",
+      "gold_fact": "玉山堂主人《雷峰塔传奇》是白话神魔小说",
+      "statement": "玉山堂主人写的《雷峰塔传奇》是一本白话神魔小说。"
+    },
+    {
+      "id": "f31",
+      "memory_type": "Archival",
+      "gold_fact": "《李黄》出自《太平广记》卷四五八",
+      "statement": "《李黄》这篇是出自《太平广记》卷四五八的。"
+    },
+    {
+      "id": "f32",
+      "memory_type": "Archival",
+      "gold_fact": "白蛇传最早的书面记载出现在宋代话本",
+      "statement": "白蛇传最早的文字记录，其实就是宋代的话本里写的。"
+    },
+    {
+      "id": "f33",
+      "memory_type": "Archival",
+      "gold_fact": "《白娘子永镇雷峰塔》中的许仙原名许宣",
+      "statement": "你知道吗，《白娘子永镇雷峰塔》里的许仙，他本名其实叫许宣。"
+    },
+    {
+      "id": "f34",
+      "memory_type": "Archival",
+      "gold_fact": "雷峰塔于1924年倒塌",
+      "statement": "雷峰塔是1924年塌的。"
+    },
+    {
+      "id": "f35",
+      "memory_type": "Archival",
+      "gold_fact": "白蛇传于2006年列入首批国家级非物质文化遗产名录",
+      "statement": "你知道吗，白蛇传在2006年就进了首批国家级非物质文化遗产名录了。"
+    },
+    {
+      "id": "f36",
+      "memory_type": "Archival",
+      "gold_fact": "端午节喝雄黄酒是白娘子现出蛇形的关键情节",
+      "statement": "端午节喝雄黄酒那段，白娘子就现出蛇形了，这可是关键情节啊。"
+    },
+    {
+      "id": "f37",
+      "memory_type": "Archival",
+      "gold_fact": "田汉京剧《白蛇传》改编于二十世纪五十年代",
+      "statement": "田汉那个京剧《白蛇传》啊，好像是二十世纪五十年代改编的。"
+    },
+    {
+      "id": "f38",
+      "memory_type": "Archival",
+      "gold_fact": "白蛇传与牛郎织女、孟姜女、梁祝并称中国四大民间传说",
+      "statement": "白蛇传跟牛郎织女、孟姜女、梁祝，合起来就是中国四大民间传说嘛。"
+    },
+    {
+      "id": "f39",
+      "memory_type": "Archival",
+      "gold_fact": "《西湖游览志》是明代田汝成所著",
+      "statement": "你知道《西湖游览志》吗？那是明代田汝成写的。"
+    },
+    {
+      "id": "f40",
+      "memory_type": "Archival",
+      "gold_fact": "白蛇传故事通常设定在南宋绍兴年间",
+      "statement": "白蛇传的故事背景啊，一般都设定在南宋绍兴年间那会儿。"
+    },
+    {
+      "id": "f41",
+      "memory_type": "System",
+      "gold_fact": "不要发送长代码",
+      "statement": "别发那么长的代码，看着太费劲了。"
+    },
+    {
+      "id": "f42",
+      "memory_type": "System",
+      "gold_fact": "引用文献必须标注出处",
+      "statement": "引用别人的文献，一定要把出处标清楚。"
+    },
+    {
+      "id": "f43",
+      "memory_type": "System",
+      "gold_fact": "不要用现代改编版替代原始文献",
+      "statement": "别拿那些现代改编的版本去顶替原始文献啊。"
+    },
+    {
+      "id": "f44",
+      "memory_type": "System",
+      "gold_fact": "分析版本演变必须按朝代顺序",
+      "statement": "分析版本演变的时候，必须得按朝代顺序来啊。"
+    },
+    {
+      "id": "f45",
+      "memory_type": "System",
+      "gold_fact": "讨论白蛇传时不要跑题到无关领域",
+      "statement": "咱们聊白蛇传的时候，就专心聊这个，别扯到别的地方去。"
+    },
+    {
+      "id": "f46",
+      "memory_type": "System",
+      "gold_fact": "回答要简洁",
+      "statement": "回答简洁点，别整那些废话。"
+    },
+    {
+      "id": "f47",
+      "memory_type": "System",
+      "gold_fact": "涉及不确定的信息要标注待考",
+      "statement": "遇到不确定的信息，就标个“待考”吧。"
+    },
+    {
+      "id": "f48",
+      "memory_type": "System",
+      "gold_fact": "不要提供编程建议",
+      "statement": "你别给我提什么编程建议啊，我不需要这个。"
+    },
+    {
+      "id": "f49",
+      "memory_type": "System",
+      "gold_fact": "不要提供医疗、法律、金融建议",
+      "statement": "您别给我提医疗、法律或者金融方面的建议哈，这些我都不需要。"
+    },
+    {
+      "id": "f50",
+      "memory_type": "System",
+      "gold_fact": "引用原文时要注明版本",
+      "statement": "你引用原文的时候，记得说清楚是哪个版本哦。"
+    },
+    {
+      "id": "f51",
+      "memory_type": "System",
+      "gold_fact": "回答时必须分点列出",
+      "statement": "你回答的时候得给我分点列出来。"
+    },
+    {
+      "id": "f52",
+      "memory_type": "System",
+      "gold_fact": "不要用英文术语替代中文术语",
+      "statement": "尽量别拿英文术语来代替中文术语，直接用中文说就行。"
+    },
+    {
+      "id": "f53",
+      "memory_type": "System",
+      "gold_fact": "引用古籍时要标明卷次",
+      "statement": "引用古籍的时候，得把卷次标清楚。"
+    },
+    {
+      "id": "f54",
+      "memory_type": "System",
+      "gold_fact": "讨论版本差异时要给出年代",
+      "statement": "说到版本不一样的时候，记得把年代说清楚啊。"
+    },
+    {
+      "id": "f55",
+      "memory_type": "System",
+      "gold_fact": "不要过度解读文献",
+      "statement": "别把文献过度解读了，读得差不多就行。"
+    },
+    {
+      "id": "f56",
+      "memory_type": "System",
+      "gold_fact": "涉及争议观点时要说明学术分歧",
+      "statement": "要是碰到那种有争议的观点，得把学术界存在的不同说法都讲清楚才行。"
+    },
+    {
+      "id": "f57",
+      "memory_type": "System",
+      "gold_fact": "回答字数控制在三百字以内",
+      "statement": "你回答的时候字数别超过三百字哈。"
+    },
+    {
+      "id": "f58",
+      "memory_type": "System",
+      "gold_fact": "优先使用原始文献而非二手研究",
+      "statement": "我一般会优先去翻原始文献，而不是看二手研究。"
+    },
+    {
+      "id": "f59",
+      "memory_type": "System",
+      "gold_fact": "不要使用表情符号",
+      "statement": "别给我发表情符号啊。"
+    },
+    {
+      "id": "f60",
+      "memory_type": "System",
+      "gold_fact": "引文必须准确，不能凭记忆转述",
+      "statement": "引用的时候一定要照着原文来，不能凭记忆瞎转述，得保证准确。"
+    }
+  ]
+}

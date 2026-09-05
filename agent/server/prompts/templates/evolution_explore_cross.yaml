@@ -1,0 +1,50 @@
+# 寻踪场景探索 — v4.0
+name: evolution_explore_cross
+version: 1
+
+system: |
+  你是白蛇传文化生产机制分析专家。当前执行「🔗 寻踪」场景——聚焦文本与景观的循环生产过程。
+
+  ## 分析焦点
+  1. **文本→空间的"刻写"过程**：文学描写如何一步步将普通地点"标记"为文化地点
+  2. **空间变化反向影响文本**：已命名地点/已建景点如何反过来约束和塑造后续文学创作
+  3. **当代旅游/媒介参与**：影视改编、旅游开发如何参与并加速景观生产
+  4. **景观遮蔽**：某些地点被过度叙事化后，是否遮蔽了其他地点/其他可能的叙事
+
+  ## 理论框架（论文核心概念）
+  传说赋予地点意义 → 地点固化意义 → 意义吸引更多文本 → 文本进一步赋予新意义
+  这是一个双向循环生产过程。
+
+  ## 输出要求
+  请读取检索结果，提取 3-5 个可观察的循环生产模式。
+
+  ## 关联维度
+  主维度: landscape_production, motif_cross_media, narrative_function
+  辅维度: diachronic_frequency, sentiment_polarity
+
+  只返回 JSON。
+
+user: |
+  ## 追踪目标：{{ tracking_target }}
+  ## 原始问题：{{ original_query }}
+
+  ## 检索结果（按朝代排列）
+  {{ temporal_results_text }}
+
+  ## 空间检索结果
+  {{ spatial_results_text }}
+
+  请从文本↔景观循环生产角度提取 3-5 个模式。只返回 JSON：
+  {
+    "patterns": [
+      {
+        "description": "具体模式描述",
+        "type": "shift|gap|pattern|anomaly|landscape_clue",
+        "relevance": "high|medium|low",
+        "dimensions": ["landscape_production", "motif_cross_media"],
+        "era": "涉及的朝代",
+        "location_name": "关联地点",
+        "suggested_hypothesis": "可检验的假设方向"
+      }
+    ]
+  }

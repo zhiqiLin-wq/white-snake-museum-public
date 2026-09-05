@@ -1,0 +1,32 @@
+# 技能定义：跨朝代角色对比 — 调用 ComparisonWorkflow
+name: character_comparison
+display_name: "跨朝代角色对比分析"
+description: "对比白蛇传不同版本/朝代中角色的形象、命运与叙事功能的变化"
+category: analysis
+icon: "📊"
+
+triggers:
+  - "对比.*(白蛇|许仙|法海|小青)"
+  - "(比较|对比).*(形象|角色|人物)"
+  - "(唐代|宋代|明代|清代).*(白蛇|形象|差异|变化)"
+  - "(白蛇|法海).*(变了|变化|演变|不同)"
+
+# 使用 Comparison 工作流
+workflow: comparison
+
+system_prompt: |
+  你是比较文学研究专家。请从以下三个维度进行对比分析：
+  1. **表层差异**：情节、人物行为的具体不同之处
+  2. **中层差异**：叙事策略、视角、结构的变化
+  3. **深层差异**：时代精神、文化观念、宗教思想的演变
+  请为每层差异提供文献引用支持。
+
+tools:
+  - search_literature:
+      query: "角色对比"
+      top_k: 10
+  - compare_chapters:
+      aspect: "auto_detect"
+
+context_rules:
+  multi_character: true

@@ -1,0 +1,32 @@
+# 技能定义：雷峰塔文化 — 全面解读雷峰塔与白蛇传的关系
+name: leifeng_culture
+display_name: "雷峰塔文化 — 镇压与救赎"
+description: "深入解读雷峰塔在白蛇传中的文化意义，从佛教建筑到文学符号的演变"
+category: analysis
+icon: "🏯"
+
+triggers:
+  - "雷峰塔"
+  - "白娘子.*(塔|镇压|囚禁)"
+  - "leifeng.*(pagoda|tower)"
+
+workflow: literature_qa
+
+system_prompt: |
+  你是白蛇传文化与建筑史学研究者。请全面分析雷峰塔在白蛇传中的文化意义：
+
+  1. **历史上的雷峰塔**：建造年代、建筑特色、真实历史
+  2. **文学中的雷峰塔**：白蛇传中雷峰塔的场景描写、在情节中的作用
+  3. **象征意义**：镇压/囚禁/救赎/时间流逝的符号
+  4. **遗址与重建**：1924年倒塌、2002年重建与当代文化记忆
+  5. **艺术再现**：绘画、戏曲、影视中的雷峰塔形象
+
+tools:
+  - search_literature:
+      query: "雷峰塔 白娘子 法海 镇压"
+      top_k: 10
+  - get_location_info:
+      location_name: "雷峰塔"
+
+context_rules:
+  location_required: true

@@ -1,0 +1,48 @@
+# 场景识别分类器 — v4.0 四场景
+name: evolution_scenario_classify
+version: 1
+model: ${effective_fast_model}
+
+system: |
+  你是白蛇传文脉演化分析的场景识别助手。根据用户查询，判断属于哪种研究场景并提取关键信息。
+
+  ## 四种场景定义
+
+  **trace（溯源）**：时间轴主导——追踪目标从唐到清的文本演变
+  特征：关注"演变过程""如何变化""从X到Y"
+  示例：「追踪雷峰塔的叙事演变」「白娘子形象在历代的变化」
+
+  **landscape（观景）**：空间轴主导——地点在不同朝代的叙事意义层叠
+  特征：关注"象征什么""代表什么""叙事意义"
+  示例：「雷峰塔在不同朝代象征什么」「金山寺的宗教意义变迁」
+
+  **compare（对照）**：对比分析——两个版本/朝代间的系统性差异
+  特征：关注"对比""区别""比较""不同"
+  示例：「对比冯梦龙本和方成培本」「唐代和清代的白蛇形象差异」
+
+  **cross（寻踪）**：时空交叉——文本↔景观的循环生产过程
+  特征：关注"变成""成为""如何变成""生产机制"
+  示例：「断桥如何从石桥变成爱情符号」「雷峰塔如何被赋予文化意义」
+
+  ## 目标类型
+  - location: 地理地点（雷峰塔、金山寺、断桥、西湖…）
+  - character: 人物角色（白娘子、许仙、法海、小青…）
+  - theme: 主题母题（爱情、镇压、自由、报恩…）
+  - object: 物件意象（塔、蛇、伞、药…）
+  - motif: 跨媒介母题
+
+  只返回 JSON。
+
+user: |
+  ## 用户查询
+  {{ query }}
+
+  返回 JSON（只返回 JSON，不要其他内容）：
+  {
+    "scenario": "trace|landscape|compare|cross",
+    "tracking_target": "识别的追踪目标",
+    "target_type": "location|character|theme|object|motif",
+    "active_dimensions": ["diachronic_frequency", "narrative_function", ...],
+    "compare_target": "对照场景的目标（仅 compare 场景填写）",
+    "confidence": 0.0-1.0
+  }

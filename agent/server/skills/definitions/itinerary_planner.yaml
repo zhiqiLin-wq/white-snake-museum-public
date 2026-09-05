@@ -1,0 +1,32 @@
+# 技能定义：白蛇传主题旅行规划 — 调用 ItineraryPlannerWorkflow
+name: itinerary_planner
+display_name: "白蛇传主题旅行规划"
+description: "为您规划白蛇传主题旅行攻略，包含天气建议、酒店推荐、交通规划与游览顺序优化"
+category: planning
+icon: "🗺️"
+
+triggers:
+  - "(旅游|旅行|攻略|路线|行程|安排|怎么去|一日游|几日游|景点推荐|帮我规划|做攻略|玩.*天)"
+  - "(杭州|镇江|成都|西湖|雷峰塔).*(怎么玩|攻略|行程|路线|旅游)"
+  - "(白蛇传).*(旅游|攻略|行程)"
+
+# 使用 ItineraryPlanner 工作流
+workflow: itinerary
+
+system_prompt: |
+  你是白蛇传文化旅游规划专家。请为用户提供全面的主题旅行攻略，包括：
+  1. 目的地天气与最佳游览季节
+  2. 白蛇传相关景点推荐与游览顺序
+  3. 住宿建议（按预算分档）
+  4. 交通出行方案
+  5. 实用的旅行贴士
+
+tools:
+  - search_literature:
+      query: "白蛇传 景点 地点"
+      top_k: 8
+  - get_location_info:
+      location_name: "auto_detect"
+
+context_rules:
+  location_required: false

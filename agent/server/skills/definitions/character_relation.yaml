@@ -1,0 +1,43 @@
+# 技能定义：角色关系图谱 — Pipeline 示例
+# 串联多个步骤：检索 → 提取关系 → 定位共同地点 → 生成报告
+name: character_relation_map
+display_name: "角色关系图谱"
+description: "分析两个角色的关系，定位他们共同出现的地点，生成关系图谱数据"
+icon: "🕸️"
+category: analysis
+
+triggers:
+  - "角色关系"
+  - "关系图谱"
+  - "(白娘子|许仙|法海|小青).*(关系|互动|对手)"
+
+# ★ 使用 pipeline 而不是单一 workflow
+pipeline:
+  # Step 1：分析角色关系
+  - step: analyze_relation
+    type: tool
+    tool: search_literature
+    params:
+      query: "白娘子 许仙 法海 小青 关系 相遇 对话 冲突"
+      top_k: 10
+
+  # Step 2：提取角色关系结构
+  - step: extract_relations
+    type: llm_task
+    prompt: character_relation  # 引用 prompts/templates/ 中的模板
+    input_from: analyze_relation
+
+  # Step 3：为每个地点补充数据
+  - step: enrich_locations
+    type: tool
+    tool: get_location_info
+    params:
+      location_name: "{{ locations[0].name }}"
+
+  # Step 4：生成最终的关系分析报告
+  - step: compose_report
+    type: langgraph
+    workflow: literature_qa
+
+# context_rules:
+#   multi_character: true

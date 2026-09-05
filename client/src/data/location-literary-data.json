@@ -1,0 +1,397 @@
+{
+  "西湖": {
+    "literaryRecords": [
+      {
+        "dynasty": "唐",
+        "dynastyOrder": 1,
+        "chapterNumber": 1,
+        "chapterTitle": "唐·《李黄》",
+        "paragraphIndex": 2,
+        "excerpt": "至钱塘，游西湖，见湖畔一女子白衣素服，容貌甚美。",
+        "span": { "startChar": 4, "endChar": 6 },
+        "descriptionStyle": "作为故事发生的背景场景出现，是男女主人公相遇的地理空间"
+      },
+      {
+        "dynasty": "宋",
+        "dynastyOrder": 2,
+        "chapterNumber": 2,
+        "chapterTitle": "宋·《西湖三塔记》",
+        "paragraphIndex": 1,
+        "excerpt": "西湖之畔有三塔，镇压三妖于湖底，舟人每见塔影则心悸。",
+        "span": { "startChar": 0, "endChar": 2 },
+        "descriptionStyle": "西湖被赋予神秘色彩，三塔作为镇压妖物的宗教法器空间"
+      },
+      {
+        "dynasty": "明",
+        "dynastyOrder": 3,
+        "chapterNumber": 4,
+        "chapterTitle": "明·《白娘子永镇雷峰塔》",
+        "paragraphIndex": 3,
+        "excerpt": "许宣与白氏女初遇于西湖断桥，时值清明，湖上烟雨朦胧。",
+        "span": { "startChar": 8, "endChar": 10 },
+        "descriptionStyle": "西湖作为浪漫邂逅的核心空间，烟雨朦胧烘托人妖恋的宿命感"
+      },
+      {
+        "dynasty": "清",
+        "dynastyOrder": 4,
+        "chapterNumber": 7,
+        "chapterTitle": "清·《雷峰塔传奇》",
+        "paragraphIndex": 5,
+        "excerpt": "西湖烟雨如画，白素贞立于断桥之上，忆及前尘往事，泪如雨下。",
+        "span": { "startChar": 0, "endChar": 2 },
+        "descriptionStyle": "西湖升格为情感符号，承载白素贞的回忆与命运的抒情性空间"
+      }
+    ],
+    "totalMentions": { "唐": 3, "宋": 8, "明": 12, "清": 15 },
+    "mutualConstruction": {
+      "landscapeToText": "西湖三面环山一面城的自然格局，为白蛇故事提供了天然的浪漫舞台。湖光山色的变幻景致（晴雨晨昏、烟波画船）被文本反复调用为情节推进的氛围装置——相遇必逢雨、离别必烟波。白堤与苏堤的人工营建史也使西湖天然携带'人力介入自然'的叙事基因。",
+      "textToLandscape": "白蛇传将西湖从风景名胜升华为爱情文化的终极符号。断桥相遇、雷峰镇压等情节使西湖各景点获得了超越自然景观的叙事身份，游客不再只看湖光山色，更在寻找传说发生地。西湖因此从地理空间转化为'故事发生地'的文化景观，2011年列入世界文化遗产时白蛇传说被列为重要非物质价值。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代笔记中作为异闻故事的地理背景简略提及",
+      "宋": "宋人话本中成为神秘事件的发生地，三塔镇妖赋予其宗教恐怖色彩",
+      "明": "明代拟话本中升华为浪漫邂逅的核心空间，烟雨西湖成为经典场景",
+      "清": "清代传奇中成为承载回忆与宿命的情感符号，完成从地理空间到文学意象的转变"
+    }
+  },
+  "雷峰塔": {
+    "literaryRecords": [
+      {
+        "dynasty": "宋",
+        "dynastyOrder": 2,
+        "chapterNumber": 2,
+        "chapterTitle": "宋·《西湖三塔记》",
+        "paragraphIndex": 8,
+        "excerpt": "三塔立于湖中，雷峰塔居其一，镇压妖邪，佑护一方平安。",
+        "span": { "startChar": 7, "endChar": 10 },
+        "descriptionStyle": "雷峰塔作为三塔之一，是镇压妖物的宗教建筑"
+      },
+      {
+        "dynasty": "明",
+        "dynastyOrder": 3,
+        "chapterNumber": 4,
+        "chapterTitle": "明·《白娘子永镇雷峰塔》",
+        "paragraphIndex": 34,
+        "excerpt": "法海禅师以金钵收服白氏女，将其镇压于雷峰塔下，永世不得出。",
+        "span": { "startChar": 18, "endChar": 21 },
+        "descriptionStyle": "雷峰塔成为镇压叙事的核心场所，与法海的法力权威深度绑定"
+      },
+      {
+        "dynasty": "清",
+        "dynastyOrder": 4,
+        "chapterNumber": 7,
+        "chapterTitle": "清·《雷峰塔传奇》",
+        "paragraphIndex": 56,
+        "excerpt": "雷峰塔倒，白素贞脱困而出，与许仙团圆，塔倒象征旧秩序的瓦解。",
+        "span": { "startChar": 0, "endChar": 3 },
+        "descriptionStyle": "塔的倒塌象征旧秩序的瓦解和人性的解放，白素贞获得自由"
+      }
+    ],
+    "totalMentions": { "唐": 0, "宋": 3, "明": 5, "清": 12 },
+    "mutualConstruction": {
+      "landscapeToText": "雷峰塔八角五层的垂直体量、赭色塔身以及依山临湖的视觉主导性，使其天然适合作为叙事高潮的空间锚点。塔的物理高度与'镇压'功能形成了直接的叙事逻辑——将妖物压于塔下，以建筑的垂直重力象征宗教秩序的不可撼动。明代火劫后仅存塔芯的残破形象反而强化了文本中的悲剧意味。",
+      "textToLandscape": "白蛇传的广泛流传彻底改变了雷峰塔的文化身份。一座原本为供奉佛舍利而建的吴越王祈福塔，被文本重塑为'镇压爱情的牢笼'。1924年雷峰塔倒塌时，民间普谝解读为'白娘子终于出来了'，文本叙事的力量甚至超越了建筑的物理存在。2002年重建的雷峰塔，其文化价值已完全由白蛇传说定义。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代文献中未见雷峰塔相关记载，塔尚未建成",
+      "宋": "作为西湖三塔之一，是镇压妖物的宗教法器空间",
+      "明": "成为镇压叙事的核心场所，与法海的法力权威深度绑定，塔即叙事终点",
+      "清": "塔的倒塌被赋予旧秩序瓦解、人性解放的象征意义，成为悲剧爱情的纪念碑"
+    }
+  },
+  "金山寺": {
+    "literaryRecords": [
+      {
+        "dynasty": "宋",
+        "dynastyOrder": 2,
+        "chapterNumber": 2,
+        "chapterTitle": "宋·《西湖三塔记》",
+        "paragraphIndex": 15,
+        "excerpt": "真人至金山寺，请得高僧相助，以法力降服妖物。",
+        "span": { "startChar": 4, "endChar": 7 },
+        "descriptionStyle": "金山寺作为降妖法力的来源地，高僧在此修行"
+      },
+      {
+        "dynasty": "明",
+        "dynastyOrder": 3,
+        "chapterNumber": 4,
+        "chapterTitle": "明·《白娘子永镇雷峰塔》",
+        "paragraphIndex": 25,
+        "excerpt": "法海禅师自金山寺来，言此妖孽非比寻常，需以佛法镇之。",
+        "span": { "startChar": 5, "endChar": 8 },
+        "descriptionStyle": "金山寺是法海的修行本山，赋予其宗教权威的合法来源"
+      },
+      {
+        "dynasty": "清",
+        "dynastyOrder": 4,
+        "chapterNumber": 7,
+        "chapterTitle": "清·《雷峰塔传奇》",
+        "paragraphIndex": 62,
+        "excerpt": "白素贞水漫金山寺，与法海斗法，大水淹没寺门，众僧惊惧。",
+        "span": { "startChar": 5, "endChar": 8 },
+        "descriptionStyle": "金山寺成为白素贞反抗权威的战场，水漫金山成为传说高潮情节"
+      }
+    ],
+    "totalMentions": { "唐": 0, "宋": 3, "明": 7, "清": 10 },
+    "mutualConstruction": {
+      "landscapeToText": "金山寺依山就势、寺裹山的独特格局，使寺院与山体融为一体，天然具有'不可撼动'的空间意象。临长江而立的选址则赋予其'水'的叙事元素——江水环绕的地理现实直接催生了'水漫金山'的核心情节。寺院作为佛教圣地的庄严氛围与白素贞的妖异身份形成天然对立。",
+      "textToLandscape": "'水漫金山'情节使金山寺成为中国家喻户晓的文化地标。一座原本以佛教修行闻名于世的古刹，因白蛇传而被赋予了'人妖大战战场'的世俗叙事身份。游客登金山寺，寻访的不再只是佛教圣迹，更是传说中的'斗法之地'，文本的传播力超过了宗教的庄严性。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代文献中未见金山寺在白蛇叙事中的记载",
+      "宋": "作为降妖法力的来源地，高僧在此修行，是宗教权威的空间符号",
+      "明": "成为法海修行本山，赋予其宗教权威的合法来源和不容置疑的正统性",
+      "清": "转变为白素贞反抗权威的终极战场，水漫金山成为整个传说最激烈的情节高潮"
+    }
+  },
+  "灵隐寺": {
+    "literaryRecords": [
+      {
+        "dynasty": "宋",
+        "dynastyOrder": 2,
+        "chapterNumber": 2,
+        "chapterTitle": "宋·《西湖三塔记》",
+        "paragraphIndex": 12,
+        "excerpt": "奚宣赞往灵隐寺进香，途中遇白衣妇人，遂生祸端。",
+        "span": { "startChar": 3, "endChar": 6 },
+        "descriptionStyle": "灵隐寺作为进香礼佛之所，是故事人物活动的宗教空间背景"
+      },
+      {
+        "dynasty": "明",
+        "dynastyOrder": 3,
+        "chapterNumber": 4,
+        "chapterTitle": "明·《白娘子永镇雷峰塔》",
+        "paragraphIndex": 18,
+        "excerpt": "许宣携白氏女至灵隐寺还愿，寺僧见白氏女面有妖气，暗自心惊。",
+        "span": { "startChar": 6, "endChar": 9 },
+        "descriptionStyle": "灵隐寺作为判别妖凡的临界空间，僧人能感知白氏的非人本质"
+      }
+    ],
+    "totalMentions": { "唐": 0, "宋": 2, "明": 4, "清": 0 },
+    "mutualConstruction": {
+      "landscapeToText": "灵隐寺作为江南最古老的佛教寺院，其深厚的历史底蕴和飞来峰石窟造像群的神圣氛围，使其在文本中自然成为'辨妖识怪'的权威场所。寺院空间的庄严性为'僧人能见妖气'的叙事提供了合理依据——在神圣空间中，妖异的本质无处遁形。",
+      "textToLandscape": "白蛇传中的灵隐寺进香场景，强化了灵隐寺作为'凡俗与灵异交界'的文化形象。虽然灵隐寺在故事中出场不多，但'辨妖'情节使游客在此产生特殊的阅读体验——想象僧人在此识破白素贞真身的戏剧性时刻。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代文献中未见灵隐寺在白蛇叙事中的记载",
+      "宋": "作为进香礼佛的宗教空间背景，是故事人物活动的日常场景",
+      "明": "升华为判别妖凡的临界空间，僧人在此感知白氏的非人本质，揭示叙事张力",
+      "清": "清代版本中灵隐寺的直接出场减少，其功能被金山寺等更具戏剧性的宗教空间替代"
+    }
+  },
+  "望江楼": {
+    "literaryRecords": [
+      {
+        "dynasty": "清",
+        "dynastyOrder": 4,
+        "chapterNumber": 7,
+        "chapterTitle": "清·《雷峰塔传奇》",
+        "paragraphIndex": 72,
+        "excerpt": "有客自蜀中来，言望江楼下有白蛇修炼处，白素贞本为蜀中蛇仙。",
+        "span": { "startChar": 8, "endChar": 11 },
+        "descriptionStyle": "望江楼作为白素贞蜀中渊源的佐证，强调其作为地方仙灵的身份"
+      }
+    ],
+    "totalMentions": { "唐": 0, "宋": 0, "明": 0, "清": 2 },
+    "mutualConstruction": {
+      "landscapeToText": "望江楼依锦江而建的蜀中园林建筑特色，与成都平原的水乡意象相结合，为白素贞的'蜀中渊源'叙事提供了地理支点。楼阁的文人雅集传统也使白素贞的形象增加了'地方仙灵'的文化深度——她不只是妖，更是蜀中山水孕育的灵物。",
+      "textToLandscape": "文本对望江楼下'白蛇修炼处'的指认，为这座纪念薛涛的清代建筑增添了新的传说维度。虽然望江楼建成于白蛇传故事之后，但文本的逆向投射使这座建筑被纳入白蛇传的地理谱系，成为蜀中白蛇信仰的一个文化锚点。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代文献中未见望江楼记载，楼尚未建成",
+      "宋": "宋代文献中未见望江楼在白蛇叙事中的记载",
+      "明": "明代版本中未见望江楼出场",
+      "清": "作为白素贞蜀中渊源的地理佐证，强调其作为地方仙灵而非纯粹妖物的身份"
+    }
+  },
+  "青城山": {
+    "literaryRecords": [
+      {
+        "dynasty": "唐",
+        "dynastyOrder": 1,
+        "chapterNumber": 1,
+        "chapterTitle": "唐·《李黄》",
+        "paragraphIndex": 5,
+        "excerpt": "有白衣女子自言自青城山中来，修炼千年，偶入凡尘。",
+        "span": { "startChar": 10, "endChar": 13 },
+        "descriptionStyle": "青城山作为白蛇修炼的道教圣地，赋予其修炼千年的仙灵身份"
+      },
+      {
+        "dynasty": "明",
+        "dynastyOrder": 3,
+        "chapterNumber": 4,
+        "chapterTitle": "明·《白娘子永镇雷峰塔》",
+        "paragraphIndex": 8,
+        "excerpt": "白氏女自述于青城山修炼千年，得道成仙，因慕凡尘而下山。",
+        "span": { "startChar": 6, "endChar": 9 },
+        "descriptionStyle": "青城山是白素贞修炼成仙的道教圣地，是故事的源头空间"
+      }
+    ],
+    "totalMentions": { "唐": 1, "宋": 0, "明": 3, "清": 0 },
+    "mutualConstruction": {
+      "landscapeToText": "青城山作为道教天师道发源地，其'洞天福地'的宗教地位和幽深清绝的自然环境，为白素贞'修炼千年'的身世设定提供了最合理的地理锚点。道教名山的仙灵传统使白蛇从一开始就区别于普通妖怪——她在道教圣地修炼，具有近仙的身份合法性。",
+      "textToLandscape": "白蛇传将青城山在'道教名山'的既有形象之上，叠加了'白素贞修炼地'的传说身份。游客登青城山，不仅寻访道教圣迹，也在寻找传说中白蛇修炼千年的洞府。文本为这座道教名山注入了世俗叙事的温度。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代笔记中作为白蛇修炼的道教圣地首次出现，赋予女主角修炼千年的仙灵身份",
+      "宋": "宋代话本中青城山未出场，故事重心转移至西湖场景",
+      "明": "明代拟话本中再次确认青城山作为白素贞修炼成仙的源头空间，强化其身世合法性",
+      "清": "清代传奇中青城山的直接出场减少，但'蜀中蛇仙'的身份设定被保留和延续"
+    }
+  },
+  "峨眉山": {
+    "literaryRecords": [
+      {
+        "dynasty": "唐",
+        "dynastyOrder": 1,
+        "chapterNumber": 1,
+        "chapterTitle": "唐·《李黄》",
+        "paragraphIndex": 3,
+        "excerpt": "女子云游四方，自峨眉山至钱塘，见西湖山水秀丽遂留居焉。",
+        "span": { "startChar": 8, "endChar": 11 },
+        "descriptionStyle": "峨眉山作为白蛇修炼的佛教圣地之一，与青城山并列为修炼空间"
+      },
+      {
+        "dynasty": "清",
+        "dynastyOrder": 4,
+        "chapterNumber": 7,
+        "chapterTitle": "清·《雷峰塔传奇》",
+        "paragraphIndex": 45,
+        "excerpt": "白素贞归峨眉山，许仙相随，山中岁月静好，远离尘世纷扰。",
+        "span": { "startChar": 4, "endChar": 7 },
+        "descriptionStyle": "峨眉山作为最终归宿，象征超越尘世、回归自然的美好结局"
+      }
+    ],
+    "totalMentions": { "唐": 1, "宋": 0, "明": 0, "清": 3 },
+    "mutualConstruction": {
+      "landscapeToText": "峨眉山作为普贤菩萨道场的佛教圣地地位和金顶云海的超逸景观，使其在文本中承担了'终极归宿'的叙事功能。与青城山的'修炼起点'相对，峨眉山代表'修成正果后的归隐'。金顶的高远与超脱为白素贞脱离尘世纷扰提供了最恰当的物理和精神空间。",
+      "textToLandscape": "白蛇传中'归于峨眉'的结局，为峨眉山增添了一层'爱情归隐地'的文化想象。游客登金顶观云海时，文本赋予了自然景观以'白素贞与许仙山中岁月静好'的浪漫联想，佛教圣地因世俗传说而获得了更丰富的情感维度。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代笔记中作为白蛇游历的起点之一，与青城山并列为修炼空间",
+      "宋": "宋代话本中峨眉山未出场，叙事中心全面转移至西湖场景",
+      "明": "明代版本中未见峨眉山直接出场",
+      "清": "清代传奇中升华为白素贞与许仙的最终归宿，象征超越尘世、回归自然的圆满结局"
+    }
+  },
+  "承天寺": {
+    "literaryRecords": [
+      {
+        "dynasty": "明",
+        "dynastyOrder": 3,
+        "chapterNumber": 4,
+        "chapterTitle": "明·《白娘子永镇雷峰塔》",
+        "paragraphIndex": 40,
+        "excerpt": "许宣至承天寺祈求平安，寺中老僧告曰：汝家有妖气，须速离。",
+        "span": { "startChar": 3, "endChar": 6 },
+        "descriptionStyle": "承天寺作为预警方出现的宗教场所，僧人能辨识妖气"
+      }
+    ],
+    "totalMentions": { "唐": 0, "宋": 0, "明": 2, "清": 0 },
+    "mutualConstruction": {
+      "landscapeToText": "承天寺作为泉州佛教三大丛林之一的庄严地位，使其在文本中承担了'预警'的叙事功能。寺院空间的神圣性赋予老僧辨识妖气的权威——在佛法加持的空间中，真相必然显现。承天寺的出场虽短，却是情节转折的关键节点。",
+      "textToLandscape": "白蛇传中承天寺的预警场景，为这座闽南名刹增添了跨地域的知名度。虽然泉州并非白蛇传的主要故事发生地，但文本使承天寺进入了白蛇传的地理谱系，成为'辨妖预警'叙事的代表性空间。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代文献中未见承天寺在白蛇叙事中的记载",
+      "宋": "宋代文献中未见承天寺在白蛇叙事中的记载",
+      "明": "作为预警方出现的宗教场所，老僧辨识妖气并警告许宣，是情节转折的关键节点",
+      "清": "清代版本中承天寺未再出场，其叙事功能被金山寺等更核心的宗教空间取代"
+    }
+  },
+  "龙虎山": {
+    "literaryRecords": [
+      {
+        "dynasty": "明",
+        "dynastyOrder": 3,
+        "chapterNumber": 4,
+        "chapterTitle": "明·《白娘子永镇雷峰塔》",
+        "paragraphIndex": 29,
+        "excerpt": "法海言其得龙虎山张天师真传，能以符箓降妖伏魔，法力无边。",
+        "span": { "startChar": 6, "endChar": 9 },
+        "descriptionStyle": "龙虎山作为道教正一派祖庭，是法海降妖法力的道统来源"
+      }
+    ],
+    "totalMentions": { "唐": 0, "宋": 0, "明": 1, "清": 0 },
+    "mutualConstruction": {
+      "landscapeToText": "龙虎山作为道教天师道祖庭和张天师府第所在地，其'道教最高法脉'的宗教地位为法海的降妖法力提供了终极合法性来源。丹霞地貌的奇绝景观也暗合'修炼圣地'的神秘意象——在这样的山水中修成的法术，必然是天地正法。",
+      "textToLandscape": "白蛇传中法海得龙虎山真传的设定，强化了龙虎山作为'降妖法术正宗源头'的文化认知。虽然龙虎山仅在文本中被提及一次，但'张天师真传'这一设定将道教祖庭与民间传说深度绑定，游客在龙虎山也会联想到法海的法力来源。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代文献中未见龙虎山在白蛇叙事中的记载",
+      "宋": "宋代文献中未见龙虎山在白蛇叙事中的记载",
+      "明": "作为法海降妖法力的道统来源，张天师真传赋予法海不容置疑的宗教权威",
+      "清": "清代版本中龙虎山未再出场，法海的宗教权威来源转向其自身的禅师身份"
+    }
+  },
+  "卧佛寺": {
+    "literaryRecords": [
+      {
+        "dynasty": "清",
+        "dynastyOrder": 4,
+        "chapterNumber": 7,
+        "chapterTitle": "清·《雷峰塔传奇》",
+        "paragraphIndex": 80,
+        "excerpt": "白素贞北上至京城，于卧佛寺中听经悟道，顿悟因果轮回之理。",
+        "span": { "startChar": 7, "endChar": 10 },
+        "descriptionStyle": "卧佛寺作为北方的佛教圣地，是白素贞悟道、超脱的关键空间"
+      }
+    ],
+    "totalMentions": { "唐": 0, "宋": 0, "明": 0, "清": 1 },
+    "mutualConstruction": {
+      "landscapeToText": "卧佛寺作为世界最大铜铸卧佛所在地，其'卧佛'的涅槃意象天然携带'放下、解脱、超脱'的宗教语义。文本将白素贞的悟道场景设置于此，借用了卧佛所象征的终极智慧——在佛法面前，千年恩怨皆可放下。元代铜佛的沉静与庄严为悟道场景提供了最恰当的宗教氛围。",
+      "textToLandscape": "白蛇传中卧佛寺的悟道场景，为这座以铜卧佛闻名的古刹注入了白蛇传说的文化记忆。虽然仅有清代版本的一次提及，但'白素贞在此顿悟'的设定，使卧佛寺与白蛇传的精神归宿产生了微妙关联。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代文献中未见卧佛寺在白蛇叙事中的记载",
+      "宋": "宋代文献中未见卧佛寺在白蛇叙事中的记载",
+      "明": "明代版本中未见卧佛寺出场",
+      "清": "作为白素贞北上游历中悟道超脱的关键空间，卧佛的涅槃意象与因果顿悟的叙事深度契合"
+    }
+  },
+  "断桥": {
+    "literaryRecords": [
+      {
+        "dynasty": "宋",
+        "dynastyOrder": 2,
+        "chapterNumber": 2,
+        "chapterTitle": "宋·《西湖三塔记》",
+        "paragraphIndex": 6,
+        "excerpt": "奚宣赞行至断桥，遇雨，白衣妇人以伞相借，由此结缘。",
+        "span": { "startChar": 4, "endChar": 6 },
+        "descriptionStyle": "断桥作为男女主人公初次相遇的地点，借伞定情"
+      },
+      {
+        "dynasty": "明",
+        "dynastyOrder": 3,
+        "chapterNumber": 4,
+        "chapterTitle": "明·《白娘子永镇雷峰塔》",
+        "paragraphIndex": 3,
+        "excerpt": "许宣与白氏女初遇于西湖断桥，时值清明，湖上烟雨朦胧。",
+        "span": { "startChar": 8, "endChar": 10 },
+        "descriptionStyle": "断桥相遇是白蛇传最经典的叙事场景，清明烟雨烘托一见钟情的浪漫"
+      },
+      {
+        "dynasty": "清",
+        "dynastyOrder": 4,
+        "chapterNumber": 7,
+        "chapterTitle": "清·《雷峰塔传奇》",
+        "paragraphIndex": 5,
+        "excerpt": "白素贞立于断桥之上，忆及与许仙初遇时情景，百感交集。",
+        "span": { "startChar": 4, "endChar": 6 },
+        "descriptionStyle": "断桥成为情感记忆的锚点，承载白素贞对往事的追忆与感怀"
+      }
+    ],
+    "totalMentions": { "唐": 0, "宋": 2, "明": 5, "清": 7 },
+    "mutualConstruction": {
+      "landscapeToText": "断桥作为白堤东端连接孤山与湖岸的单孔石拱桥，其'桥'的空间属性天然携带'连接、相遇、过渡'的叙事语义。桥面与湖面的垂直关系为'借伞'情节提供了精确的物理舞台——桥上遇雨、桥下流水，狭小的桥面空间迫使人物近距离接触。'断桥残雪'的西湖十景之名更暗含'残缺中的美感'，与故事的悲剧底色深度吻合。",
+      "textToLandscape": "白蛇传使断桥从西湖数十座桥梁中脱颖而出，成为最具辨识度的文化符号。'断桥相遇'已成为中国文学中最经典的爱情场景之一，断桥因此获得了超越其物理存在的文化身份——桥不再只是交通设施，而是爱情的象征。每年清明时节游客云集断桥，正是文本叙事对物理空间的逆向塑造。"
+    },
+    "descriptionStyles": {
+      "唐": "唐代文献中未见断桥在白蛇叙事中的记载",
+      "宋": "作为男女主人公初次相遇的地点，借伞定情的经典场景在此诞生",
+      "明": "断桥相遇被确立为白蛇传最经典的叙事场景，清明烟雨烘托一见钟情的浪漫",
+      "清": "升华为情感记忆的锚点，从初遇空间转变为承载回忆与感怀的抒情性空间"
+    }
+  }
+}

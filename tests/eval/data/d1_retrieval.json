@@ -1,0 +1,995 @@
+{
+  "meta": {
+    "name": "D1 检索评测集（强相关重标版）",
+    "generator": "LLM 生成 + 强相关标准重标（剔除同主题沾边弱相关）",
+    "model": "deepseek-v4-flash",
+    "relabel_rule": "直接回答/直接支持查询才算相关，宁缺毋滥",
+    "total_memories": 89,
+    "total_queries": 51,
+    "difficulty_breakdown": {
+      "exact": 16,
+      "semantic": 19,
+      "cross": 16
+    }
+  },
+  "memories": [
+    {
+      "id": "m001",
+      "content": "该学者认为《李黄》中的白衣女子尚不具备后世白娘子的情感温度，仅为蛇妖害人的早期意象。",
+      "memory_type": "Entity",
+      "importance": 0.7
+    },
+    {
+      "id": "m002",
+      "content": "该学者特别关注《西湖三塔记》中奚宣赞与白蛇的相遇地点西湖，认为西湖场景的设定奠定了白蛇传的空间原型。",
+      "memory_type": "Entity",
+      "importance": 0.8
+    },
+    {
+      "id": "m003",
+      "content": "该学者偏好以母题流变视角比较《西湖三塔记》的三怪与《白娘子永镇雷峰塔》的一妖，指出从多怪到单妖的简化增强了白娘子的主角地位。",
+      "memory_type": "Entity",
+      "importance": 0.8
+    },
+    {
+      "id": "m004",
+      "content": "该学者在研究中反复强调《白娘子永镇雷峰塔》中法海形象的多重性，认为他既是卫道者也是悲剧的推动者。",
+      "memory_type": "Entity",
+      "importance": 0.7
+    },
+    {
+      "id": "m005",
+      "content": "该学者对冯梦龙《警世通言》中许宣而非许仙的称呼非常敏感，认为这一早期姓名形态保留了故事的时代印记。",
+      "memory_type": "Entity",
+      "importance": 0.6
+    },
+    {
+      "id": "m006",
+      "content": "该学者认为方成培《雷峰塔传奇》使白蛇传从神怪故事升华为爱情悲剧，是其个人最看重的版本节点。",
+      "memory_type": "Entity",
+      "importance": 0.9
+    },
+    {
+      "id": "m007",
+      "content": "该学者主张在研究《雷峰塔传奇》时应当同时考察清代宫廷演出的梨园本，因方成培本受其影响。",
+      "memory_type": "Entity",
+      "importance": 0.6
+    },
+    {
+      "id": "m008",
+      "content": "该学者对玉山堂主人《雷峰塔传奇》的白话神魔小说改编评价不高，认为其文学性弱于拟话本。",
+      "memory_type": "Entity",
+      "importance": 0.5
+    },
+    {
+      "id": "m009",
+      "content": "该学者长期关注陈遇乾《义妖传》中苏州弹词的说唱特征，认为它保留了民间口头叙事的生动细节。",
+      "memory_type": "Entity",
+      "importance": 0.8
+    },
+    {
+      "id": "m010",
+      "content": "该学者认为田汉《白蛇传》京剧中的断桥一场是全剧情感高潮，体现了现代改编对传统母题的提炼。",
+      "memory_type": "Entity",
+      "importance": 0.7
+    },
+    {
+      "id": "m011",
+      "content": "该学者对水漫金山母题尤为着迷，专门比较了方成培本和田汉本对水斗场面处理的不同。",
+      "memory_type": "Entity",
+      "importance": 0.8
+    },
+    {
+      "id": "m012",
+      "content": "该学者在论文中指出镇塔母题经历了从三塔镇妖到单塔镇妻的演变，暗含女性反抗意识的增强。",
+      "memory_type": "Entity",
+      "importance": 0.9
+    },
+    {
+      "id": "m013",
+      "content": "该学者常常提醒学生注意三塔镇妖中的数字三，认为它与中国民间信仰中的三界观念相关。",
+      "memory_type": "Entity",
+      "importance": 0.6
+    },
+    {
+      "id": "m014",
+      "content": "该学者认为钱塘门、涌金门、昭庆寺等真实地名在白蛇传中的运用，使虚构故事获得了地方志般的可信度。",
+      "memory_type": "Entity",
+      "importance": 0.7
+    },
+    {
+      "id": "m015",
+      "content": "该学者对四圣观这一宗教空间极感兴趣，认为它是《西湖三塔记》中道教降妖逻辑的集中体现。",
+      "memory_type": "Entity",
+      "importance": 0.7
+    },
+    {
+      "id": "m016",
+      "content": "该学者对龙虎山在传说谱系中的角色持怀疑态度，认为其加入是后世道教叙述的层累。",
+      "memory_type": "Entity",
+      "importance": 0.5
+    },
+    {
+      "id": "m017",
+      "content": "该学者认为长安东市作为《李黄》的发生地，暗示了白蛇传故事从北向南地域转移的轨迹。",
+      "memory_type": "Entity",
+      "importance": 0.6
+    },
+    {
+      "id": "m018",
+      "content": "该学者赞赏小青从《白娘子永镇雷峰塔》中的丫鬟形象发展到后世义婢的过程，认为这体现了民间道德理想。",
+      "memory_type": "Entity",
+      "importance": 0.7
+    },
+    {
+      "id": "m019",
+      "content": "该学者主张白蛇传研究不能只依赖文人文本，应重视弹词、戏曲等俗文学中的异文，以还原传说全貌。",
+      "memory_type": "Entity",
+      "importance": 0.8
+    },
+    {
+      "id": "m020",
+      "content": "该学者认为白娘子从妖到仙的身份升格是白蛇传版本演变的核心线索，也是他最近的研究课题。",
+      "memory_type": "Entity",
+      "importance": 0.9
+    },
+    {
+      "id": "m101",
+      "content": "《太平广记》卷四五八《李黄》中，李黄在长安东市遇白衣女子，归家后化水而亡。",
+      "memory_type": "Archival",
+      "importance": 0.6
+    },
+    {
+      "id": "m102",
+      "content": "《西湖三塔记》中，奚宣赞在西湖遇白蛇、乌鸡、獭三怪，它们分别化为白衣妇人、卯奴和婆婆。",
+      "memory_type": "Archival",
+      "importance": 0.6
+    },
+    {
+      "id": "m103",
+      "content": "《西湖三塔记》里，奚真人在四圣观降妖，将白蛇、乌鸡、獭三怪镇压于西湖三座石塔之下。",
+      "memory_type": "Archival",
+      "importance": 0.7
+    },
+    {
+      "id": "m104",
+      "content": "冯梦龙《白娘子永镇雷峰塔》收录于《警世通言》，是拟话本作品。",
+      "memory_type": "Archival",
+      "importance": 0.5
+    },
+    {
+      "id": "m105",
+      "content": "《白娘子永镇雷峰塔》中，白娘子被法海镇压于雷峰塔。",
+      "memory_type": "Archival",
+      "importance": 0.6
+    },
+    {
+      "id": "m106",
+      "content": "清乾隆年间，方成培改编的《雷峰塔传奇》是戏曲作品，白蛇传在此定型为爱情悲剧。",
+      "memory_type": "Archival",
+      "importance": 0.7
+    },
+    {
+      "id": "m107",
+      "content": "清代玉山堂主人的《雷峰塔传奇》是一部白话神魔小说。",
+      "memory_type": "Archival",
+      "importance": 0.5
+    },
+    {
+      "id": "m108",
+      "content": "清代陈遇乾的《义妖传》是苏州弹词作品。",
+      "memory_type": "Archival",
+      "importance": 0.5
+    },
+    {
+      "id": "m109",
+      "content": "田汉创作的京剧《白蛇传》是现当代白蛇传故事的重要版本。",
+      "memory_type": "Archival",
+      "importance": 0.5
+    },
+    {
+      "id": "m110",
+      "content": "白蛇传故事的核心人物包括白娘子（白素贞）、许仙（许宣）、法海、小青。",
+      "memory_type": "Archival",
+      "importance": 0.4
+    },
+    {
+      "id": "m111",
+      "content": "白蛇传版本中的地点包括西湖、雷峰塔、金山寺、钱塘门、涌金门、昭庆寺、四圣观、龙虎山和长安东市。",
+      "memory_type": "Archival",
+      "importance": 0.4
+    },
+    {
+      "id": "m112",
+      "content": "《西湖三塔记》中，奚宣赞是核心人物，而奚真人是降妖者。",
+      "memory_type": "Archival",
+      "importance": 0.5
+    },
+    {
+      "id": "m113",
+      "content": "白蛇传核心母题包括白蛇化人、人妖恋、镇塔、三塔镇妖和水漫金山。",
+      "memory_type": "Archival",
+      "importance": 0.4
+    },
+    {
+      "id": "m114",
+      "content": "白蛇传故事的母题流变与版本演变是研究该传说的关键视角。",
+      "memory_type": "Archival",
+      "importance": 0.4
+    },
+    {
+      "id": "m115",
+      "content": "《李黄》中的白衣女子是白蛇所化，这一情节属于白蛇化人母题。",
+      "memory_type": "Archival",
+      "importance": 0.5
+    },
+    {
+      "id": "m117",
+      "content": "《白娘子永镇雷峰塔》的故事背景涉及钱塘门、涌金门等杭州地点。",
+      "memory_type": "Archival",
+      "importance": 0.4
+    },
+    {
+      "id": "m118",
+      "content": "《雷峰塔传奇》中，白蛇传的重要情节包括白娘子与许仙的爱情纠葛及法海的干预。",
+      "memory_type": "Archival",
+      "importance": 0.5
+    },
+    {
+      "id": "m119",
+      "content": "水漫金山是白蛇传的核心情节之一，在多个版本中出现。",
+      "memory_type": "Archival",
+      "importance": 0.5
+    },
+    {
+      "id": "m120",
+      "content": "白蛇传版本从唐代文言小说、宋代话本、明代拟话本、清代戏曲与弹词，发展到现当代京剧，呈现清晰的演变脉络。",
+      "memory_type": "Archival",
+      "importance": 0.7
+    },
+    {
+      "id": "m181",
+      "content": "唐代《太平广记》卷四五八《李黄》中，李黄在长安东市遇白衣女子，归家后化水而亡，是白蛇传早期文言小说形态。",
+      "memory_type": "Archival",
+      "importance": 0.7
+    },
+    {
+      "id": "m191",
+      "content": "该学者要求引用《太平广记》时，必须使用卷四五八《李黄》原文，不得用后世白蛇传情节替代。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m192",
+      "content": "该学者规定在研究《西湖三塔记》时，须将奚宣赞与后世许宣明确区分，避免人名混淆。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m193",
+      "content": "该学者要求分析版本演变时必须严格按朝代顺序，从唐《李黄》到宋《西湖三塔记》再到明清各本依次考察。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m194",
+      "content": "该学者强调讨论“水漫金山”母题时，须说明该情节不见于《太平广记》和《西湖三塔记》，而见于《雷峰塔传奇》等后世作品。",
+      "memory_type": "System",
+      "importance": 0.91
+    },
+    {
+      "id": "m195",
+      "content": "该学者要求引用《警世通言》时，必须写全篇名《白娘子永镇雷峰塔》，不得简称为“白蛇传”。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m196",
+      "content": "该学者规定在比较方成培《雷峰塔传奇》与玉山堂主人《雷峰塔传奇》时，需分别标注戏曲与小说属性，不可混为一谈。",
+      "memory_type": "System",
+      "importance": 0.92
+    },
+    {
+      "id": "m197",
+      "content": "该学者要求研究“三塔镇妖”母题时，应以《西湖三塔记》中奚真人在四圣观降妖并镇于三石塔的文本为据。",
+      "memory_type": "System",
+      "importance": 0.91
+    },
+    {
+      "id": "m198",
+      "content": "该学者强调在分析白蛇化人母题时，须先引用《李黄》中白衣女子于长安东市出现的原文，再讨论后续演变。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m199",
+      "content": "该学者要求讨论金山寺场景时，须说明该地点主要出现在《雷峰塔传奇》及之后版本，而非早期文献的主要场景。",
+      "memory_type": "System",
+      "importance": 0.91
+    },
+    {
+      "id": "m200",
+      "content": "该学者规定在研究弹词《义妖传》时，需注意其作为苏州弹词的文体特征，并与戏曲、小说版本区别分析。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m201",
+      "content": "该学者要求涉及许仙姓名时，需明确早期版本作“许宣”，并指出从哪一版本起改为“许仙”。",
+      "memory_type": "System",
+      "importance": 0.92
+    },
+    {
+      "id": "m202",
+      "content": "该学者强调讨论白娘子形象时，不得以田汉《白蛇传》中的现代京剧形象替代古代文献中的原型。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m203",
+      "content": "该学者要求研究“镇塔”情节时，需区分雷峰塔镇白娘子与三石塔镇三怪的不同内涵，不可混淆。",
+      "memory_type": "System",
+      "importance": 0.91
+    },
+    {
+      "id": "m204",
+      "content": "该学者规定在分析小青这一角色时，须说明其在《西湖三塔记》中对应卯奴，并考察后期的演变。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m205",
+      "content": "该学者要求研究李黄故事时，必须重点分析“归家后化水而亡”这一结局，不得忽略其与后世爱情结局的差异。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m206",
+      "content": "该学者强调在比较“奚真人镇压三怪”与“法海镇白蛇”时，需指出两个故事分别属于《西湖三塔记》和《白娘子永镇雷峰塔》。",
+      "memory_type": "System",
+      "importance": 0.91
+    },
+    {
+      "id": "m207",
+      "content": "该学者要求在所有论文中，涉及版本名称时一律加书名号，并注明朝代与作者，如清乾隆方成培《雷峰塔传奇》。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m208",
+      "content": "该学者规定在引用《义妖传》时，需注明其为陈遇乾所作，并说明其说唱文学的特点。",
+      "memory_type": "System",
+      "importance": 0.91
+    },
+    {
+      "id": "m209",
+      "content": "该学者要求研究“母题流变”时，必须梳理从人妖恋到爱情悲剧的演变脉络，并标注每个阶段的代表版本。",
+      "memory_type": "System",
+      "importance": 0.92
+    },
+    {
+      "id": "m210",
+      "content": "该学者强调在分析西湖与雷峰塔的象征意义时，需分别说明它们在《西湖三塔记》《白娘子永镇雷峰塔》和《雷峰塔传奇》中的不同功能。",
+      "memory_type": "System",
+      "importance": 0.9
+    },
+    {
+      "id": "m231",
+      "content": "该学者正在梳理《李黄》与《西湖三塔记》中白蛇化人母题从唐代到宋代的流变线索。",
+      "memory_type": "Working",
+      "importance": 0.3
+    },
+    {
+      "id": "m232",
+      "content": "该学者正在比对冯梦龙《白娘子永镇雷峰塔》与方成培《雷峰塔传奇》中许仙人物性格的差异。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m233",
+      "content": "该学者正在核查《西湖三塔记》中奚宣赞与《白娘子永镇雷峰塔》中许宣的姓名演变关系。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m234",
+      "content": "该学者正在分析《雷峰塔传奇》中水漫金山母题在清代戏曲中的舞台呈现方式。",
+      "memory_type": "Working",
+      "importance": 0.3
+    },
+    {
+      "id": "m235",
+      "content": "该学者正在考据《李黄》中长安东市与《白娘子永镇雷峰塔》中西湖两地作为故事发生地的功能转换。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m236",
+      "content": "该学者正在研究《西湖三塔记》中三石塔与雷峰塔镇妖母题的承继关系。",
+      "memory_type": "Working",
+      "importance": 0.3
+    },
+    {
+      "id": "m237",
+      "content": "该学者正在查阅《义妖传》苏州弹词中白娘子形象较清代前版本女性意识的强化表现。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m238",
+      "content": "该学者正在比较田汉《白蛇传》京剧与陈遇乾《义妖传》中法海形象的道德立场差异。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m239",
+      "content": "该学者正在追踪金山寺作为重要场景在历代白蛇传版本中的首次出现时间。",
+      "memory_type": "Working",
+      "importance": 0.3
+    },
+    {
+      "id": "m240",
+      "content": "该学者正在考察玉山堂主人《雷峰塔传奇》白话小说对冯梦龙拟话本的文本增删细节。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m241",
+      "content": "该学者正在比对《西湖三塔记》中奚真人四圣观降妖与《白娘子永镇雷峰塔》中法海雷峰塔镇妖的叙事结构异同。",
+      "memory_type": "Working",
+      "importance": 0.3
+    },
+    {
+      "id": "m242",
+      "content": "该学者正在分析白蛇传人妖恋母题从《李黄》的悲剧性到方成培爱情悲剧的定型演变。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m243",
+      "content": "该学者正在验证《雷峰塔传奇》中白娘子、小青与许仙的关系设定是否完全脱离《西湖三塔记》的妖怪框架。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m244",
+      "content": "该学者正在关注《义妖传》中白娘子报恩情节与前代版本中无报恩动机的差异。",
+      "memory_type": "Working",
+      "importance": 0.2
+    },
+    {
+      "id": "m245",
+      "content": "该学者正在尝试从版本演变角度重构钱塘门、涌金门、昭庆寺等地名在历代白蛇传文本中的叙事功能变化。",
+      "memory_type": "Working",
+      "importance": 0.3
+    },
+    {
+      "id": "m246",
+      "content": "综上，该学者认为白蛇传最早的文字记载可追溯至唐代《太平广记》中的《李黄》，其中白蛇化身为白衣女子在长安东市惑人，故事核心是妖祸而非爱情。",
+      "memory_type": "Summary",
+      "importance": 0.3
+    },
+    {
+      "id": "m247",
+      "content": "该学者指出，宋代话本《西湖三塔记》将白蛇故事背景移至西湖，并加入白蛇、乌鸡、獭三怪以及奚真人镇妖于三石塔的母题，此时仍属降妖传说。",
+      "memory_type": "Summary",
+      "importance": 0.2
+    },
+    {
+      "id": "m248",
+      "content": "该学者分析，明代冯梦龙《白娘子永镇雷峰塔》首次确立法海镇压白娘子于雷峰塔的经典结局，使故事从单纯的妖异传说转向人妖冲突的叙事。",
+      "memory_type": "Summary",
+      "importance": 0.3
+    },
+    {
+      "id": "m250",
+      "content": "该学者对比明清版本后总结，白蛇传的母题流变表现为从“三塔镇妖”到“雷峰塔镇妖”的符号转换，镇压地点与方式随版本演变逐渐固定化。",
+      "memory_type": "Summary",
+      "importance": 0.2
+    },
+    {
+      "id": "m251",
+      "content": "该学者注意到，清代玉山堂主人《雷峰塔传奇》以白话神魔小说形式重述白蛇故事，在情节上强化了神魔斗法元素，与方成培的戏曲版本形成文体差异。",
+      "memory_type": "Summary",
+      "importance": 0.2
+    },
+    {
+      "id": "m252",
+      "content": "该学者指出，清代陈遇乾《义妖传》作为苏州弹词文本，将白娘子塑造为更重情义的“义妖”，反映出地方曲艺对白蛇形象道德化的改造。",
+      "memory_type": "Summary",
+      "importance": 0.3
+    },
+    {
+      "id": "m253",
+      "content": "该学者认为，现当代田汉《白蛇传》京剧在继承爱情悲剧主线的基础上，突出了白素贞反抗法海的斗争性，使传统故事获得现代人文意涵。",
+      "memory_type": "Summary",
+      "importance": 0.2
+    },
+    {
+      "id": "m254",
+      "content": "该学者综合分析七个版本后发现，白蛇传的核心人物从唐代李黄、宋代奚宣赞逐渐演变为明代以后的许宣（许仙），男性主角的姓名和身份随版本更新而变迁。",
+      "memory_type": "Summary",
+      "importance": 0.3
+    },
+    {
+      "id": "m255",
+      "content": "该学者强调，从《李黄》到《西湖三塔记》，白蛇化人与男性相遇的地点由长安东市转移至西湖，地理背景的置换使故事与杭州风物紧密绑定。",
+      "memory_type": "Summary",
+      "importance": 0.2
+    },
+    {
+      "id": "m256",
+      "content": "该学者解析，白蛇传中“水漫金山”母题在冯梦龙版中并未出现，直至清代方成培《雷峰塔传奇》才被系统纳入，成为白娘子反抗的标志性情节。",
+      "memory_type": "Summary",
+      "importance": 0.3
+    },
+    {
+      "id": "m257",
+      "content": "该学者指出，在《西湖三塔记》中奚真人于四圣观降妖并镇怪于三石塔，这一道教色彩浓厚的结局与后世佛教法海镇塔形成宗教元素的流变。",
+      "memory_type": "Summary",
+      "importance": 0.2
+    },
+    {
+      "id": "m258",
+      "content": "该学者认为，白蛇传从文言小说到话本、拟话本、戏曲、弹词、京剧的文体演变，不仅改变叙述形式，也推动了母题从志怪到爱情的社会化转型。",
+      "memory_type": "Summary",
+      "importance": 0.3
+    },
+    {
+      "id": "m259",
+      "content": "该学者概括，唐代《李黄》重在白蛇害人的恐怖后果，宋代《西湖三塔记》加入镇妖仪式，而明清新版本则逐渐淡化妖性、强化人性，最终达成爱情悲剧的定调。",
+      "memory_type": "Summary",
+      "importance": 0.2
+    },
+    {
+      "id": "m260",
+      "content": "该学者总结，白蛇传版本演变的核心脉络是“妖祸—降妖—人妖恋—爱情悲剧—抗争故事”，这一母题流变反映了不同时代对异类婚恋的伦理想象。",
+      "memory_type": "Summary",
+      "importance": 0.3
+    }
+  ],
+  "queries": [
+    {
+      "id": "q001",
+      "query": "清代玉山堂主人的《雷峰塔传奇》作为白话神魔小说，如何强化了神魔斗法元素？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m251"
+      ]
+    },
+    {
+      "id": "q002",
+      "query": "为什么方成培的《雷峰塔传奇》把白蛇传升华为爱情悲剧？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m259"
+      ]
+    },
+    {
+      "id": "q003",
+      "query": "清乾隆时期，白蛇传说在舞台艺术中最终确立了忠贞爱情的主题，这对应哪部作品？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m106",
+        "m006"
+      ]
+    },
+    {
+      "id": "q004",
+      "query": "在对比两个同名白蛇传文本时，学者要求如何明确标注文体类型？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m196"
+      ]
+    },
+    {
+      "id": "q005",
+      "query": "宋代话本中湖心三塔的镇妖意象，如何影响后来雷峰塔神话的母题？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m250",
+        "m012"
+      ]
+    },
+    {
+      "id": "q006",
+      "query": "在传统说书艺术中，白素贞的形象如何被赋予“忠义”标签来迎合伦理教化？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m252"
+      ]
+    },
+    {
+      "id": "q007",
+      "query": "为什么学者坚持把清宫戏班的演出底本纳入某个传奇作品的研究视野？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m007"
+      ]
+    },
+    {
+      "id": "q008",
+      "query": "除了戏曲改编，清代还有一部以神仙妖怪斗法为特色的通俗小说版白蛇故事，它叫什么？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m107",
+        "m251"
+      ]
+    },
+    {
+      "id": "q009",
+      "query": "陈遇乾《义妖传》的苏州弹词说唱特征是什么？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m009"
+      ]
+    },
+    {
+      "id": "q010",
+      "query": "田汉创作的京剧《白蛇传》为什么被视为现当代白蛇传故事的重要版本？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m253",
+        "m010",
+        "m109"
+      ]
+    },
+    {
+      "id": "q011",
+      "query": "分析白蛇传中法海所在寺庙的场景时，应如何说明该场景的版本来源？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m199",
+        "m239"
+      ]
+    },
+    {
+      "id": "q012",
+      "query": "他想弄清哪一版白蛇传最早把法海驻锡之地写成重要舞台？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m239",
+        "m199"
+      ]
+    },
+    {
+      "id": "q013",
+      "query": "早期白蛇故事里人妖相遇的地点从北方的城市移到南方的湖边，这对故事的地域色彩有何作用？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m255"
+      ]
+    },
+    {
+      "id": "q014",
+      "query": "为什么很多人说京剧版白素贞与许仙重逢的那场戏最打动人心？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m010",
+        "m109"
+      ]
+    },
+    {
+      "id": "q015",
+      "query": "在西湖边的传说中，哪些人物构成了基本的人物谱系？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m110",
+        "m109",
+        "m010"
+      ]
+    },
+    {
+      "id": "q016",
+      "query": "研究某部以说唱形式呈现的白蛇故事时，应当如何把握它的体裁界限？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m200",
+        "m009"
+      ]
+    },
+    {
+      "id": "q017",
+      "query": "玉山堂主人的《雷峰塔传奇》白话小说对冯梦龙拟话本具体增改了哪些细节？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m240",
+        "m256"
+      ]
+    },
+    {
+      "id": "q018",
+      "query": "“水漫金山”为什么在冯梦龙版白蛇传里没有，到清代方成培《雷峰塔传奇》才成为白娘子反抗的标志性情节？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m256",
+        "m011",
+        "m012"
+      ]
+    },
+    {
+      "id": "q019",
+      "query": "这位学者怎么比较方成培与田汉两个版本中水淹金山寺的斗法场面？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m011",
+        "m256",
+        "m012"
+      ]
+    },
+    {
+      "id": "q020",
+      "query": "白蛇传故事在不同版本中，主要的地理活动场所有哪些？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m111",
+        "m241",
+        "m257"
+      ]
+    },
+    {
+      "id": "q021",
+      "query": "白蛇传里的男主人公在早期作品中另有称呼吗？从哪一版本开始换名的？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m005",
+        "m201",
+        "m254"
+      ]
+    },
+    {
+      "id": "q022",
+      "query": "在早期白蛇降妖故事里，为何降妖者身份会从道士变成和尚？两种收妖方式有什么异同？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m257"
+      ]
+    },
+    {
+      "id": "q023",
+      "query": "白蛇传的宗教色彩如何经历了从道教到佛教的转变？三石塔与雷峰塔各有什么象征意义？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m257",
+        "m250",
+        "m012"
+      ]
+    },
+    {
+      "id": "q024",
+      "query": "白蛇传里塔的意象从镇压妖怪变为镇压人妻，这个变化透露了怎样的女性意识？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m012"
+      ]
+    },
+    {
+      "id": "q025",
+      "query": "《西湖三塔记》中奚宣赞是什么地位的人物？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m112"
+      ]
+    },
+    {
+      "id": "q026",
+      "query": "为什么该学者不让用田汉《白蛇传》中的现代京剧形象来替代古代文献里的白娘子原型？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m253",
+        "m010"
+      ]
+    },
+    {
+      "id": "q027",
+      "query": "该学者在分析白蛇传人妖恋母题从《李黄》的悲剧到方成培爱情悲剧的演变吗？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m242"
+      ]
+    },
+    {
+      "id": "q028",
+      "query": "白蛇故事在不同文学体裁中流传时，其主题是如何从志怪转向爱情题材的？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m258",
+        "m260",
+        "m259"
+      ]
+    },
+    {
+      "id": "q029",
+      "query": "学者为什么总向学生强调塔下压怪故事里那个神秘数字与民间天地人三界信仰的关联？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m013"
+      ]
+    },
+    {
+      "id": "q030",
+      "query": "除了雷峰塔镇白蛇，白蛇传里还有哪些反复出现的经典桥段？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m113",
+        "m119",
+        "m115"
+      ]
+    },
+    {
+      "id": "q031",
+      "query": "研究白蛇传说时，怎样才能避免把法海镇白蛇和西湖三塔压妖当成同一种“塔”的象征？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m203",
+        "m250"
+      ]
+    },
+    {
+      "id": "q032",
+      "query": "学者正在核对《雷峰塔传奇》的人物关系是否已经完全脱离了旧版妖怪故事的框架？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m243"
+      ]
+    },
+    {
+      "id": "q033",
+      "query": "李黄故事中“归家后化水而亡”的结局，为何不能忽略它与后世爱情结局的差异？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m205",
+        "m246",
+        "m259"
+      ]
+    },
+    {
+      "id": "q034",
+      "query": "如何从版本演变角度重构钱塘门、涌金门、昭庆寺在历代白蛇传文本中的叙事功能变化？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m245"
+      ]
+    },
+    {
+      "id": "q035",
+      "query": "龙虎山在传说谱系中的角色为何被怀疑是后世道教叙述的层累？",
+      "difficulty": "exact",
+      "relevant_ids": []
+    },
+    {
+      "id": "q036",
+      "query": "《白娘子永镇雷峰塔》的故事场景设在哪些江南城门口附近？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m117"
+      ]
+    },
+    {
+      "id": "q037",
+      "query": "“三怪”镇压桥段与“镇白蛇”桥段分别对应哪两部文本？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m206"
+      ]
+    },
+    {
+      "id": "q038",
+      "query": "白蛇传最早发生在唐代长安的繁华商业区，是否说明了故事随后的地域迁移？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m235",
+        "m255"
+      ]
+    },
+    {
+      "id": "q039",
+      "query": "戏曲里白娘子和许仙的爱情故事，为什么总有一个和尚出来干预？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m004"
+      ]
+    },
+    {
+      "id": "q040",
+      "query": "规范的文献引注里，古代剧目名称应当如何处理朝代与作者信息？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m207"
+      ]
+    },
+    {
+      "id": "q041",
+      "query": "请问学者如何评价小青从《白娘子永镇雷峰塔》中的丫鬟形象到后世义婢的演变？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m018"
+      ]
+    },
+    {
+      "id": "q042",
+      "query": "水漫金山是白蛇传的哪个核心情节？它在哪些版本中反复出现？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m119",
+        "m194"
+      ]
+    },
+    {
+      "id": "q043",
+      "query": "引用《义妖传》时，学者要求注明作者是谁？并说明该作品具有什么特点？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m208"
+      ]
+    },
+    {
+      "id": "q044",
+      "query": "白蛇传研究为什么不能只看文人文本？地方戏和书场里的不同唱本是否同样重要？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m019"
+      ]
+    },
+    {
+      "id": "q045",
+      "query": "白蛇传的故事在不同朝代有哪些主要载体？从古至今如何一步步发展为今天的戏剧形式？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m120",
+        "m258"
+      ]
+    },
+    {
+      "id": "q046",
+      "query": "在分析白蛇传的叙事主题变迁时，学者要求怎样按阶段整理代表性文本？",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m209"
+      ]
+    },
+    {
+      "id": "q047",
+      "query": "关于白娘子在传说中地位提升的现象，该学者有何见解？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m020",
+        "m003"
+      ]
+    },
+    {
+      "id": "q048",
+      "query": "有学者考证白蛇传源头时提到一个志怪故事，说的是一位书生在长安遇到白衣女子后离奇死去，具体出处是什么？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m101"
+      ]
+    },
+    {
+      "id": "q049",
+      "query": "该学者强调在分析西湖与雷峰塔的象征意义时，需要分别说明它们在《西湖三塔记》《白娘子永镇雷峰塔》和《雷峰塔传奇》中的不同功能吗？",
+      "difficulty": "exact",
+      "relevant_ids": [
+        "m210"
+      ]
+    },
+    {
+      "id": "q050",
+      "query": "这位研究者提到，解读西湖和雷峰塔的喻意时，必须区分它们在不同白蛇故事文本里各自扮演的角色。",
+      "difficulty": "semantic",
+      "relevant_ids": [
+        "m210"
+      ]
+    },
+    {
+      "id": "q051",
+      "query": "在对比白蛇题材的古代小说与戏曲时，怎样把握杭州地标与塔意象在各版本中的叙事作用？",
+      "difficulty": "cross",
+      "relevant_ids": [
+        "m002",
+        "m012",
+        "m210"
+      ]
+    }
+  ]
+}

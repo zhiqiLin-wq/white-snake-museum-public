@@ -1,0 +1,159 @@
+[
+  {
+    "name": "西湖",
+    "historicalName": "西湖（钱塘湖/西子湖）",
+    "currentName": "杭州西湖",
+    "builtYear": null,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "原为钱塘江口海湾，后因泥沙淤积形成潟湖。唐代白居易、宋代苏轼先后疏浚，筑白堤、苏堤。历代文人墨客留下大量诗文。2011年列入世界文化遗产。",
+    "panoramaUrl": "https://www.720yun.com/t/51vkOlqldfq?scene_id=51248758",
+    "poi": {
+      "address": "杭州市西湖区",
+      "openTime": "全天开放",
+      "ticketPrice": "免费（部分景点收费）"
+    }
+  },
+  {
+    "name": "雷峰塔",
+    "historicalName": "雷峰塔（皇妃塔）",
+    "currentName": "雷峰塔",
+    "builtYear": 975,
+    "destroyedYear": 1924,
+    "rebuiltYear": 2002,
+    "historicalChanges": "吴越国王钱俶为供奉佛螺髻发舍利而建。明嘉靖年间遭倭寇焚毁，仅存塔芯。1924年9月25日倒塌。2002年重建为铜构塔，新塔内部展示白蛇传主题浮雕。",
+    "panoramaUrl": "https://www.720yun.com/t/6a8jOrwkuv3?scene_id=2082123",
+    "poi": {
+      "address": "杭州市西湖区南山路15号",
+      "openTime": "8:00-17:00（11月-3月）/ 8:00-19:00（4月-10月）",
+      "ticketPrice": "40元"
+    }
+  },
+  {
+    "name": "金山寺",
+    "historicalName": "泽心寺",
+    "currentName": "镇江金山寺",
+    "builtYear": 326,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "东晋始建，历代重修。白蛇传中水漫金山故事发生地，法海禅师修行处。现存慈寿塔为金山标志性建筑。",
+    "panoramaUrl": "https://www.720yun.com/t/24vktepm5fw?scene_id=69856263",
+    "poi": {
+      "address": "镇江市润州区金山路62号",
+      "openTime": "8:00-17:00",
+      "ticketPrice": "65元"
+    }
+  },
+  {
+    "name": "灵隐寺",
+    "historicalName": "云林禅寺",
+    "currentName": "杭州灵隐寺",
+    "builtYear": 326,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "东晋咸和元年建，历代重修。江南著名古刹，飞来峰石窟造像群为全国重点文物保护单位。",
+    "panoramaUrl": "https://www.720yun.com/t/de328ur6cts?scene_id=1773977",
+    "poi": {
+      "address": "杭州市西湖区灵隐路法云弄1号",
+      "openTime": "7:00-18:15",
+      "ticketPrice": "75元（含飞来峰景区）"
+    }
+  },
+  {
+    "name": "望江楼",
+    "historicalName": "崇丽阁",
+    "currentName": "成都望江楼",
+    "builtYear": 1889,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "清光绪年间建，为纪念唐代女诗人薛涛而建。薛涛井为其取水制笺处。",
+    "panoramaUrl": "https://www.720yun.com/t/0e4jt5unzO5?scene_id=13200053",
+    "poi": {
+      "address": "成都市武侯区望江路30号",
+      "openTime": "8:00-18:00",
+      "ticketPrice": "20元"
+    }
+  },
+  {
+    "name": "青城山",
+    "historicalName": "丈人山",
+    "currentName": "四川青城山",
+    "builtYear": null,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "道教名山，天师道发源地。白蛇传中白素贞修炼之地，天师洞、上清宫为重要道教宫观。",
+    "panoramaUrl": "https://www.720yun.com/t/b0vkObdmgpy?scene_id=58663613",
+    "poi": null
+  },
+  {
+    "name": "峨眉山",
+    "historicalName": "大光明山",
+    "currentName": "四川峨眉山",
+    "builtYear": null,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "佛教四大名山之一，普贤菩萨道场。白蛇传中白蛇修炼之所。金顶十方普贤像为标志性景观。",
+    "panoramaUrl": "https://www.720yun.com/t/f2vkbh79g7y?scene_id=95860074",
+    "poi": null
+  },
+  {
+    "name": "承天寺",
+    "historicalName": "月台寺",
+    "currentName": "泉州承天寺",
+    "builtYear": 957,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "南唐保大十五年建，闽南著名寺院。泉州佛教三大丛林之一。",
+    "panoramaUrl": "https://www.720yun.com/t/78akn7dq58q?scene_id=116153811",
+    "poi": {
+      "address": "泉州市鲤城区南俊路36号",
+      "openTime": "8:00-17:30",
+      "ticketPrice": "免费"
+    }
+  },
+  {
+    "name": "龙虎山",
+    "historicalName": "云锦山",
+    "currentName": "江西龙虎山",
+    "builtYear": null,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "道教天师道祖庭，张天师府第所在地。世界自然遗产，丹霞地貌代表。",
+    "panoramaUrl": "https://www.720yun.com/t/0232fjO8wea?scene_id=422669",
+    "poi": {
+      "address": "鹰潭市贵溪市龙虎山大道1号",
+      "openTime": "8:00-17:30",
+      "ticketPrice": "120元"
+    }
+  },
+  {
+    "name": "卧佛寺",
+    "historicalName": "十方普觉寺",
+    "currentName": "北京卧佛寺",
+    "builtYear": 627,
+    "destroyedYear": null,
+    "rebuiltYear": null,
+    "historicalChanges": "唐贞观年间建，现存元代铜卧佛为世界最大铜铸卧佛。",
+    "panoramaUrl": "https://www.720yun.com/t/9dcjvOmf5a9?scene_id=20690149",
+    "poi": {
+      "address": "北京市海淀区香山卧佛寺路",
+      "openTime": "8:30-16:30",
+      "ticketPrice": "5元"
+    }
+  },
+  {
+    "name": "断桥",
+    "historicalName": "段家桥（宝祐桥）",
+    "currentName": "杭州断桥",
+    "builtYear": null,
+    "destroyedYear": null,
+    "rebuiltYear": 1921,
+    "historicalChanges": "白蛇传中许仙与白素贞相遇之处，西湖十景之'断桥残雪'所在地。民国十年重建为水泥桥面。",
+    "panoramaUrl": "https://www.720yun.com/t/96vk6li9r87?scene_id=98633220",
+    "poi": {
+      "address": "杭州市西湖区北山街",
+      "openTime": "全天开放",
+      "ticketPrice": "免费"
+    }
+  }
+]

@@ -1,0 +1,50 @@
+# RAG 检索评估系统 — Chunking 消融配置
+# 基于: rag-evaluation-test-design.md 3.2 节
+# 最后更新: 2026-08-10
+#
+# 注意: 此消融实验将重新运行完整 Chunker → ChromaDB → BM25 索引管道
+# 每个 variant 预计耗时 13-26 分钟（含分块 + 索引重建 + CI 评估）
+# 完整模式 (6 variants): 预计 80-160 分钟
+# Quick 模式 (3 variants: C0/C1/C2): 预计 40-80 分钟
+
+ablation:
+  type: chunking
+  base_config: R  # 基于 Full Pipeline
+  variants:
+    C0:
+      desc: "当前基线"
+      changes: {}
+    C1:
+      desc: "更大 chunk"
+      changes:
+        classical_chinese.max_chunk_chars: 400
+        huaben.max_chunk_chars: 800
+        imitation_huaben.max_chunk_chars: 800
+    C2:
+      desc: "更小 chunk"
+      changes:
+        classical_chinese.max_chunk_chars: 150
+        huaben.max_chunk_chars: 400
+        imitation_huaben.max_chunk_chars: 400
+    C3:
+      desc: "更高语义合并阈值 (更激进合并)"
+      changes:
+        all.similarity_threshold: "+0.10"
+    C4:
+      desc: "更低语义合并阈值 (更保守合并)"
+      changes:
+        all.similarity_threshold: "-0.10"
+    C5:
+      desc: "禁用 context_prefix"
+      changes:
+        opera_libretto.context_prefix_enabled: false
+        script.context_prefix_enabled: false
+
+# Quick 模式: 仅跑 C0/C1/C2
+quick_mode_variants:
+  - C0
+  - C1
+  - C2
+
+# 磁盘空间要求: >= 5GB (每个 variant 的 ChromaDB 约 500MB-1GB)
+min_disk_space_gb: 5

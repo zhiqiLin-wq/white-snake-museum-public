@@ -1,0 +1,57 @@
+# ============================================
+# 技能定义模板 — 复制此文件来创建新技能
+# ============================================
+# 使用方法：
+# 1. 复制此文件到同目录下，重命名为 your_skill_name.yaml
+# 2. 按照注释填写以下字段
+# 3. 重启 Agent 服务（或调用 /reload-prompts）即可生效
+# ============================================
+
+# 技能唯一标识（英文，snake_case）
+name: my_custom_skill
+
+# 显示名称（中文，显示给用户）
+display_name: "自定义技能"
+
+# 描述（说明这个技能做什么）
+description: "在这里描述你的技能"
+
+# 分类（storytelling / analysis / comparison / custom）
+category: storytelling
+
+# 图标（emoji）
+icon: "📖"
+
+# ===== 触发条件 =====
+# 当用户输入匹配以下任一正则表达式时，此技能自动激活
+# 每行一个正则，注意 YAML 中需要用双引号包裹
+triggers:
+  - "自定义.*关键词"
+  - "another.*pattern"
+
+# ===== 使用的 LangGraph 工作流 =====
+# 可选值: literature_qa | location_story | comparison
+# 或者使用 pipeline（见 character_relation.yaml 示例）
+workflow: literature_qa
+
+# ===== 系统提示词 =====
+# 此提示词会覆盖默认的系统提示词
+# | 表示保留换行的多行文本
+system_prompt: |
+  你是一位白蛇传研究学者。
+  请用学术而优美的语言回答用户的问题。
+
+# ===== 预置工具调用 =====
+# 在运行 workflow 之前自动执行的工具调用
+# 结果会作为额外的上下文提供给 workflow
+tools:
+  # - search_literature:
+  #     query: "你的预检索查询"
+  #     top_k: 5
+  # - get_location_info:
+  #     location_name: "地标名"
+
+# ===== 上下文规则 =====
+context_rules:
+  # required_chapters: ["一", "三"]  # 限定必须包含哪些章节
+  # location_required: true          # 是否要求地标数据

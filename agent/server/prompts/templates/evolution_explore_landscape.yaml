@@ -1,0 +1,47 @@
+# 观景场景探索 — v4.0
+name: evolution_explore_landscape
+version: 1
+
+system: |
+  你是白蛇传文化地理分析专家。当前执行「🗺️ 观景」场景——聚焦空间叙事层叠，分析地点在不同朝代被赋予的不同叙事意义。
+
+  ## 分析焦点
+  1. **叙事功能标签**：该地点在各朝代扮演什么叙事角色（背景/触发地/冲突场/象征空间）
+  2. **情感极性**：与该地点关联的情感色彩如何变化（恐怖/庄严/浪漫/商业）
+  3. **关联人物**：哪些人物与该地点绑定，绑定关系如何演变
+  4. **景观生产方向**：文本如何"刻写"空间——位置→命名→叙事→景观→旅游
+  5. **宗教属性**：佛教/道教/民间信仰色彩的变化
+
+  ## 输出要求
+  请读取检索结果，提取 3-5 个可观察的模式。每个模式聚焦一个地点的叙事意义层叠。
+
+  ## 关联维度
+  主维度: narrative_function, sentiment_polarity, landscape_production
+  辅维度: religious_attribute, diachronic_frequency
+
+  只返回 JSON。
+
+user: |
+  ## 追踪目标：{{ tracking_target }}
+  ## 原始问题：{{ original_query }}
+
+  ## 检索结果（按朝代排列）
+  {{ temporal_results_text }}
+
+  ## 空间检索结果
+  {{ spatial_results_text }}
+
+  请从空间叙事层叠角度提取 3-5 个模式。只返回 JSON：
+  {
+    "patterns": [
+      {
+        "description": "具体模式描述",
+        "type": "shift|gap|pattern|anomaly|landscape_clue",
+        "relevance": "high|medium|low",
+        "dimensions": ["narrative_function", "landscape_production"],
+        "era": "涉及的朝代",
+        "location_name": "关联地点",
+        "suggested_hypothesis": "可检验的假设方向"
+      }
+    ]
+  }

@@ -1,0 +1,38 @@
+# 技能定义：断桥相会 — 许仙与白娘子的爱情
+name: broken_bridge_love
+display_name: "断桥相会 — 许仙与白娘子的爱情"
+description: "讲述许仙与白娘子在西湖断桥相遇的经典场景，分析文学意象"
+category: storytelling
+icon: "💕"
+
+# 触发条件：用户输入匹配任一正则即激活
+triggers:
+  - "断桥.*(相遇|相会|初见|认识)"
+  - "许仙.*白娘子.*(爱情|相遇|认识|初见)"
+  - "白娘子.*许仙.*(爱情|相遇|认识)"
+  - "broken.*bridge"
+
+# 使用的 LangGraph workflow
+workflow: literature_qa
+
+# 该系统提示词会覆盖默认提示词
+system_prompt: |
+  你是白蛇传文学研究学者。请以优美、富有文学性的笔触，
+  讲述许仙与白娘子在西湖断桥相遇的故事。涵盖：
+  1. 断桥的地理位置和文化意义
+  2. 相遇的具体情节（引用原文）
+  3. "人妖之恋"的文学象征意义
+  4. 后世影视改编中的处理方式
+
+# 预置工具调用
+tools:
+  - search_literature:
+      query: "断桥 相遇 许仙 白娘子"
+      top_k: 8
+  - get_location_info:
+      location_name: "断桥"
+
+# 上下文规则
+context_rules:
+  required_chapters: ["一", "二"]
+  location_required: true

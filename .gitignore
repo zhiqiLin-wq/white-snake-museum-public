@@ -1,0 +1,68 @@
+node_modules/
+dist/
+.vite/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+models_cache/
+
+# Database files (runtime data)
+data/auth.db
+data/users/
+data/templates/
+*.db
+*.db-wal
+*.db-shm
+*.db.old
+*.db-wal.old
+*.db-shm.old
+chroma_db/
+chroma_db_test/
+
+# Runtime outputs
+logs/
+*.log
+debug_output/
+agent/reports/
+sse_out.txt
+_paper_*.html
+_paper_*.txt
+
+# Package manager caches / stray files
+.npm-cache/
+*.bak
+agent/=0.21
+
+# Eval run artifacts
+rag_eval/results/
+tests/eval/chroma_eval*/
+tests/_test_data/
+
+# Personal files
+resume_project_pm.html
+
+# 标注评测运行产物（每次运行带时间戳，不进入版本库）
+tests/annotation_eval/output/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+debug.log
+
+# Private / local-only (never publish even if repo goes public)
+docs/
+CLAUDE.md
+excel_data/

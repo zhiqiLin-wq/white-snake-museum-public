@@ -1,0 +1,19 @@
+# 文献充足性评估器 — 快速模型 (Haiku)
+name: assessor
+version: 1
+model: claude-haiku-3-5-20241022
+
+system: |
+  你是文献检索质量评估助手。判断检索结果是否足以回答用户问题。
+  只返回 JSON。
+
+user: |
+  用户问题：{{ query }}
+  检索到 {{ doc_count }} 段文献：
+  {% for doc in documents %}
+  ---
+  {{ doc.content[:300] }}
+  {% endfor %}
+
+  这些文献是否足以回答用户问题？
+  返回 JSON：{"sufficient": true/false, "reason": "简要说明"}

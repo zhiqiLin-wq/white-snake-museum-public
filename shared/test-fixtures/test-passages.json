@@ -1,0 +1,62 @@
+[
+  {
+    "id": "tang-lihuang-para2",
+    "dynasty": "唐",
+    "chapter": "李黄",
+    "paragraph_index": 2,
+    "text": "有白衣老妪，居于路侧。问之曰：\"此蛇修炼千年，已通人性。\"",
+    "expected_annotations": [
+      { "category": "person", "start_char": 1, "end_char": 5, "label": "白衣老妪" },
+      { "category": "motif", "start_char": 18, "end_char": 22, "label": "修炼千年" }
+    ]
+  },
+  {
+    "id": "song-xihu-para4",
+    "dynasty": "宋",
+    "chapter": "西湖三塔记",
+    "paragraph_index": 4,
+    "text": "临安府有西湖三塔，塔下镇有三妖：一曰白蛇，二曰青鱼，三曰乌鸡。",
+    "expected_annotations": [
+      { "category": "location", "start_char": 0, "end_char": 3, "label": "临安府" },
+      { "category": "location", "start_char": 4, "end_char": 8, "label": "西湖三塔" },
+      { "category": "person", "start_char": 18, "end_char": 20, "label": "白蛇" },
+      { "category": "person", "start_char": 23, "end_char": 25, "label": "青鱼" }
+    ]
+  },
+  {
+    "id": "ming-leifengta-para12",
+    "dynasty": "明",
+    "chapter": "白娘子永镇雷峰塔",
+    "paragraph_index": 12,
+    "text": "许宣立于船头，遥望雷峰塔，心中暗忖：此妖非寻常之妖，乃千年白蛇也。",
+    "expected_annotations": [
+      { "category": "person", "start_char": 0, "end_char": 2, "label": "许宣" },
+      { "category": "location", "start_char": 9, "end_char": 12, "label": "雷峰塔" },
+      { "category": "motif", "start_char": 27, "end_char": 31, "label": "千年白蛇" }
+    ]
+  },
+  {
+    "id": "qing-chuanqi-para8",
+    "dynasty": "清",
+    "chapter": "雷峰塔传奇",
+    "paragraph_index": 8,
+    "text": "法海手持金钵，朗声道：\"妖孽受死！\"白素贞泪如雨下，跪地求饶。",
+    "expected_annotations": [
+      { "category": "person", "start_char": 0, "end_char": 2, "label": "法海" },
+      { "category": "person", "start_char": 18, "end_char": 21, "label": "白素贞" },
+      { "category": "event", "start_char": 12, "end_char": 16, "label": "妖孽受死" }
+    ]
+  },
+  {
+    "id": "mixed-punctuation",
+    "dynasty": "清",
+    "chapter": "标点测试",
+    "paragraph_index": 1,
+    "text": "「白蛇传」者，民间之异闻也。西湖之畔，雷峰之下，有塔巍然——此镇妖之塔也。",
+    "expected_annotations": [
+      { "category": "term", "start_char": 1, "end_char": 4, "label": "白蛇传" },
+      { "category": "location", "start_char": 14, "end_char": 16, "label": "西湖" },
+      { "category": "location", "start_char": 19, "end_char": 21, "label": "雷峰" }
+    ]
+  }
+]

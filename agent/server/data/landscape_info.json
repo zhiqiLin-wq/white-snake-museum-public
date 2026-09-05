@@ -1,0 +1,98 @@
+{
+  "雷峰塔": {
+    "physicalLandscape": {
+      "geographicalFeatures": "位于西湖南岸夕照山，依山临湖，塔高约36米，八角五层砖木结构",
+      "architecturalFeatures": "始建于北宋太平兴国二年(977年)，原为七层，明代遭火劫后改筑为五层，外墙赭色",
+      "historicalChanges": "北宋初建为吴越王祈福塔 → 明代火劫改建 → 清代成为西湖标志性景观 → 1924年倒塌 → 2002年重建",
+      "currentStatus": "2002年按宋塔风格重建，西湖十景之一'雷峰夕照'所在地"
+    }
+  },
+  "西湖": {
+    "physicalLandscape": {
+      "geographicalFeatures": "杭州城西，面积约6.39平方公里，三面环山一面城，湖中有白堤、苏堤、杨公堤",
+      "architecturalFeatures": "人工与自然结合的园林湖泊，唐宋以来不断疏浚营建，亭台楼阁遍布湖山之间",
+      "historicalChanges": "唐代为泻湖 → 宋代苏轼筑苏堤 → 明清成为文化景观胜地 → 当代世界文化遗产",
+      "currentStatus": "世界文化遗产(2011年)，国家5A级景区"
+    }
+  },
+  "金山寺": {
+    "physicalLandscape": {
+      "geographicalFeatures": "位于江苏镇江市金山(原名氐父山)，临长江而立，山寺一体",
+      "architecturalFeatures": "始建于东晋，依山就势构筑，寺裹山、山裹寺格局独特",
+      "historicalChanges": "东晋初建 → 唐代兴盛 → 清代与白蛇故事绑定 → 当代佛教活动中心",
+      "currentStatus": "全国重点寺院，镇江标志性文化地标"
+    }
+  },
+  "断桥": {
+    "physicalLandscape": {
+      "geographicalFeatures": "西湖白堤东端，连接孤山与湖岸，桥长约8米，单孔石拱桥",
+      "architecturalFeatures": "南宋时已有断桥之名，桥面铺石板，桥下湖水与北里湖相通",
+      "historicalChanges": "唐代已有白堤 → 南宋命名断桥 → 明代与白蛇传说结合 → 当代西湖核心景点",
+      "currentStatus": "西湖十景之一'断桥残雪'所在地，白蛇传爱情文化象征"
+    }
+  },
+  "保和堂": {
+    "physicalLandscape": {
+      "geographicalFeatures": "杭州城内清河坊一带，南宋御街核心区域",
+      "architecturalFeatures": "南宋临安城内药铺，小说中为许仙经营的药铺，建筑为传统江南民居商铺格局",
+      "historicalChanges": "南宋御街商业区 → 明清小说虚构地点 → 当代文化记忆符号",
+      "currentStatus": "杭州清河坊历史文化街区内的文化记忆节点"
+    }
+  },
+  "许宅": {
+    "physicalLandscape": {
+      "geographicalFeatures": "杭州城区内，小说中许宣/许仙的住所",
+      "architecturalFeatures": "小说中为普通市民住宅，明清小说版本中不断具体化",
+      "historicalChanges": "纯文学虚构地点，在不同版本中位置和格局有所变化",
+      "currentStatus": "白蛇传叙事中的核心家庭空间符号"
+    }
+  },
+  "白府": {
+    "physicalLandscape": {
+      "geographicalFeatures": "小说中白素贞的居所，通常被描述为富丽神秘的宅邸",
+      "architecturalFeatures": "文学想象中的精怪居所，兼具人间豪宅与异界空间的二元特征",
+      "historicalChanges": "在宋明话本中由模糊到具体，清代传奇中融入园林美学描写",
+      "currentStatus": "白蛇传中的核心叙事空间，象征异类与人类世界的边界"
+    }
+  },
+  "钱塘门": {
+    "physicalLandscape": {
+      "geographicalFeatures": "杭州古城门之一，位于城西，濒临西湖",
+      "architecturalFeatures": "南宋临安城十三门之一，城门为砖石拱券结构",
+      "historicalChanges": "南宋都城门 → 元明清沿用 → 民国时期拆除城墙",
+      "currentStatus": "仅存地名，杭州市区内历史地名"
+    }
+  },
+  "清波门": {
+    "physicalLandscape": {
+      "geographicalFeatures": "杭州古城门之一，位于城南，吴山脚下",
+      "architecturalFeatures": "南宋临安城十三门之一，因门外清波河得名",
+      "historicalChanges": "南宋都城门 → 元明清沿用 → 民国时期拆除",
+      "currentStatus": "仅存地名和部分遗址标识，西湖景区入口之一"
+    }
+  },
+  "苏州": {
+    "physicalLandscape": {
+      "geographicalFeatures": "江苏省南部，太湖之滨，水网密布的江南水乡古城",
+      "architecturalFeatures": "古城呈长方形，水陆双棋盘格局，小桥流水、园林宅第遍布",
+      "historicalChanges": "春秋吴国都城 → 唐宋江南经济中心 → 明清文化繁华地 → 当代历史文化名城",
+      "currentStatus": "国家历史文化名城，古典园林世界文化遗产"
+    }
+  },
+  "镇江": {
+    "physicalLandscape": {
+      "geographicalFeatures": "江苏省南部，长江南岸，宁镇山脉东端",
+      "architecturalFeatures": "长江与京杭大运河交汇处的古城，金山临江而立",
+      "historicalChanges": "六朝军事重镇 → 唐宋商贸枢纽 → 明清与白蛇故事深度绑定",
+      "currentStatus": "国家历史文化名城，金山寺为白蛇传文化核心地标"
+    }
+  },
+  "临安": {
+    "physicalLandscape": {
+      "geographicalFeatures": "即今杭州，南宋都城，西湖在其西侧",
+      "architecturalFeatures": "南宋临安城为不规则矩形，宫城在南凤凰山麓，御街贯穿南北",
+      "historicalChanges": "吴越国都 → 南宋行在 → 元代改杭州路 → 明清江南第一府",
+      "currentStatus": "即今杭州市，南宋临安城遗址为全国重点文物保护单位"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+# 主张验证 — v4.0
+name: evolution_test
+version: 1
+
+system: |
+  你的任务是严格评估一个学术主张。基于提供的证据，给出审慎的判断。
+
+  ## 评估标准
+  - **supported**：有 2+ 条直接支持证据，且无反证
+  - **insufficient**：证据不足（支持<2 条，或证据间接/模糊）
+  - **refuted**：有明确的反证或矛盾证据（1 条强反证即推翻）
+
+  ## 重要原则
+  - 证据不足 ≠ 主张错误 → 标注 insufficient
+  - 只有与主张直接相关的证据才算数
+  - 间接证据需要标注并降低置信度
+  - 对"沉默"的论证需要特别谨慎（absence of evidence ≠ evidence of absence）
+
+  ## 场景补充规则
+  {% if scenario == 'landscape' %}
+  景观场景特别关注：叙事功能标签的证据、情感极性变化、景观生产方向的直接引用
+  {% elif scenario == 'cross' %}
+  寻踪场景特别关注：文本→空间刻写的直接证据、空间反向影响的证据、跨媒介传播链条
+  {% endif %}
+
+  只返回 JSON。
+
+user: |
+  ## 主张：{{ statement }}
+
+  ## 支持证据
+  {% if pro_evidence %}
+  {% for ev in pro_evidence %}
+  - [{{ ev.source }}] {{ ev.text }}
+  {% endfor %}
+  {% else %}
+  无
+  {% endif %}
+
+  ## 反对证据
+  {% if con_evidence %}
+  {% for ev in con_evidence %}
+  - [{{ ev.source }}] {{ ev.text }}
+  {% endfor %}
+  {% else %}
+  无
+  {% endif %}
+
+  ## 分析场景：{{ scenario }}
+
+  请评估此主张。只返回 JSON：
+  {
+    "verdict": "supported|insufficient|refuted",
+    "reasoning": "详细的判断理由，引用具体证据",
+    "confidence": "high|medium|low",
+    "gap_detected": true/false,
+    "suggested_next_step": "如果 evidence 不足，建议补充搜索什么"
+  }

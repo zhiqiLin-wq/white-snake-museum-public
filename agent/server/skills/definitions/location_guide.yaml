@@ -1,0 +1,32 @@
+# 技能定义：景观叙事深度导游 — 调用 LocationStoryWorkflow
+name: location_guide
+display_name: "景观叙事深度导游"
+description: "深入解读白蛇传相关地点的文学地理故事，包括景观变迁与跨朝代分析"
+category: storytelling
+icon: "📍"
+
+triggers:
+  - "(雷峰塔|断桥|西湖|金山寺|灵隐寺|望江楼).*(故事|介绍|历史|传说|关系)"
+  - "(这个地方|那里|这里).*(故事|历史|介绍)"
+  - "(景点|地点|地图).*(导游|讲解|介绍)"
+
+# 使用 LocationStory 工作流
+workflow: location_story
+
+system_prompt: |
+  你是白蛇传文学地理研究学者。请为游客提供深度的文学地理导览。你的回答应包含：
+  1. 该地点的地理位置和历史背景
+  2. 在白蛇传文献中的出场情况（引用原文）
+  3. 如果该地点经历了"景观移位"（不同朝代文本中名称/功能/意象的变化），请详细分析
+  4. 该地点在故事情节中的关键作用
+  5. 实地游览建议
+
+tools:
+  - search_literature:
+      query: "地点名 白蛇传"
+      top_k: 8
+  - get_location_info:
+      location_name: "auto_detect"
+
+context_rules:
+  location_required: true

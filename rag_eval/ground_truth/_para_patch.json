@@ -1,0 +1,2557 @@
+{
+ "primary_classical_chinese_一_00001": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00002": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00003": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00004": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00005": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00006": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00007": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00008": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00009": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_classical_chinese_一_00010": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 1,
+  "old_valid": true
+ },
+ "primary_huaben_二_00011": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_huaben_二_00012": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_huaben_二_00013": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_huaben_二_00014": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_huaben_二_00015": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_huaben_二_00016": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_huaben_二_00017": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_huaben_二_00018": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_huaben_二_00019": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 2,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00020": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00021": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00022": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00023": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00024": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00025": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00026": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00027": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00028": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00029": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00030": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00031": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00032": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00033": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00034": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00035": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00036": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00037": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00038": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00039": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00040": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00041": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00042": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00043": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00044": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00045": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00046": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00047": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00048": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00049": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00050": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00051": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00052": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00053": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00054": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00055": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00056": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00057": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00058": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00059": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00060": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00061": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00062": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_imitation_huaben_三_00063": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 3,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00064": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00065": {
+  "old": 0,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00066": {
+  "old": 0,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00067": {
+  "old": 0,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00068": {
+  "old": 0,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00069": {
+  "old": 0,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00070": {
+  "old": 0,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00071": {
+  "old": 0,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00072": {
+  "old": 0,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00073": {
+  "old": 0,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": true
+ },
+ "primary_opera_libretto_四_00074": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00075": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00076": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00077": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00078": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00079": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00080": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00081": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00082": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00083": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00084": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00085": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00086": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00087": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00088": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00089": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00090": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00091": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00092": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00093": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00094": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00095": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00096": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00097": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00098": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00099": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00100": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00101": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00102": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00103": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00104": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00105": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00106": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00107": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00108": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00109": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00110": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00111": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00112": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00113": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00114": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00115": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00116": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00117": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00118": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00119": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00120": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00121": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00122": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00123": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00124": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00125": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00126": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00127": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00128": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00129": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00130": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00131": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00132": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00133": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00134": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00135": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00136": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00137": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00138": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00139": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00140": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00141": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00142": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00143": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00144": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00145": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00146": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00147": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00148": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00149": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00150": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00151": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00152": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00153": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00154": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00155": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00156": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00157": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00158": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00159": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00160": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00161": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00162": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00163": {
+  "old": -1,
+  "new": 2,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00164": {
+  "old": -1,
+  "new": 2,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00165": {
+  "old": -1,
+  "new": 2,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00166": {
+  "old": -1,
+  "new": 2,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00167": {
+  "old": -1,
+  "new": 2,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00168": {
+  "old": -1,
+  "new": 2,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00169": {
+  "old": -1,
+  "new": 2,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00170": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00171": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00172": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00173": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00174": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00175": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00176": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00177": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00178": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00179": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00180": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00181": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00182": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00183": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00184": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00185": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00186": {
+  "old": -1,
+  "new": 3,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00187": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00188": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00189": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00190": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00191": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00192": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00193": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00194": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00195": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00196": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00197": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00198": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00199": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00200": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00201": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00202": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_opera_libretto_四_00203": {
+  "old": -1,
+  "new": 6,
+  "method": "文本匹配",
+  "chapter": 4,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00204": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00205": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00206": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00207": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00208": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00209": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00210": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00211": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00212": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00213": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00214": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00215": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00216": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00217": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00218": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00219": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00220": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00221": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00222": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00223": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00224": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00225": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00226": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00227": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00228": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00229": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00230": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00231": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00232": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00233": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00234": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00235": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00236": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00237": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00238": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00239": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00240": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00241": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00242": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00243": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00244": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00245": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00246": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00247": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00248": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00249": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00250": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00251": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00252": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00253": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00254": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00255": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00256": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00257": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00258": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00259": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00260": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00261": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00262": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00263": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00264": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00265": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00266": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00267": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00268": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00269": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00270": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00271": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00272": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00273": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00274": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00275": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00276": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00277": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00278": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00279": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00280": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00281": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00282": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00283": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00284": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00285": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00286": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00287": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00288": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00289": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00290": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00291": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00292": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00293": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00294": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00295": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00296": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00297": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00298": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00299": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00300": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00301": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00302": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00303": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00304": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00305": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00306": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00307": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00308": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00309": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00310": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00311": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00312": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00313": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_chapter_vernacular_五_00314": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 5,
+  "old_valid": false
+ },
+ "primary_tanci_六_00315": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00316": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00317": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00318": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00319": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00320": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00321": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00322": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00323": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00324": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_tanci_六_00325": {
+  "old": -1,
+  "new": 1,
+  "method": "文本匹配",
+  "chapter": 6,
+  "old_valid": false
+ },
+ "primary_script_七_00326": {
+  "old": -1,
+  "new": 0,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00327": {
+  "old": -1,
+  "new": 2,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00328": {
+  "old": -1,
+  "new": 4,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00329": {
+  "old": -1,
+  "new": 5,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00330": {
+  "old": -1,
+  "new": 9,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00331": {
+  "old": -1,
+  "new": 10,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00332": {
+  "old": -1,
+  "new": 13,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00333": {
+  "old": -1,
+  "new": 16,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00334": {
+  "old": -1,
+  "new": 17,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00335": {
+  "old": -1,
+  "new": 18,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00336": {
+  "old": -1,
+  "new": 21,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00337": {
+  "old": -1,
+  "new": 23,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00338": {
+  "old": -1,
+  "new": 24,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00339": {
+  "old": -1,
+  "new": 25,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00340": {
+  "old": -1,
+  "new": 26,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00341": {
+  "old": -1,
+  "new": 27,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00342": {
+  "old": -1,
+  "new": 27,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00343": {
+  "old": -1,
+  "new": 30,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00344": {
+  "old": -1,
+  "new": 33,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00345": {
+  "old": -1,
+  "new": 37,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00346": {
+  "old": -1,
+  "new": 38,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00347": {
+  "old": -1,
+  "new": 40,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00348": {
+  "old": -1,
+  "new": 41,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00349": {
+  "old": -1,
+  "new": 44,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00350": {
+  "old": -1,
+  "new": 46,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00351": {
+  "old": -1,
+  "new": 46,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00352": {
+  "old": -1,
+  "new": 50,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00353": {
+  "old": -1,
+  "new": 54,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00354": {
+  "old": -1,
+  "new": 64,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00355": {
+  "old": -1,
+  "new": 67,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00356": {
+  "old": -1,
+  "new": 55,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00357": {
+  "old": -1,
+  "new": 72,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00358": {
+  "old": -1,
+  "new": 74,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00359": {
+  "old": -1,
+  "new": 76,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00360": {
+  "old": -1,
+  "new": 78,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00361": {
+  "old": -1,
+  "new": 79,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00362": {
+  "old": -1,
+  "new": 83,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00363": {
+  "old": -1,
+  "new": 85,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00364": {
+  "old": -1,
+  "new": 86,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ },
+ "primary_script_七_00365": {
+  "old": -1,
+  "new": 90,
+  "method": "文本匹配",
+  "chapter": 7,
+  "old_valid": false
+ }
+}

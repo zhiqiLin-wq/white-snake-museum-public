@@ -1,0 +1,1389 @@
+{
+  "meta": {
+    "name": "D5 衰减评测集",
+    "generator": "纯规则枚举（不调 LLM）",
+    "total_cases": 153,
+    "tombstone_cases": 24,
+    "keep_cases": 129,
+    "note": "expected_label 由 should_tombstone 规则反推，零歧义"
+  },
+  "cases": [
+    {
+      "id": "d5_001",
+      "memory_type": "System",
+      "importance": 0.5,
+      "days_unaccessed": 1,
+      "content": "用户约束：不要执行操作1",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_002",
+      "memory_type": "System",
+      "importance": 0.5,
+      "days_unaccessed": 365,
+      "content": "用户约束：不要执行操作2",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_003",
+      "memory_type": "System",
+      "importance": 0.5,
+      "days_unaccessed": 999,
+      "content": "用户约束：不要执行操作3",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_004",
+      "memory_type": "System",
+      "importance": 0.9,
+      "days_unaccessed": 1,
+      "content": "用户约束：不要执行操作4",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_005",
+      "memory_type": "System",
+      "importance": 0.9,
+      "days_unaccessed": 365,
+      "content": "用户约束：不要执行操作5",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_006",
+      "memory_type": "System",
+      "importance": 0.9,
+      "days_unaccessed": 999,
+      "content": "用户约束：不要执行操作6",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_007",
+      "memory_type": "System",
+      "importance": 0.95,
+      "days_unaccessed": 1,
+      "content": "用户约束：不要执行操作7",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_008",
+      "memory_type": "System",
+      "importance": 0.95,
+      "days_unaccessed": 365,
+      "content": "用户约束：不要执行操作8",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_009",
+      "memory_type": "System",
+      "importance": 0.95,
+      "days_unaccessed": 999,
+      "content": "用户约束：不要执行操作9",
+      "expected_label": "keep",
+      "reason": "System 类型永不清理"
+    },
+    {
+      "id": "d5_010",
+      "memory_type": "Entity",
+      "importance": 0.1,
+      "days_unaccessed": 1,
+      "content": "用户偏好事项10",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.6 但 days 1 <= TTL 180，保留"
+    },
+    {
+      "id": "d5_011",
+      "memory_type": "Entity",
+      "importance": 0.1,
+      "days_unaccessed": 179,
+      "content": "用户偏好事项11",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.6 但 days 179 <= TTL 180，保留"
+    },
+    {
+      "id": "d5_012",
+      "memory_type": "Entity",
+      "importance": 0.1,
+      "days_unaccessed": 180,
+      "content": "用户偏好事项12",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.6 但 days 180 <= TTL 180，保留"
+    },
+    {
+      "id": "d5_013",
+      "memory_type": "Entity",
+      "importance": 0.1,
+      "days_unaccessed": 181,
+      "content": "用户偏好事项13",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.6 且 days 181 > TTL 180，tombstone"
+    },
+    {
+      "id": "d5_014",
+      "memory_type": "Entity",
+      "importance": 0.1,
+      "days_unaccessed": 360,
+      "content": "用户偏好事项14",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.6 且 days 360 > TTL 180，tombstone"
+    },
+    {
+      "id": "d5_015",
+      "memory_type": "Entity",
+      "importance": 0.1,
+      "days_unaccessed": 540,
+      "content": "用户偏好事项15",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.6 且 days 540 > TTL 180，tombstone"
+    },
+    {
+      "id": "d5_016",
+      "memory_type": "Entity",
+      "importance": 0.5,
+      "days_unaccessed": 1,
+      "content": "用户偏好事项16",
+      "expected_label": "keep",
+      "reason": "importance 0.5 < floor 0.6 但 days 1 <= TTL 180，保留"
+    },
+    {
+      "id": "d5_017",
+      "memory_type": "Entity",
+      "importance": 0.5,
+      "days_unaccessed": 179,
+      "content": "用户偏好事项17",
+      "expected_label": "keep",
+      "reason": "importance 0.5 < floor 0.6 但 days 179 <= TTL 180，保留"
+    },
+    {
+      "id": "d5_018",
+      "memory_type": "Entity",
+      "importance": 0.5,
+      "days_unaccessed": 180,
+      "content": "用户偏好事项18",
+      "expected_label": "keep",
+      "reason": "importance 0.5 < floor 0.6 但 days 180 <= TTL 180，保留"
+    },
+    {
+      "id": "d5_019",
+      "memory_type": "Entity",
+      "importance": 0.5,
+      "days_unaccessed": 181,
+      "content": "用户偏好事项19",
+      "expected_label": "tombstone",
+      "reason": "importance 0.5 < floor 0.6 且 days 181 > TTL 180，tombstone"
+    },
+    {
+      "id": "d5_020",
+      "memory_type": "Entity",
+      "importance": 0.5,
+      "days_unaccessed": 360,
+      "content": "用户偏好事项20",
+      "expected_label": "tombstone",
+      "reason": "importance 0.5 < floor 0.6 且 days 360 > TTL 180，tombstone"
+    },
+    {
+      "id": "d5_021",
+      "memory_type": "Entity",
+      "importance": 0.5,
+      "days_unaccessed": 540,
+      "content": "用户偏好事项21",
+      "expected_label": "tombstone",
+      "reason": "importance 0.5 < floor 0.6 且 days 540 > TTL 180，tombstone"
+    },
+    {
+      "id": "d5_022",
+      "memory_type": "Entity",
+      "importance": 0.6,
+      "days_unaccessed": 1,
+      "content": "用户偏好事项22",
+      "expected_label": "keep",
+      "reason": "importance 0.6 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_023",
+      "memory_type": "Entity",
+      "importance": 0.6,
+      "days_unaccessed": 179,
+      "content": "用户偏好事项23",
+      "expected_label": "keep",
+      "reason": "importance 0.6 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_024",
+      "memory_type": "Entity",
+      "importance": 0.6,
+      "days_unaccessed": 180,
+      "content": "用户偏好事项24",
+      "expected_label": "keep",
+      "reason": "importance 0.6 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_025",
+      "memory_type": "Entity",
+      "importance": 0.6,
+      "days_unaccessed": 181,
+      "content": "用户偏好事项25",
+      "expected_label": "keep",
+      "reason": "importance 0.6 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_026",
+      "memory_type": "Entity",
+      "importance": 0.6,
+      "days_unaccessed": 360,
+      "content": "用户偏好事项26",
+      "expected_label": "keep",
+      "reason": "importance 0.6 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_027",
+      "memory_type": "Entity",
+      "importance": 0.6,
+      "days_unaccessed": 540,
+      "content": "用户偏好事项27",
+      "expected_label": "keep",
+      "reason": "importance 0.6 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_028",
+      "memory_type": "Entity",
+      "importance": 0.7,
+      "days_unaccessed": 1,
+      "content": "用户偏好事项28",
+      "expected_label": "keep",
+      "reason": "importance 0.7 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_029",
+      "memory_type": "Entity",
+      "importance": 0.7,
+      "days_unaccessed": 179,
+      "content": "用户偏好事项29",
+      "expected_label": "keep",
+      "reason": "importance 0.7 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_030",
+      "memory_type": "Entity",
+      "importance": 0.7,
+      "days_unaccessed": 180,
+      "content": "用户偏好事项30",
+      "expected_label": "keep",
+      "reason": "importance 0.7 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_031",
+      "memory_type": "Entity",
+      "importance": 0.7,
+      "days_unaccessed": 181,
+      "content": "用户偏好事项31",
+      "expected_label": "keep",
+      "reason": "importance 0.7 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_032",
+      "memory_type": "Entity",
+      "importance": 0.7,
+      "days_unaccessed": 360,
+      "content": "用户偏好事项32",
+      "expected_label": "keep",
+      "reason": "importance 0.7 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_033",
+      "memory_type": "Entity",
+      "importance": 0.7,
+      "days_unaccessed": 540,
+      "content": "用户偏好事项33",
+      "expected_label": "keep",
+      "reason": "importance 0.7 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_034",
+      "memory_type": "Entity",
+      "importance": 0.9,
+      "days_unaccessed": 1,
+      "content": "用户偏好事项34",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_035",
+      "memory_type": "Entity",
+      "importance": 0.9,
+      "days_unaccessed": 179,
+      "content": "用户偏好事项35",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_036",
+      "memory_type": "Entity",
+      "importance": 0.9,
+      "days_unaccessed": 180,
+      "content": "用户偏好事项36",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_037",
+      "memory_type": "Entity",
+      "importance": 0.9,
+      "days_unaccessed": 181,
+      "content": "用户偏好事项37",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_038",
+      "memory_type": "Entity",
+      "importance": 0.9,
+      "days_unaccessed": 360,
+      "content": "用户偏好事项38",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_039",
+      "memory_type": "Entity",
+      "importance": 0.9,
+      "days_unaccessed": 540,
+      "content": "用户偏好事项39",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_040",
+      "memory_type": "Entity",
+      "importance": 1.0,
+      "days_unaccessed": 1,
+      "content": "用户偏好事项40",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_041",
+      "memory_type": "Entity",
+      "importance": 1.0,
+      "days_unaccessed": 179,
+      "content": "用户偏好事项41",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_042",
+      "memory_type": "Entity",
+      "importance": 1.0,
+      "days_unaccessed": 180,
+      "content": "用户偏好事项42",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_043",
+      "memory_type": "Entity",
+      "importance": 1.0,
+      "days_unaccessed": 181,
+      "content": "用户偏好事项43",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_044",
+      "memory_type": "Entity",
+      "importance": 1.0,
+      "days_unaccessed": 360,
+      "content": "用户偏好事项44",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_045",
+      "memory_type": "Entity",
+      "importance": 1.0,
+      "days_unaccessed": 540,
+      "content": "用户偏好事项45",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.6，豁免保留"
+    },
+    {
+      "id": "d5_046",
+      "memory_type": "Archival",
+      "importance": 0.1,
+      "days_unaccessed": 1,
+      "content": "宋代江南地区事实46",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.4 但 days 1 <= TTL 90，保留"
+    },
+    {
+      "id": "d5_047",
+      "memory_type": "Archival",
+      "importance": 0.1,
+      "days_unaccessed": 89,
+      "content": "宋代江南地区事实47",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.4 但 days 89 <= TTL 90，保留"
+    },
+    {
+      "id": "d5_048",
+      "memory_type": "Archival",
+      "importance": 0.1,
+      "days_unaccessed": 90,
+      "content": "宋代江南地区事实48",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.4 但 days 90 <= TTL 90，保留"
+    },
+    {
+      "id": "d5_049",
+      "memory_type": "Archival",
+      "importance": 0.1,
+      "days_unaccessed": 91,
+      "content": "宋代江南地区事实49",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.4 且 days 91 > TTL 90，tombstone"
+    },
+    {
+      "id": "d5_050",
+      "memory_type": "Archival",
+      "importance": 0.1,
+      "days_unaccessed": 180,
+      "content": "宋代江南地区事实50",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.4 且 days 180 > TTL 90，tombstone"
+    },
+    {
+      "id": "d5_051",
+      "memory_type": "Archival",
+      "importance": 0.1,
+      "days_unaccessed": 270,
+      "content": "宋代江南地区事实51",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.4 且 days 270 > TTL 90，tombstone"
+    },
+    {
+      "id": "d5_052",
+      "memory_type": "Archival",
+      "importance": 0.3,
+      "days_unaccessed": 1,
+      "content": "宋代江南地区事实52",
+      "expected_label": "keep",
+      "reason": "importance 0.3 < floor 0.4 但 days 1 <= TTL 90，保留"
+    },
+    {
+      "id": "d5_053",
+      "memory_type": "Archival",
+      "importance": 0.3,
+      "days_unaccessed": 89,
+      "content": "宋代江南地区事实53",
+      "expected_label": "keep",
+      "reason": "importance 0.3 < floor 0.4 但 days 89 <= TTL 90，保留"
+    },
+    {
+      "id": "d5_054",
+      "memory_type": "Archival",
+      "importance": 0.3,
+      "days_unaccessed": 90,
+      "content": "宋代江南地区事实54",
+      "expected_label": "keep",
+      "reason": "importance 0.3 < floor 0.4 但 days 90 <= TTL 90，保留"
+    },
+    {
+      "id": "d5_055",
+      "memory_type": "Archival",
+      "importance": 0.3,
+      "days_unaccessed": 91,
+      "content": "宋代江南地区事实55",
+      "expected_label": "tombstone",
+      "reason": "importance 0.3 < floor 0.4 且 days 91 > TTL 90，tombstone"
+    },
+    {
+      "id": "d5_056",
+      "memory_type": "Archival",
+      "importance": 0.3,
+      "days_unaccessed": 180,
+      "content": "宋代江南地区事实56",
+      "expected_label": "tombstone",
+      "reason": "importance 0.3 < floor 0.4 且 days 180 > TTL 90，tombstone"
+    },
+    {
+      "id": "d5_057",
+      "memory_type": "Archival",
+      "importance": 0.3,
+      "days_unaccessed": 270,
+      "content": "宋代江南地区事实57",
+      "expected_label": "tombstone",
+      "reason": "importance 0.3 < floor 0.4 且 days 270 > TTL 90，tombstone"
+    },
+    {
+      "id": "d5_058",
+      "memory_type": "Archival",
+      "importance": 0.4,
+      "days_unaccessed": 1,
+      "content": "宋代江南地区事实58",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_059",
+      "memory_type": "Archival",
+      "importance": 0.4,
+      "days_unaccessed": 89,
+      "content": "宋代江南地区事实59",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_060",
+      "memory_type": "Archival",
+      "importance": 0.4,
+      "days_unaccessed": 90,
+      "content": "宋代江南地区事实60",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_061",
+      "memory_type": "Archival",
+      "importance": 0.4,
+      "days_unaccessed": 91,
+      "content": "宋代江南地区事实61",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_062",
+      "memory_type": "Archival",
+      "importance": 0.4,
+      "days_unaccessed": 180,
+      "content": "宋代江南地区事实62",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_063",
+      "memory_type": "Archival",
+      "importance": 0.4,
+      "days_unaccessed": 270,
+      "content": "宋代江南地区事实63",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_064",
+      "memory_type": "Archival",
+      "importance": 0.5,
+      "days_unaccessed": 1,
+      "content": "宋代江南地区事实64",
+      "expected_label": "keep",
+      "reason": "importance 0.5 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_065",
+      "memory_type": "Archival",
+      "importance": 0.5,
+      "days_unaccessed": 89,
+      "content": "宋代江南地区事实65",
+      "expected_label": "keep",
+      "reason": "importance 0.5 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_066",
+      "memory_type": "Archival",
+      "importance": 0.5,
+      "days_unaccessed": 90,
+      "content": "宋代江南地区事实66",
+      "expected_label": "keep",
+      "reason": "importance 0.5 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_067",
+      "memory_type": "Archival",
+      "importance": 0.5,
+      "days_unaccessed": 91,
+      "content": "宋代江南地区事实67",
+      "expected_label": "keep",
+      "reason": "importance 0.5 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_068",
+      "memory_type": "Archival",
+      "importance": 0.5,
+      "days_unaccessed": 180,
+      "content": "宋代江南地区事实68",
+      "expected_label": "keep",
+      "reason": "importance 0.5 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_069",
+      "memory_type": "Archival",
+      "importance": 0.5,
+      "days_unaccessed": 270,
+      "content": "宋代江南地区事实69",
+      "expected_label": "keep",
+      "reason": "importance 0.5 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_070",
+      "memory_type": "Archival",
+      "importance": 0.9,
+      "days_unaccessed": 1,
+      "content": "宋代江南地区事实70",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_071",
+      "memory_type": "Archival",
+      "importance": 0.9,
+      "days_unaccessed": 89,
+      "content": "宋代江南地区事实71",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_072",
+      "memory_type": "Archival",
+      "importance": 0.9,
+      "days_unaccessed": 90,
+      "content": "宋代江南地区事实72",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_073",
+      "memory_type": "Archival",
+      "importance": 0.9,
+      "days_unaccessed": 91,
+      "content": "宋代江南地区事实73",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_074",
+      "memory_type": "Archival",
+      "importance": 0.9,
+      "days_unaccessed": 180,
+      "content": "宋代江南地区事实74",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_075",
+      "memory_type": "Archival",
+      "importance": 0.9,
+      "days_unaccessed": 270,
+      "content": "宋代江南地区事实75",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_076",
+      "memory_type": "Archival",
+      "importance": 1.0,
+      "days_unaccessed": 1,
+      "content": "宋代江南地区事实76",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_077",
+      "memory_type": "Archival",
+      "importance": 1.0,
+      "days_unaccessed": 89,
+      "content": "宋代江南地区事实77",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_078",
+      "memory_type": "Archival",
+      "importance": 1.0,
+      "days_unaccessed": 90,
+      "content": "宋代江南地区事实78",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_079",
+      "memory_type": "Archival",
+      "importance": 1.0,
+      "days_unaccessed": 91,
+      "content": "宋代江南地区事实79",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_080",
+      "memory_type": "Archival",
+      "importance": 1.0,
+      "days_unaccessed": 180,
+      "content": "宋代江南地区事实80",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_081",
+      "memory_type": "Archival",
+      "importance": 1.0,
+      "days_unaccessed": 270,
+      "content": "宋代江南地区事实81",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.4，豁免保留"
+    },
+    {
+      "id": "d5_082",
+      "memory_type": "Summary",
+      "importance": 0.1,
+      "days_unaccessed": 1,
+      "content": "对话摘要要点82",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.3 但 days 1 <= TTL 30，保留"
+    },
+    {
+      "id": "d5_083",
+      "memory_type": "Summary",
+      "importance": 0.1,
+      "days_unaccessed": 29,
+      "content": "对话摘要要点83",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.3 但 days 29 <= TTL 30，保留"
+    },
+    {
+      "id": "d5_084",
+      "memory_type": "Summary",
+      "importance": 0.1,
+      "days_unaccessed": 30,
+      "content": "对话摘要要点84",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.3 但 days 30 <= TTL 30，保留"
+    },
+    {
+      "id": "d5_085",
+      "memory_type": "Summary",
+      "importance": 0.1,
+      "days_unaccessed": 31,
+      "content": "对话摘要要点85",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.3 且 days 31 > TTL 30，tombstone"
+    },
+    {
+      "id": "d5_086",
+      "memory_type": "Summary",
+      "importance": 0.1,
+      "days_unaccessed": 60,
+      "content": "对话摘要要点86",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.3 且 days 60 > TTL 30，tombstone"
+    },
+    {
+      "id": "d5_087",
+      "memory_type": "Summary",
+      "importance": 0.1,
+      "days_unaccessed": 90,
+      "content": "对话摘要要点87",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.3 且 days 90 > TTL 30，tombstone"
+    },
+    {
+      "id": "d5_088",
+      "memory_type": "Summary",
+      "importance": 0.2,
+      "days_unaccessed": 1,
+      "content": "对话摘要要点88",
+      "expected_label": "keep",
+      "reason": "importance 0.2 < floor 0.3 但 days 1 <= TTL 30，保留"
+    },
+    {
+      "id": "d5_089",
+      "memory_type": "Summary",
+      "importance": 0.2,
+      "days_unaccessed": 29,
+      "content": "对话摘要要点89",
+      "expected_label": "keep",
+      "reason": "importance 0.2 < floor 0.3 但 days 29 <= TTL 30，保留"
+    },
+    {
+      "id": "d5_090",
+      "memory_type": "Summary",
+      "importance": 0.2,
+      "days_unaccessed": 30,
+      "content": "对话摘要要点90",
+      "expected_label": "keep",
+      "reason": "importance 0.2 < floor 0.3 但 days 30 <= TTL 30，保留"
+    },
+    {
+      "id": "d5_091",
+      "memory_type": "Summary",
+      "importance": 0.2,
+      "days_unaccessed": 31,
+      "content": "对话摘要要点91",
+      "expected_label": "tombstone",
+      "reason": "importance 0.2 < floor 0.3 且 days 31 > TTL 30，tombstone"
+    },
+    {
+      "id": "d5_092",
+      "memory_type": "Summary",
+      "importance": 0.2,
+      "days_unaccessed": 60,
+      "content": "对话摘要要点92",
+      "expected_label": "tombstone",
+      "reason": "importance 0.2 < floor 0.3 且 days 60 > TTL 30，tombstone"
+    },
+    {
+      "id": "d5_093",
+      "memory_type": "Summary",
+      "importance": 0.2,
+      "days_unaccessed": 90,
+      "content": "对话摘要要点93",
+      "expected_label": "tombstone",
+      "reason": "importance 0.2 < floor 0.3 且 days 90 > TTL 30，tombstone"
+    },
+    {
+      "id": "d5_094",
+      "memory_type": "Summary",
+      "importance": 0.3,
+      "days_unaccessed": 1,
+      "content": "对话摘要要点94",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_095",
+      "memory_type": "Summary",
+      "importance": 0.3,
+      "days_unaccessed": 29,
+      "content": "对话摘要要点95",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_096",
+      "memory_type": "Summary",
+      "importance": 0.3,
+      "days_unaccessed": 30,
+      "content": "对话摘要要点96",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_097",
+      "memory_type": "Summary",
+      "importance": 0.3,
+      "days_unaccessed": 31,
+      "content": "对话摘要要点97",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_098",
+      "memory_type": "Summary",
+      "importance": 0.3,
+      "days_unaccessed": 60,
+      "content": "对话摘要要点98",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_099",
+      "memory_type": "Summary",
+      "importance": 0.3,
+      "days_unaccessed": 90,
+      "content": "对话摘要要点99",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_100",
+      "memory_type": "Summary",
+      "importance": 0.4,
+      "days_unaccessed": 1,
+      "content": "对话摘要要点100",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_101",
+      "memory_type": "Summary",
+      "importance": 0.4,
+      "days_unaccessed": 29,
+      "content": "对话摘要要点101",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_102",
+      "memory_type": "Summary",
+      "importance": 0.4,
+      "days_unaccessed": 30,
+      "content": "对话摘要要点102",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_103",
+      "memory_type": "Summary",
+      "importance": 0.4,
+      "days_unaccessed": 31,
+      "content": "对话摘要要点103",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_104",
+      "memory_type": "Summary",
+      "importance": 0.4,
+      "days_unaccessed": 60,
+      "content": "对话摘要要点104",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_105",
+      "memory_type": "Summary",
+      "importance": 0.4,
+      "days_unaccessed": 90,
+      "content": "对话摘要要点105",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_106",
+      "memory_type": "Summary",
+      "importance": 0.9,
+      "days_unaccessed": 1,
+      "content": "对话摘要要点106",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_107",
+      "memory_type": "Summary",
+      "importance": 0.9,
+      "days_unaccessed": 29,
+      "content": "对话摘要要点107",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_108",
+      "memory_type": "Summary",
+      "importance": 0.9,
+      "days_unaccessed": 30,
+      "content": "对话摘要要点108",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_109",
+      "memory_type": "Summary",
+      "importance": 0.9,
+      "days_unaccessed": 31,
+      "content": "对话摘要要点109",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_110",
+      "memory_type": "Summary",
+      "importance": 0.9,
+      "days_unaccessed": 60,
+      "content": "对话摘要要点110",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_111",
+      "memory_type": "Summary",
+      "importance": 0.9,
+      "days_unaccessed": 90,
+      "content": "对话摘要要点111",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_112",
+      "memory_type": "Summary",
+      "importance": 1.0,
+      "days_unaccessed": 1,
+      "content": "对话摘要要点112",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_113",
+      "memory_type": "Summary",
+      "importance": 1.0,
+      "days_unaccessed": 29,
+      "content": "对话摘要要点113",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_114",
+      "memory_type": "Summary",
+      "importance": 1.0,
+      "days_unaccessed": 30,
+      "content": "对话摘要要点114",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_115",
+      "memory_type": "Summary",
+      "importance": 1.0,
+      "days_unaccessed": 31,
+      "content": "对话摘要要点115",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_116",
+      "memory_type": "Summary",
+      "importance": 1.0,
+      "days_unaccessed": 60,
+      "content": "对话摘要要点116",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_117",
+      "memory_type": "Summary",
+      "importance": 1.0,
+      "days_unaccessed": 90,
+      "content": "对话摘要要点117",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_118",
+      "memory_type": "Working",
+      "importance": 0.1,
+      "days_unaccessed": 1,
+      "content": "临时状态标记118",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.3 但 days 1 <= TTL 7，保留"
+    },
+    {
+      "id": "d5_119",
+      "memory_type": "Working",
+      "importance": 0.1,
+      "days_unaccessed": 6,
+      "content": "临时状态标记119",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.3 但 days 6 <= TTL 7，保留"
+    },
+    {
+      "id": "d5_120",
+      "memory_type": "Working",
+      "importance": 0.1,
+      "days_unaccessed": 7,
+      "content": "临时状态标记120",
+      "expected_label": "keep",
+      "reason": "importance 0.1 < floor 0.3 但 days 7 <= TTL 7，保留"
+    },
+    {
+      "id": "d5_121",
+      "memory_type": "Working",
+      "importance": 0.1,
+      "days_unaccessed": 8,
+      "content": "临时状态标记121",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.3 且 days 8 > TTL 7，tombstone"
+    },
+    {
+      "id": "d5_122",
+      "memory_type": "Working",
+      "importance": 0.1,
+      "days_unaccessed": 14,
+      "content": "临时状态标记122",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.3 且 days 14 > TTL 7，tombstone"
+    },
+    {
+      "id": "d5_123",
+      "memory_type": "Working",
+      "importance": 0.1,
+      "days_unaccessed": 21,
+      "content": "临时状态标记123",
+      "expected_label": "tombstone",
+      "reason": "importance 0.1 < floor 0.3 且 days 21 > TTL 7，tombstone"
+    },
+    {
+      "id": "d5_124",
+      "memory_type": "Working",
+      "importance": 0.2,
+      "days_unaccessed": 1,
+      "content": "临时状态标记124",
+      "expected_label": "keep",
+      "reason": "importance 0.2 < floor 0.3 但 days 1 <= TTL 7，保留"
+    },
+    {
+      "id": "d5_125",
+      "memory_type": "Working",
+      "importance": 0.2,
+      "days_unaccessed": 6,
+      "content": "临时状态标记125",
+      "expected_label": "keep",
+      "reason": "importance 0.2 < floor 0.3 但 days 6 <= TTL 7，保留"
+    },
+    {
+      "id": "d5_126",
+      "memory_type": "Working",
+      "importance": 0.2,
+      "days_unaccessed": 7,
+      "content": "临时状态标记126",
+      "expected_label": "keep",
+      "reason": "importance 0.2 < floor 0.3 但 days 7 <= TTL 7，保留"
+    },
+    {
+      "id": "d5_127",
+      "memory_type": "Working",
+      "importance": 0.2,
+      "days_unaccessed": 8,
+      "content": "临时状态标记127",
+      "expected_label": "tombstone",
+      "reason": "importance 0.2 < floor 0.3 且 days 8 > TTL 7，tombstone"
+    },
+    {
+      "id": "d5_128",
+      "memory_type": "Working",
+      "importance": 0.2,
+      "days_unaccessed": 14,
+      "content": "临时状态标记128",
+      "expected_label": "tombstone",
+      "reason": "importance 0.2 < floor 0.3 且 days 14 > TTL 7，tombstone"
+    },
+    {
+      "id": "d5_129",
+      "memory_type": "Working",
+      "importance": 0.2,
+      "days_unaccessed": 21,
+      "content": "临时状态标记129",
+      "expected_label": "tombstone",
+      "reason": "importance 0.2 < floor 0.3 且 days 21 > TTL 7，tombstone"
+    },
+    {
+      "id": "d5_130",
+      "memory_type": "Working",
+      "importance": 0.3,
+      "days_unaccessed": 1,
+      "content": "临时状态标记130",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_131",
+      "memory_type": "Working",
+      "importance": 0.3,
+      "days_unaccessed": 6,
+      "content": "临时状态标记131",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_132",
+      "memory_type": "Working",
+      "importance": 0.3,
+      "days_unaccessed": 7,
+      "content": "临时状态标记132",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_133",
+      "memory_type": "Working",
+      "importance": 0.3,
+      "days_unaccessed": 8,
+      "content": "临时状态标记133",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_134",
+      "memory_type": "Working",
+      "importance": 0.3,
+      "days_unaccessed": 14,
+      "content": "临时状态标记134",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_135",
+      "memory_type": "Working",
+      "importance": 0.3,
+      "days_unaccessed": 21,
+      "content": "临时状态标记135",
+      "expected_label": "keep",
+      "reason": "importance 0.3 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_136",
+      "memory_type": "Working",
+      "importance": 0.4,
+      "days_unaccessed": 1,
+      "content": "临时状态标记136",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_137",
+      "memory_type": "Working",
+      "importance": 0.4,
+      "days_unaccessed": 6,
+      "content": "临时状态标记137",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_138",
+      "memory_type": "Working",
+      "importance": 0.4,
+      "days_unaccessed": 7,
+      "content": "临时状态标记138",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_139",
+      "memory_type": "Working",
+      "importance": 0.4,
+      "days_unaccessed": 8,
+      "content": "临时状态标记139",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_140",
+      "memory_type": "Working",
+      "importance": 0.4,
+      "days_unaccessed": 14,
+      "content": "临时状态标记140",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_141",
+      "memory_type": "Working",
+      "importance": 0.4,
+      "days_unaccessed": 21,
+      "content": "临时状态标记141",
+      "expected_label": "keep",
+      "reason": "importance 0.4 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_142",
+      "memory_type": "Working",
+      "importance": 0.9,
+      "days_unaccessed": 1,
+      "content": "临时状态标记142",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_143",
+      "memory_type": "Working",
+      "importance": 0.9,
+      "days_unaccessed": 6,
+      "content": "临时状态标记143",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_144",
+      "memory_type": "Working",
+      "importance": 0.9,
+      "days_unaccessed": 7,
+      "content": "临时状态标记144",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_145",
+      "memory_type": "Working",
+      "importance": 0.9,
+      "days_unaccessed": 8,
+      "content": "临时状态标记145",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_146",
+      "memory_type": "Working",
+      "importance": 0.9,
+      "days_unaccessed": 14,
+      "content": "临时状态标记146",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_147",
+      "memory_type": "Working",
+      "importance": 0.9,
+      "days_unaccessed": 21,
+      "content": "临时状态标记147",
+      "expected_label": "keep",
+      "reason": "importance 0.9 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_148",
+      "memory_type": "Working",
+      "importance": 1.0,
+      "days_unaccessed": 1,
+      "content": "临时状态标记148",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_149",
+      "memory_type": "Working",
+      "importance": 1.0,
+      "days_unaccessed": 6,
+      "content": "临时状态标记149",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_150",
+      "memory_type": "Working",
+      "importance": 1.0,
+      "days_unaccessed": 7,
+      "content": "临时状态标记150",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_151",
+      "memory_type": "Working",
+      "importance": 1.0,
+      "days_unaccessed": 8,
+      "content": "临时状态标记151",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_152",
+      "memory_type": "Working",
+      "importance": 1.0,
+      "days_unaccessed": 14,
+      "content": "临时状态标记152",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    },
+    {
+      "id": "d5_153",
+      "memory_type": "Working",
+      "importance": 1.0,
+      "days_unaccessed": 21,
+      "content": "临时状态标记153",
+      "expected_label": "keep",
+      "reason": "importance 1.0 >= floor 0.3，豁免保留"
+    }
+  ]
+}

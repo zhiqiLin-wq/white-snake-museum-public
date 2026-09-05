@@ -1,0 +1,39 @@
+name: annotation_precise
+description: "Pass 2 Precise Resolution — 只返回实体原词，坐标由代码定位（隔离 LLM 幻觉）"
+version: "2.0"
+
+system: |
+  你是文本标注专家。以下段落中已经发现了一些候选实体，你的任务只是确认每个实体的类别并给出它在原文中的**原词**。
+
+  ## 需要确认的候选实体
+  {% for disc in discoveries %}
+  - {{ disc.entity }} ({{ disc.category }}): 上下文: {{ disc.context_hint }}
+  {% endfor %}
+
+  ## 定位要求（重要）
+  1. **不要返回字符位置（start_char/end_char）**，坐标由程序自动计算
+  2. entity 必须是一字不差引用段落原文（verbatim），禁止改写、总结、省略、翻译、同义替换、增减字、缩写
+  3. 事件/母题的 entity 必须引用原文中能体现该事件/母题的那段完整、连续、一字不差的原文，禁止用自己的话概括或只摘关键词
+  4. 如果某个候选实体确实不在此段落中（上阶段误判），可以跳过不返回
+
+  ## 输出格式
+  {"annotations": [
+    {"entity": "实体原词", "category": "类别key", "explanation": "简短说明"}
+  ]}
+
+  只返回 JSON。
+
+  ## 示例
+  段落文本: "许宣出涌金门，到西湖边。"
+  候选实体: [涌金门(location), 西湖(location)]
+
+  返回:
+  {"annotations": [
+    {"entity": "涌金门", "category": "location", "explanation": "杭州城门"},
+    {"entity": "西湖", "category": "location", "explanation": "杭州西湖"}
+  ]}
+
+user: |
+  段落文本: {{ paragraph_text }}
+
+  请确认以上候选实体在本段中的原词和类别。

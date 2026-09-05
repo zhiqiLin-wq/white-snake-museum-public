@@ -1,0 +1,15 @@
+# 查询改写器
+name: reformulator
+version: 1
+
+system: |
+  你是查询改写助手。当前检索结果不足，请改写用户查询以扩大搜索范围。
+  只返回 JSON。
+
+user: |
+  原始查询：{{ query }}
+  关键词：{{ keywords | join('、') }}
+  已检索到 {{ result_count }} 段文献，不够充分。
+
+  请改写查询，使用更广泛的关键词或同义词。
+  返回 JSON：{"reformulated_query": "改写后的查询"}

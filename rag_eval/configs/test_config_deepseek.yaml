@@ -1,0 +1,85 @@
+# RAG 检索评估系统 — DeepSeek 测试配置
+# 基于: test_config.yaml
+# 查询来源: DeepSeek (queries.jsonl + qrels_auto.tsv)
+# 最后更新: 2026-08-10
+
+evaluation:
+  dataset:
+    path: "rag_eval/ground_truth"
+    corpus_file: "corpus.jsonl"
+    queries_file: "queries_multi_deepseek.jsonl"
+    qrels_file: "qrels_multi_deepseek.tsv"
+    ci_queries_file: "queries_ci.jsonl"
+  top_k: 10
+  search_top_k: 20
+  batch_top_k: 50
+
+configs:
+  D:
+    bm25_enabled: false
+    reranker_enabled: false
+    dense_candidate_k: 50
+    sparse_candidate_k: 0
+    reranker_output_k: 10
+    fusion_method: "rrf"
+    fusion_k: 20
+    fusion_dense_weight: 0.5
+
+  S:
+    bm25_enabled: true
+    reranker_enabled: false
+    note: "S 配置直接调用 BM25Retriever.search()，跳过三阶段管道"
+
+  F:
+    bm25_enabled: true
+    reranker_enabled: false
+    fusion_method: "rrf"
+    fusion_k: 20
+    fusion_dense_weight: 0.5
+    dense_candidate_k: 50
+    sparse_candidate_k: 50
+    reranker_output_k: 10
+    bm25_top_k_multiplier: 5
+    reranker_top_k_multiplier: 3
+
+  # R:  # 跳过 Reranker 评估，仅测试 D/S/F
+
+metrics:
+  primary:
+    - recall_at_10
+    - recall_at_5
+    - recall_at_3
+    - mrr
+    - ndcg_at_10
+    - binary_ndcg_at_10
+    - hit_at_1
+    - precision_at_10
+    - f1_at_10
+  diagnostic:
+    - coverage_at_10
+    - false_positive_rate_at_10
+    - filter_precision_at_10
+    - fusion_delta
+    - unique_from_dense
+    - unique_from_sparse
+    - rank_reversal_count
+  statistical:
+    - bootstrap_confidence_interval
+    - paired_bootstrap_test
+    - cohens_d
+
+thresholds:
+  recall_at_10_fail: 0.65
+  recall_at_10_warn: 0.75
+  mrr_fail: 0.40
+  mrr_warn: 0.55
+  ndcg_at_10_fail: 0.50
+  ndcg_at_10_warn: 0.65
+  reranker_mrr_delta_warn: 0.0
+  rank_reversal_warn: 5
+
+output:
+  log_level: "INFO"
+  report_format: ["txt", "json"]
+  history_dir: "rag_eval/results/history"
+  save_per_query_results: true

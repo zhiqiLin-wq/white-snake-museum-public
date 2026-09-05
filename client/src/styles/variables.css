@@ -1,0 +1,117 @@
+:root {
+  /* ============================================================
+     设计令牌 · 极简黑白 · 淡蓝微缀
+     原则：95% 灰阶 + ≤5% 淡蓝点缀；统一圆角/间距/动效时长
+  ============================================================ */
+
+  /* ---------- 布局尺寸 ---------- */
+  --sidebar-width: 220px;
+  --agent-panel-width: 360px;
+
+  /* ---------- 中性灰阶（背景） ---------- */
+  --color-bg-primary: #FFFFFF;      /* 主底：纯白 */
+  --color-bg-secondary: #F7F8FA;    /* 次底：极浅灰 */
+  --color-bg-tertiary: #F0F2F5;     /* 末底：浅灰（输入/禁用） */
+  --color-bg-hover: #F2F4F7;        /* hover 底 */
+  --color-bg-active: #EBEDF0;       /* 按下底 */
+
+  /* ---------- 中性灰阶（文字） ---------- */
+  --color-text-primary: #1A1A1A;    /* 正文：近墨黑 */
+  --color-text-secondary: #4B5563;  /* 次文本 */
+  --color-text-tertiary: #6B7280;   /* 辅助/说明 */
+  --color-text-placeholder: #9CA3AF; /* placeholder */
+  --color-text-disabled: #BFC4CC;   /* 禁用 */
+
+  /* ---------- 中性灰阶（边框 & 分割） ---------- */
+  --color-border: #E5E7EB;          /* 主边框 */
+  --color-border-light: #F0F2F5;    /* 轻分割 */
+  --color-border-dark: #D1D5DB;     /* 强调边框（focus） */
+
+  /* ---------- 点缀色（淡蓝 · 严格限量 ≤5%） ---------- */
+  --color-accent: #5B9BD5;          /* 主点缀 */
+  --color-accent-hover: #4A8BC5;    /* hover */
+  --color-accent-active: #3D7BB5;   /* 按下 */
+  --color-accent-light: #EBF4FC;    /* 选中底/浅底 */
+  --color-accent-ring: rgba(91, 155, 213, 0.10); /* focus 光晕 */
+
+  /* ---------- 语义状态色（仅 Toast / Badge / 结论；统一淡蓝系，避免绿色调破坏配色） ---------- */
+  --color-success: #5B9BD5;
+  --color-success-light: #EBF4FC;
+  --color-warning: #C4AE62;
+  --color-warning-light: #FBF7E8;
+  --color-error: #C89292;
+  --color-error-light: #FBF0F0;
+
+  /* ---------- 标注五色（降饱和冷色系，区分度保留但不喧宾） ---------- */
+  --color-annotation-person: #6DA8D6;
+  --color-annotation-location: #8FB8C9;
+  --color-annotation-event: #6FB9C4;
+  --color-annotation-term: #9AA6D4;
+  --color-annotation-motif: #D09EBC;
+  --color-annotation-custom: #B4B482;
+
+  /* ---------- 考据结论色（灰阶+低饱和；统一淡蓝主调，黄/红仅作区分） ---------- */
+  --color-verdict-supported: #5B9BD5;
+  --color-verdict-insufficient: #C4AE62;
+  --color-verdict-refuted: #C89292;
+
+  /* ---------- 阶段状态色（统一淡蓝系） ---------- */
+  --color-phase-active: #5B9BD5;
+  --color-phase-complete: #5B9BD5;
+  --color-phase-interrupt: #C4AE62;
+  --color-phase-error: #C89292;
+
+  /* ---------- 标注边框样式 ---------- */
+  --annotation-border-user: solid;
+  --annotation-border-agent: dashed;
+
+  /* ---------- 旁批样式 ---------- */
+  --marginalia-bg: #F7F8FA;
+  --marginalia-border: #E5E7EB;
+  --marginalia-font-size: 0.72rem;
+  --marginalia-max-width: 200px;
+  --marginalia-padding: 8px;
+
+  /* ---------- 圆角（全站统一 8px，小元素 6px/4px） ---------- */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 10px;
+  --radius-full: 999px;
+
+  /* ---------- 间距音阶（统一 4px 网格） ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ---------- 阴影（极简：淡 + 低对比） ---------- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.08);
+  --shadow-focus: 0 0 0 2px var(--color-accent-ring);
+
+  /* ---------- 动效令牌（丝滑 60fps：只动 transform/opacity） ---------- */
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --dur-slow: 320ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);     /* 丝滑缓动 */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);     /* 出场回弹感 */
+
+  /* ---------- 图表色板（低饱和区分色，统一冷色系，避免绿色调） ---------- */
+  --chart-c1: #5B9BD5;
+  --chart-c2: #8FB8C9;
+  --chart-c3: #9AA6D4;
+  --chart-c4: #D09EBC;
+  --chart-c5: #B4B482;
+  --chart-c6: #6FB9C4;
+  --chart-c7: #C4AE62;
+  --chart-c8: #9BA8B5;
+
+  /* ---------- 字体 ---------- */
+  --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+  --font-sans: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
