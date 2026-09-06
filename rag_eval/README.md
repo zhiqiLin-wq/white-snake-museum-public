@@ -1,136 +1,77 @@
-# RAG 检索评估系统 (rag_eval)
+# RAG 检索评估系统（rag_eval）
 
-基于 [rag-evaluation-test-design.md](../rag-evaluation-test-design.md) v1.0 设计，
-严格遵循 [rag-eval-implementation-tasks.md](../rag-eval-implementation-tasks.md) 任务分解。
+对 RAG 检索流水线做**量化评测**的子系统：以人工校验的查询集（queries）和相关性标注（qrels）为真值，对比不同检索策略（稠密 / 稀疏 / 融合 / 全管线）与不同 LLM Provider 的 Recall@k、MRR、NDCG 等指标，支持消融实验。
+
+> 本目录仅收录评测框架与当前数据集；开发过程中的一次性诊断、调参、修补脚本不随仓库发布。
 
 ## 目录结构
 
-```
+```text
 rag_eval/
-├── README.md                          # 本文件
+├── README.md                  # 本文件
+├── RETRIEVAL_RULES.md         # 检索规则与口径约定
 ├── __init__.py
-├── loader.py                          # BEIR 格式数据加载器 (T01.01)
-├── metrics.py                         # 指标计算引擎 (T02.01~T02.09 + T07.03)
-├── evaluate.py                        # 评估主脚本 (T03.01~T03.19)
-├── reporter.py                        # 报告生成器 (T04.01~T04.08)
-├── benchmark.py                       # 性能基准测试 (T06.01~T06.06)
-├── generate_dataset.py                # 数据集生成工具 (T01.02~T01.06)
-├── conftest.py                        # pytest fixtures (T00.05)
-├── _verify_imports.py                 # 导入验证 (T00.04)
-├── _verify_chunk_ids.py               # chunk_id 跨索引一致性 (T00.08)
-├── _smoke_test.py                     # 端到端 Smoke Test (T00.09)
-├── configs/
-│   ├── test_config.yaml               # 主评估配置 (T00.02)
-│   └── chunking_ablation.yaml         # Chunking 消融配置 (T00.03)
-├── ground_truth/                      # 数据集目录
-│   ├── .gitkeep
-│   ├── corpus.jsonl                   # (待生成) 语料库
-│   ├── queries.jsonl                  # (待生成) 查询集
-│   ├── queries_ci.jsonl               # (待生成) CI 子集
-│   ├── qrels.tsv                      # (待生成) 相关性标注
-│   └── ANNOTATION_LOG.md             # 标注流程日志模板 (T07.08)
-├── results/                           # 评估结果输出
-│   └── history/                       # 历史趋势
-├── scripts/                           # 辅助脚本 (Phase 5/7)
-│   └── __init__.py
-└── tests/                             # 测试
-    ├── __init__.py
-    ├── test_self_check.py             # 评估系统自检 (T03.17)
-    ├── test_ci_gate_mock.py           # CI 门禁 Mock 测试 (T08.02)
-    ├── test_topk_boundary.py          # top_k 边界测试 (T03.16)
-    └── test_topk_multiplier_config.py # 死配置审计 (T03.19)
+├── conftest.py                # pytest fixtures
+├── loader.py                  # BEIR 格式数据加载器（corpus / queries / qrels）
+├── metrics.py                 # 指标计算引擎（Recall@k / MRR / NDCG / Hit / Precision / Coverage）
+├── evaluate.py                # 评估主入口（配置驱动，支持消融实验）
+├── full_eval.py               # 全管线评估（含标签向量 / boost 路径）
+├── fusion_ablation_core.py    # 融合策略消融核心（Dense / Sparse / RRF 等对比）
+├── detail_log.py              # 检索组件明细日志与查询预处理
+├── reporter.py                # 文本 / JSON 报告生成
+├── benchmark.py               # 性能基准
+├── configs/                   # 评估配置（Provider × 语料风格 × 是否标签增强）
+├── ground_truth/              # 评测数据集（当前版本）
+│   ├── corpus.jsonl           # 语料 chunk 快照
+│   ├── queries_*.jsonl        # 查询集（academic / daily × deepseek / qwen）
+│   ├── qrels_*.tsv            # 查询-chunk 相关性标注（augmented / src_only）
+│   └── ANNOTATION_LOG.md      # 标注流程说明
+├── scripts/                   # 数据集生成与批量评估
+│   ├── generate_query_drafts.py      # LLM 生成查询草稿
+│   ├── generate_eval_dataset.py      # 学术/日常双风格评测集
+│   ├── generate_multi_doc_queries.py # 跨文献多文档查询（deepseek/qwen/ernie）
+│   ├── setup_indices.py              # 评测专用索引构建
+│   └── run_all_evals.py              # 批量跑全部 Provider 配置
+└── tests/                     # 评测系统自测
+    ├── test_self_check.py
+    ├── test_ci_gate_mock.py
+    ├── test_topk_boundary.py
+    └── test_topk_multiplier_config.py
 ```
 
-## 快速开始
-
-### 1. 生成数据集
+## 运行评估
 
 ```bash
-# 导出语料库
-python -m rag_eval.generate_dataset --export-corpus
+# 单配置评估（配置文件见 configs/）
+python -m rag_eval.evaluate --config rag_eval/configs/test_config_daily_deepseek.yaml --verbose
+python -m rag_eval.evaluate --config rag_eval/configs/test_config_academic_deepseek.yaml --verbose
 
-#query-from-document
-
-
-python -m rag_eval.scripts.generate_eval_dataset --provider deepseek --style daily
-python -m rag_eval.scripts.generate_eval_dataset --provider deepseek --style academic
-
-python -m rag_eval.scripts.generate_eval_dataset --provider qwen --style daily
-python -m rag_eval.scripts.generate_eval_dataset --provider qwen --style academic
-
-# 1. 确认语料库就绪
- .venv/Scripts/python -m rag_eval.generate_dataset --stats
-
-
-#日常测评 
-  python -m rag_eval.evaluate --config rag_eval/configs/test_config_daily_deepseek.yaml --verbose
-  python -m rag_eval.evaluate --config rag_eval/configs/test_config_academic_deepseek.yaml --verbose
-  
-  python -m rag_eval.evaluate --config rag_eval/configs/test_config_daily_qwen.yaml --verbose
-  python -m rag_eval.evaluate --config rag_eval/configs/test_config_academic_qwen.yaml --verbose
-  
-#权重
-python -m rag_eval.evaluate --config rag_eval/configs/test_config_daily_deepseek.yaml --ablation weight --verbose
-
-#recall情况
-python rag_eval/query_analysis.py --config rag_eval/configs/test_config_daily_deepseek.yaml --output rag_eval/results/query_analysis.log
-
-python rag_eval/query_analysis.py --config rag_eval/configs/test_config_academic_deepseek.yaml --output rag_eval/results/query_analysis.log
-```
-
-### 2. 运行评估
-
-```bash
-# CI 模式 (30 条查询, 约 10 分钟)
-python -m rag_eval.evaluate --config rag_eval/configs/test_config.yaml --ci --verbose
-
-# 全量评估 (200 条查询)
-python -m rag_eval.evaluate --config rag_eval/configs/test_config.yaml --verbose
+# 消融实验（fusion = 融合策略对比；weight = 权重敏感性）
+python -m rag_eval.evaluate --config rag_eval/configs/test_config_daily_deepseek.yaml --ablation fusion
+python -m rag_eval.evaluate --config rag_eval/configs/test_config_daily_deepseek.yaml --ablation weight
 
 # 单条查询调试
 python -m rag_eval.evaluate --config rag_eval/configs/test_config.yaml --query q_001 --debug
 
-# 消融实验
-python -m rag_eval.evaluate --config rag_eval/configs/test_config.yaml --ablation fusion
-python -m rag_eval.evaluate --config rag_eval/configs/test_config.yaml --ablation weight
-```
+# 批量评估全部 Provider
+python -m rag_eval.scripts.run_all_evals
 
-### 3. 查看报告
-
-```bash
-# 文本报告
-cat rag_eval/results/latest_report.txt
-
-# JSON 报告
-cat rag_eval/results/latest_report.json
-```
-
-### 4. 运行测试
-
-```bash
-# Smoke test (零外部依赖)
-python -m rag_eval._smoke_test
-
-# 全部单元测试
+# 自测
 pytest rag_eval/tests/ -v
-
-# 仅 CI Mock 测试
-pytest rag_eval/tests/test_ci_gate_mock.py -v
 ```
 
-## 配置文件格式
+评估结果输出到 `rag_eval/results/`（运行产物，不入库）：`latest_report.txt`（文本报告）、`latest_report.json`（机器可读）。
 
-### test_config.yaml
+## 配置文件
 
 ```yaml
 evaluation:
   top_k: 10
 configs:
-  D: {bm25_enabled: false, reranker_enabled: false}   # Dense Only
-  S: {bm25_enabled: true, reranker_enabled: false}      # Sparse Only
-  F: {bm25_enabled: true, reranker_enabled: false,      # Fusion
-      fusion_method: rrf}
-  R: {bm25_enabled: true, reranker_enabled: true}       # Full Pipeline
+  D: {bm25_enabled: false, reranker_enabled: false}   # 仅稠密向量
+  S: {bm25_enabled: true,  reranker_enabled: false}   # 仅稀疏 BM25
+  F: {bm25_enabled: true,  reranker_enabled: false, fusion_method: rrf}  # 融合
+  R: {bm25_enabled: true,  reranker_enabled: true}    # 全管线（含重排）
 thresholds:
   recall_at_10_fail: 0.65
   recall_at_10_warn: 0.75
@@ -138,26 +79,17 @@ thresholds:
 
 ## 指标说明
 
-| 指标 | 说明 | 范围 |
-|------|------|------|
-| Recall@k | 前 k 结果中命中的相关文档比例 | [0, 1] |
-| MRR | 第一个相关文档排名的倒数均值 | [0, 1] |
-| NDCG@k | 归一化折损累积增益 | [0, 1] |
-| Hit@k | 前 k 结果中是否有相关文档 | {0, 1} |
-| Precision@k | 前 k 结果中相关文档占比 | [0, 1] |
-| Coverage Rate | 至少有一个相关文档被检索到的查询比例 | [0, 1] |
+| 指标 | 说明 |
+|------|------|
+| Recall@k | 前 k 个结果命中相关 chunk 的比例 |
+| MRR | 第一个相关结果排名的倒数均值 |
+| NDCG@k | 归一化折损累积增益（相关性越高的结果排得越前得分越高） |
+| Hit@k | 前 k 个结果中是否存在相关 chunk |
+| Precision@k | 前 k 个结果中相关 chunk 的占比 |
+| Coverage | 至少有一个相关 chunk 被检索到的查询比例 |
 
-## CI 集成
+## 数据集说明
 
-```bash
-# CI 流水线
-python -m rag_eval._verify_imports       # 验证导入
-python -m rag_eval._smoke_test           # Smoke test
-pytest rag_eval/tests/ -v                # 单元测试
-python -m rag_eval.evaluate --config rag_eval/configs/test_config.yaml --ci
-
-# Exit codes:
-#   0: PASS (recall_at_10 >= warn_threshold)
-#   0 + stderr: WARN (recall_at_10 < warn, >= fail)
-#   1: FAIL (recall_at_10 < fail)
-```
+- 查询分**学术型**（academic，研究者视角的比较/溯源问题）与**日常型**（daily，博物馆访客的口语化问题）两种风格；
+- qrels 由 LLM 初标 + 人工校验得到，`augmented` 为标签增强后的标注、`src_only` 为仅原文依据的标注（用于消融对照）；
+- 数据集生成脚本（`scripts/`）的 LLM API Key 从 `agent/.env` 环境变量读取，不在代码中硬编码。
