@@ -167,6 +167,13 @@ class Embedder:
           2. model forward -> last_hidden_state (batch, seq, 1024)
           3. CLS pooling: hidden[:, 0, :] -> (batch, 1024)
           4. L2 normalization: emb / ||emb||
+
+        padding 策略：padding=True（批内按最长动态填充），而非固定 512。
+        CLS 池化 + attention mask 保证填充 token 不影响输出，两种 padding
+        产出向量 cosine=1.000000（rag/tests/bench_embedder_e2.py 实测）。
+        短查询（E2 关键词串仅 20-70 字）此前为 25 字查询跑满 512 token，
+        单次 forward 1.34s -> 动态填充 0.16s（8.6 倍），且 E2 批量并发检索
+        期间不再长时间阻塞事件循环。
         """
         if not self._model or not self._tokenizer:
             raise RuntimeError("Embedding model not loaded yet")
@@ -178,7 +185,7 @@ class Embedder:
 
         enc = self._tokenizer(
             texts,
-            padding="max_length",
+            padding=True,
             truncation=True,
             max_length=512,
             return_tensors="pt",

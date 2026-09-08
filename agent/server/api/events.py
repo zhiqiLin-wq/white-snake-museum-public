@@ -50,6 +50,7 @@ class SSEEventType(str, Enum):
 
     # ===== 工作区驱动 (Workspace) — v8 新增 =====
     ANNOTATION_DATA = "annotation_data"
+    ANNOTATION_PROGRESS = "annotation_progress"   # 智能标注实时进度（阶段/计数/真实统计）
     ANNOTATION_SUGGEST = "annotation_suggest"     # v9: Agent 建议标注
     MARGINALIA_DATA = "marginalia_data"           # v11: Agent 创建的旁批评注
     PARAGRAPH_ALIGNMENT = "paragraph_alignment"   # v9: 段落对齐结果
@@ -115,6 +116,7 @@ EVOLUTION_EVENTS: frozenset[str] = frozenset(
 # B-068: 工作区事件集合（routes.py 透传不包装）
 WORKSPACE_EVENTS: frozenset[str] = frozenset([
     SSEEventType.ANNOTATION_DATA,
+    SSEEventType.ANNOTATION_PROGRESS,
     SSEEventType.ANNOTATION_SUGGEST,
     SSEEventType.MARGINALIA_DATA,
     SSEEventType.PARAGRAPH_ALIGNMENT,

@@ -80,11 +80,24 @@ export const useAnnotationStore = defineStore('annotations', () => {
 
   // ===== Getters =====
 
+  /**
+   * 分栏（对比阅读）模式下 TextReaderView 以 `ch:p:left/right` 查询，
+   * 而服务端加载与 SSE 流式写入的 agent 数据统一以裸 key `ch:p` 为准。
+   * 带后缀 key 查不到时回退裸 key，保证对比视图中 AI 高亮/旁注/洞察正常显示。
+   */
+  function resolveAgentKey(record: Record<string, unknown[]>, key: string): string {
+    if (record[key] && record[key]!.length > 0) return key
+    const m = /^(\d+:\d+):(?:left|right)$/.exec(key)
+    if (m && record[m[1]] && record[m[1]]!.length > 0) return m[1]
+    return key
+  }
+
   function visibleAnnotations(
     passageKey: PassageKey,
     splitSide?: 'left' | 'right'
   ): (Annotation | UserAnnotation)[] {
-    const agent = (agentAnnotations.value[passageKey] || []).filter(
+    const agentKey = resolveAgentKey(agentAnnotations.value as Record<string, unknown[]>, passageKey)
+    const agent = (agentAnnotations.value[agentKey] || []).filter(
       a => visibility.value.agent[a.category]
     )
     const user = (userAnnotations.value[passageKey] || []).filter(
@@ -100,7 +113,8 @@ export const useAnnotationStore = defineStore('annotations', () => {
   }
 
   function annotationsForKey(passageKey: PassageKey): Annotation[] {
-    return agentAnnotations.value[passageKey] || []
+    const key = resolveAgentKey(agentAnnotations.value as Record<string, unknown[]>, passageKey)
+    return agentAnnotations.value[key] || []
   }
 
   function userAnnotationsForKey(passageKey: PassageKey): UserAnnotation[] {
@@ -108,12 +122,14 @@ export const useAnnotationStore = defineStore('annotations', () => {
   }
 
   function insightsForKey(passageKey: PassageKey): Insight[] {
-    return aiInsights.value[passageKey] || []
+    const key = resolveAgentKey(aiInsights.value as Record<string, unknown[]>, passageKey)
+    return aiInsights.value[key] || []
   }
 
   function marginaliaForKey(passageKey: PassageKey): Marginalia[] {
     const user = userMarginalia.value[passageKey] || []
-    const agent = agentMarginalia.value[passageKey] || []
+    const agentKey = resolveAgentKey(agentMarginalia.value as Record<string, unknown[]>, passageKey)
+    const agent = agentMarginalia.value[agentKey] || []
     return [...user, ...agent].sort((a, b) => a.createdAt - b.createdAt)
   }
 
@@ -535,7 +551,7 @@ export const useAnnotationStore = defineStore('annotations', () => {
     // Delete agent annotations from server
     apiFetch('/api/annotations', {
       method: 'DELETE',
-      body: JSON.stringify({ chapterNumber, cleanAgent: true }),
+      body: JSON.stringify({ chapterNumber, cleanAgent: true, deleteAll: true }),
     }).catch(err => console.error('[annotations] Failed to clear agent annotations on server:', err))
   }
 
@@ -548,8 +564,12 @@ export const useAnnotationStore = defineStore('annotations', () => {
     }
     const existing = agentMarginalia.value[passageKey]
     for (const m of marginaliaList) {
-      if (!existing.find(e => e.id === m.id)) {
+      const idx = existing.findIndex(e => e.id === m.id)
+      if (idx === -1) {
         existing.push(m)
+      } else {
+        // 同 id 旁注（重跑标注）：内容就地更新，避免旧文案残留
+        existing[idx] = m
       }
     }
     const chNum = parseInt(passageKey.split(':')[0], 10)
@@ -1343,7 +1363,7 @@ export const useAnnotationStore = defineStore('annotations', () => {
             const userAnns: UserAnnotation[] = []
             const agentAnns: Annotation[] = []
             for (const a of anns) {
-              const source = (a.source as string) || 'user'
+              const source = (a.source as string) || 'agent'
               if (source === 'agent') {
                 agentAnns.push({
                   id: a.id as string,
@@ -1578,7 +1598,7 @@ export const useAnnotationStore = defineStore('annotations', () => {
             const userAnns: UserAnnotation[] = []
             const agentAnns: Annotation[] = []
             for (const a of anns) {
-              const source = (a.source as string) || 'user'
+              const source = (a.source as string) || 'agent'
               if (source === 'agent') {
                 agentAnns.push({
                   id: a.id as string,
@@ -1615,7 +1635,7 @@ export const useAnnotationStore = defineStore('annotations', () => {
             const userMarg: Marginalia[] = []
             const agentMarg: Marginalia[] = []
             for (const m of margs) {
-              const source = (m.source as string) || 'user'
+              const source = (m.source as string) || 'agent'
               if (source === 'agent') {
                 agentMarg.push(m as unknown as Marginalia)
               } else {

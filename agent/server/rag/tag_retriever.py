@@ -2,6 +2,7 @@
 
 严格按 rag_eval/RETRIEVAL_RULES.md。
 """
+import asyncio
 import logging
 
 import numpy as np
@@ -199,8 +200,12 @@ class TagRetriever:
         if meta_lookup:
             tag_cids = [c for c in tag_cids if c in meta_lookup]
         tag_cids = [c for c in tag_cids if self.tag_store.tag_vector(c) is not None]
-        if tag_cids:
-            q_tag_text = " ".join(qtags_disc)
+        # B-162: 标签语义通道仅在查询确实带判别性标签时才 embedding。
+        # E2 批量检索走 skip_tagging（label={}），qtags_disc 为空——此前仍对
+        # 空字符串白跑一次 bge-large CPU forward（~1.4s/次，512 padding），
+        # 且 matmul 出的全是噪声分数混入融合。空标签直接跳过该通道。
+        q_tag_text = " ".join(qtags_disc)
+        if tag_cids and q_tag_text:
             q_tag_vec = np.asarray(self.embedder.embed([q_tag_text])[0], dtype=float)
             mat = np.asarray([self.tag_store.tag_vector(c) for c in tag_cids], dtype=float)
             scores = mat @ q_tag_vec
@@ -242,7 +247,26 @@ class TagRetriever:
     async def retrieve(self, query_text, query_label, top_k=10, corpus=None, meta_lookup=None,
                        max_candidates=None, fusion_weights=None,
                        plot_unit_threshold=PLOT_UNIT_SIM_THRESHOLD, return_scores=False):
-        """五路召回 + boost 重排，返回 top-k chunk_id 列表（或 (chunk_id, score) 对）。"""
+        """五路召回 + boost 重排（异步入口），返回 top-k chunk_id 或 (cid, score)。
+
+        B-162: 召回主体全部是同步重活（bge-large CPU 推理、numpy matmul、
+        BM25 打分、boost 循环）。此前直接在事件循环线程执行，E2 矩阵扫描
+        8 路并发实际被串行化，且单次 forward ~0.2-1.4s 会卡住 SSE 心跳与
+        进度推送。现统一丢到工作线程执行：模型为 eval/no_grad 只读推理、
+        BM25/索引均为只读，线程安全；torch forward 期间释放 GIL，并发
+        检索可真正重叠。
+        """
+        return await asyncio.to_thread(
+            self.retrieve_sync, query_text, query_label,
+            top_k=top_k, corpus=corpus, meta_lookup=meta_lookup,
+            max_candidates=max_candidates, fusion_weights=fusion_weights,
+            plot_unit_threshold=plot_unit_threshold, return_scores=return_scores,
+        )
+
+    def retrieve_sync(self, query_text, query_label, top_k=10, corpus=None, meta_lookup=None,
+                      max_candidates=None, fusion_weights=None,
+                      plot_unit_threshold=PLOT_UNIT_SIM_THRESHOLD, return_scores=False):
+        """五路召回 + boost 重排的同步实现（retrieve 的线程执行体）。"""
         if not isinstance(query_label, dict) or "_error" in query_label:
             return []
 

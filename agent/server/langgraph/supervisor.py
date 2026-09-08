@@ -14,6 +14,7 @@
 4. character      (🆕 占位) — 角色演变分析
 5. itinerary      (🆕 占位) — 文旅路线规划
 """
+import asyncio
 import json
 import logging
 import time
@@ -1018,24 +1019,43 @@ class SupervisorGraph:
 
         # === BLOCK H: 标注执行入口 (P2-02) ===
         # 检测是否走新路径
-        _paragraphs_input = state.get("_paragraphs") if hasattr(state, 'get') else None
+        _paragraphs_raw = state.get("_paragraphs") if hasattr(state, 'get') else None
 
-        # 方案 A: 当 _paragraphs_input 为空时，主动从 node_client 拉取章节段落，
+        # 方案 A: 当前端未传段落时，主动从 node_client 拉取章节段落，
         # 让"全章 + 标准类别"标注也走流式两轮 pipeline，避免旧路径在
         # mcp.call_tool 一次性同步阻塞期间前端工作台长时间无任何逐段反馈。
         # 保留旧路径的情况: 指定段落标注(para_indices) 或 自定义类别(custom_categories)，
         # 因为新路径暂不支持段落子集过滤和 custom 类别（段落少时旧路径阻塞短，可接受）。
-        if (not _paragraphs_input and self.node_client
+        if (not _paragraphs_raw and self.node_client
                 and not para_indices and not custom_categories):
             try:
                 _ch_data_h = await self.node_client.get_literature_by_chapter(ch_num)
                 if _ch_data_h is not None:
                     _content_h = _re.sub(r'\r\n|\r', '\n', _ch_data_h.get("content", ""))
-                    _paragraphs_input = [p.strip() for p in _content_h.split('\n\n') if p.strip()]
+                    _paragraphs_raw = [p for p in _content_h.split('\n\n') if p.strip()]
             except Exception as _e_h:
                 logger.warning("[P2-02] 主动拉取章节段落失败，回退旧路径: %s", _e_h)
 
-        if _paragraphs_input and len(_paragraphs_input) > 0:
+        # 段落归一化：前端传入 [{"index": int, "text": str}]；后端拉取为 str 列表。
+        # 统一为 ParagraphInfo dict，且 index 与前端 splitParagraphs 的 0-based 序号严格一致
+        # （同源 \n\n 切分 + trim + 空段过滤），保证 passageKey/span 与正文渲染对齐。
+        # 注意：绝不能在此处把单段按句号重切——会导致 paragraph index 与前端正文漂移、
+        # 高亮全部错位（历史 bug 根因）。
+        _paragraphs_input: list[dict] = []
+        for _i, _p in enumerate(_paragraphs_raw or []):
+            if isinstance(_p, dict):
+                _txt = str(_p.get("text", "")).strip()
+                if _txt:
+                    _paragraphs_input.append({
+                        "index": int(_p.get("index", _i)),
+                        "text": _txt,
+                    })
+            elif isinstance(_p, str):
+                _txt = _p.strip()
+                if _txt:
+                    _paragraphs_input.append({"index": _i, "text": _txt})
+
+        if _paragraphs_input:
             # ── 新路径 ──
             async for event in self._stream_annotation_new_path(
                 ch_num, ch_title="", user_instruction=user_instruction,
@@ -1064,17 +1084,33 @@ class SupervisorGraph:
         if has_marginalia_intent:
             call_params["marginalia_notes"] = []
 
-        # C: 预期管理 — 开工前告知阶段与耗时预期，消除"卡住"感
-        yield {"type": _ET.STATUS, "data": (
-            f"开始标注第{ch_num}章：实体发现 → 精确定位 → 旁注生成，"
-            "全程约 1 分钟，标注结果将逐段出现在正文中..."
-        )}
+        # 实时进度：旧路径为一次性工具调用，只能在调用前后给出阶段反馈
+        def _ann_progress_old(phase: str, message: str, *, status: str = "running", **extra) -> dict:
+            return {
+                "type": "annotation_progress",
+                "data": {
+                    "chapterNumber": ch_num,
+                    "chapterTitle": f"第{ch_num}章",
+                    "phase": phase,
+                    "status": status,
+                    "message": message,
+                    "totalParagraphs": extra.pop("totalParagraphs", 0),
+                    **extra,
+                },
+            }
+
+        yield _ann_progress_old(
+            "prepare",
+            f"第{ch_num}章 · 正在执行标注（删除/自定义类别/段落子集走兼容通道）…",
+        )
 
         try:
             result = await self.mcp.call_tool("annotate_user_request", call_params)
             raw = result.get("result", result) if isinstance(result, dict) else result
         except (RuntimeError, ValueError, ConnectionError) as e:
-            yield {"type": _ET.ERROR, "data": {"code": "TOOL_ERROR", "message": f"工具调用异常: {e}"}}
+            _err_msg = f"工具调用异常: {e}"
+            yield _ann_progress_old("error", f"标注失败：{_err_msg}", status="error", errorMessage=_err_msg)
+            yield {"type": _ET.ERROR, "data": {"code": "TOOL_ERROR", "message": _err_msg}}
             return
 
         is_error = isinstance(raw, dict) and "error" in raw
@@ -1085,12 +1121,16 @@ class SupervisorGraph:
         }}
 
         if is_error:
-            yield {"type": _ET.CHUNK, "data": f"标注未成功: {raw.get('error', '')}"}
+            _err_msg = f"标注未成功: {raw.get('error', '')}"
+            yield _ann_progress_old("error", _err_msg, status="error", errorMessage=_err_msg)
+            yield {"type": _ET.CHUNK, "data": _err_msg}
             return
 
         # Fast fail: node_client must be available for paragraph boundary calculation
         if self.node_client is None:
-            yield {"type": _ET.ERROR, "data": {"code": "NO_NODE_CLIENT", "message": "Node API 客户端未初始化，无法计算段落边界"}}
+            _msg = "Node API 客户端未初始化，无法计算段落边界"
+            yield _ann_progress_old("error", _msg, status="error", errorMessage=_msg)
+            yield {"type": _ET.ERROR, "data": {"code": "NO_NODE_CLIENT", "message": _msg}}
             return
 
         # 直接构建 annotation_data 事件，不通过 _format_annotation_data
@@ -1105,7 +1145,9 @@ class SupervisorGraph:
         import re as _re2
         ch_data = await self.node_client.get_literature_by_chapter(ch_num)
         if ch_data is None:
-            yield {"type": _ET.ERROR, "data": {"code": "CHAPTER_NOT_FOUND", "message": f"未找到第{ch_num}章"}}
+            _msg = f"未找到第{ch_num}章"
+            yield _ann_progress_old("error", _msg, status="error", errorMessage=_msg)
+            yield {"type": _ET.ERROR, "data": {"code": "CHAPTER_NOT_FOUND", "message": _msg}}
             return
         ch_content = ch_data.get("content", "")
         ch_content = _re2.sub(r'\r\n|\r', '\n', ch_content)
@@ -1153,8 +1195,17 @@ class SupervisorGraph:
                 "updatedAt": int(__import__('time').time() * 1000),
             })
 
-        # 逐段发送小 annotation_data 事件
-        for p_idx in sorted(grouped.keys()):
+        # 逐段发送小 annotation_data 事件，同时上报真实累计进度
+        _old_paras_total = len(all_paragraphs)
+        _old_entities_done = 0
+        _old_cat_counts: dict[str, int] = {}
+        yield _ann_progress_old(
+            "resolution",
+            f"标注工具已返回 {ann_count} 个实体，正在按段落分发高亮…",
+            totalParagraphs=_old_paras_total,
+            entities=ann_count, paragraphsDone=0, categoryCounts={},
+        )
+        for _step_i, p_idx in enumerate(sorted(grouped.keys()), start=1):
             passage_annotations = [{
                 "passageKey": f"{ch_num}:{p_idx}",
                 "paragraphIndex": p_idx,
@@ -1171,12 +1222,25 @@ class SupervisorGraph:
                     "marginalia": [],
                 },
             }
+            _old_entities_done += len(grouped[p_idx])
+            for _a in grouped[p_idx]:
+                _c = _a.get("category", "custom")
+                _old_cat_counts[_c] = _old_cat_counts.get(_c, 0) + 1
+            yield _ann_progress_old(
+                "resolution",
+                f"第 {p_idx + 1}/{_old_paras_total} 段高亮完成：本段 {len(grouped[p_idx])} 个实体，"
+                f"累计 {_old_entities_done} 个",
+                totalParagraphs=_old_paras_total,
+                entities=_old_entities_done,
+                paragraphsDone=_step_i,
+                categoryCounts=dict(_old_cat_counts),
+                lastParagraphIndex=p_idx,
+            )
 
         # 旁注/批注支持：用户要求写旁注时，LLM 为实体生成批注文本
         _MARGINALIA_KEYWORDS = ["旁注", "批注", "旁批", "评注", "批语", "写注", "加注"]
         marginalia_list: list = []
         if any(kw in user_instruction for kw in _MARGINALIA_KEYWORDS) and ann_count > 0:
-            yield {"type": _ET.STATUS, "data": f"正在为 {ann_count} 个实体生成旁注..."}
             from ..config import settings as _cfg
 
             # 取优先级最高的类别（人物 > 地点 > 事件 > 术语 > 母题），去重，最多15个
@@ -1197,6 +1261,15 @@ class SupervisorGraph:
             marginalia_list = []
             _marg_total = len(candidates)
             _marg_done = 0
+            yield _ann_progress_old(
+                "marginalia",
+                f"开始为 {_marg_total} 个实体生成旁注…",
+                totalParagraphs=_old_paras_total,
+                entities=_old_entities_done,
+                paragraphsDone=len(grouped),
+                categoryCounts=dict(_old_cat_counts),
+                marginaliaDone=0, marginaliaTotal=_marg_total,
+            )
             for prio, p_idx, ann in candidates:
                 entity = ann.get("label", "")
                 category = ann.get("category", "custom")
@@ -1212,6 +1285,8 @@ class SupervisorGraph:
                 context = para_text[max(0, ann["span"]["startChar"] - 30):ann["span"]["endChar"] + 30]
                 m_user = f"原文片段: ...{context}...\n实体: {entity}\n旁注:"
 
+                # 无论成功失败都必须播报一帧，保证进度条不卡死
+                note = ""
                 try:
                     with llm_call_context("supervisor", "generate_annotation_note",
                                           upstream="annotation_scan", downstream="note_output"):
@@ -1229,21 +1304,41 @@ class SupervisorGraph:
                             "color": ann.get("color", "#F5A623"),
                             "source": "agent",
                         })
-                    # A: 旁注逐条实时播报 — 消除 20~30s 静默期
-                    _marg_done += 1
-                    yield {"type": _ET.THINKING_STEP, "data": {
-                        "step": "generate_marginalia",
-                        "message": f"旁注 {_marg_done}/{_marg_total}: 「{entity}」{'✓' if note else '× 跳过'}",
-                    }}
                 except Exception:
-                    pass
+                    note = ""
+                _marg_done += 1
+                yield _ann_progress_old(
+                    "marginalia",
+                    f"旁注 {_marg_done}/{_marg_total}：「{entity}」"
+                    f"{'完成' if note else '跳过（生成失败或内容未通过校验）'}",
+                    totalParagraphs=_old_paras_total,
+                    entities=_old_entities_done,
+                    paragraphsDone=len(grouped),
+                    categoryCounts=dict(_old_cat_counts),
+                    marginaliaDone=_marg_done, marginaliaTotal=_marg_total,
+                    currentEntity=entity,
+                )
 
             if marginalia_list:
                 yield {
                     "type": "marginalia_data",
-                    "data": {"marginalia": marginalia_list},
+                    # replace: 旧路径一次性全量发送，前端用它替换该段旧旁注
+                    "data": {"marginalia": marginalia_list, "replace": True},
                 }
-                yield {"type": _ET.CHUNK, "data": f"已为 {len(marginalia_list)} 个实体生成旁注。"}
+
+        # ── 保存阶段 ──
+        yield _ann_progress_old(
+            "saving",
+            f"标注完成：{ann_count} 个实体、{len(grouped)} 段"
+            + (f"、{len(marginalia_list)} 条旁注" if marginalia_list else "")
+            + "，正在保存…",
+            totalParagraphs=_old_paras_total,
+            entities=ann_count,
+            paragraphsDone=len(grouped),
+            categoryCounts=dict(_old_cat_counts),
+            marginaliaDone=len(marginalia_list),
+            marginaliaTotal=len(marginalia_list),
+        )
 
         # v12: 保存标注到后端文件，确保后续删除操作能命中
         # MCP 工具输出的 annotations_raw 缺少 id 和 paragraph_index，
@@ -1278,15 +1373,40 @@ class SupervisorGraph:
                 )
             except Exception as e:
                 logger.error(f"[Supervisor] save_annotations (old path) 失败 ch={ch_num}: {e}")
+                _save_msg = f"第{ch_num}章标注保存失败: {str(e)[:200]}。请手动刷新页面重试。"
+                yield _ann_progress_old("error", _save_msg, status="error", errorMessage=_save_msg)
                 yield {"type": _ET.ERROR, "data": {
                     "code": "SAVE_FAILED",
-                    "message": f"第{ch_num}章标注保存失败: {str(e)[:200]}。请手动刷新页面重试。",
+                    "message": _save_msg,
                 }}
+                return
 
-        yield {"type": _ET.CHUNK, "data": (
-            f"已完成第{ch_num}章标注（{ann_count} 个实体）。"
-            f"正文已高亮 {len(grouped)} 段，点击高亮词可查看释义。"
-        )}
+        # ── 完成：真实统计 ──
+        yield _ann_progress_old(
+            "done",
+            f"第{ch_num}章标注完成：{ann_count} 个实体、{len(grouped)} 段正文"
+            + (f"、{len(marginalia_list)} 条旁注" if marginalia_list else ""),
+            status="done",
+            totalParagraphs=_old_paras_total,
+            entities=ann_count,
+            paragraphsDone=len(grouped),
+            categoryCounts=dict(_old_cat_counts),
+            marginaliaDone=len(marginalia_list),
+            marginaliaTotal=len(marginalia_list),
+            finalStats={
+                "entities": ann_count,
+                "paragraphs": len(grouped),
+                "marginalia": len(marginalia_list),
+                "categoryCounts": dict(_old_cat_counts),
+            },
+        )
+        if ann_count > 0:
+            yield {"type": _ET.CHUNK, "data": (
+                f"第{ch_num}章标注已完成并保存：共定位 {ann_count} 个实体，"
+                f"分布在 {len(grouped)} 段正文中"
+                + (f"，生成 {len(marginalia_list)} 条旁注" if marginalia_list else "")
+                + "。正文高亮词可点击查看释义。"
+            )}
 
     # ===== P2-02: 新标注路径（两轮流水线 + 批注生成）=====
 
@@ -1329,38 +1449,123 @@ class SupervisorGraph:
             except Exception:
                 ch_title = f"第{ch_num}章"
 
-        # ── Pass 1: Discovery ──
-        # C: 预期管理 — 开工前告知阶段与规模
-        yield {"type": _ET.STATUS, "data": (
-            f"开始标注第{ch_num}章（共 {len(paragraphs)} 段）："
-            "实体发现 → 精确定位 → 旁注生成，全程约 1 分钟，标注结果将逐段出现在正文中..."
-        )}
-        yield {"type": _ET.STATUS, "data": "Pass 1/3: 正在扫描全文发现实体..."}
+        # ── 进度事件工具 ──
+        # 所有标注进度统一走 annotation_progress 结构化事件（前端进度面板是唯一实时反馈面），
+        # 不再用模糊的 STATUS/THINKING_STEP 文案，也不再发"已高亮 N 段"这类未经核实的消息。
+        def _ann_event(phase: str, message: str, *, status: str = "running", **extra) -> dict:
+            return {
+                "type": "annotation_progress",
+                "data": {
+                    "chapterNumber": ch_num,
+                    "chapterTitle": ch_title,
+                    "phase": phase,
+                    "status": status,
+                    "message": message,
+                    "totalParagraphs": len(paragraphs),
+                    **extra,
+                },
+            }
 
+        def _category_counts(collected: dict) -> dict:
+            counts: dict[str, int] = {}
+            for anns in collected.values():
+                for _a in anns:
+                    _c = _a.get("category", "custom")
+                    counts[_c] = counts.get(_c, 0) + 1
+            return counts
+
+        # ── Pass 1: Discovery ──
+        yield _ann_event(
+            "prepare",
+            f"第{ch_num}章 · 共 {len(paragraphs)} 段，开始标注流水线…",
+        )
+
+        # B2: 逐窗口进度反馈 — 用 queue 在 discovery_pass 后台运行期间实时推送
+        _progress_q: asyncio.Queue = asyncio.Queue()
+
+        async def _discovery_progress(done: int, total: int, found: int):
+            await _progress_q.put((done, total, found))
+
+        # 动态窗口：段落少时用大窗口减少 LLM 调用
+        _n_paras = len(paragraphs)
+        _total_chars = sum(len(p.get("text", "")) for p in paragraphs)
+        _win_size = _cfg.annotation_discovery_window_size
+        _win_overlap = _cfg.annotation_discovery_overlap
+        if _n_paras <= 8 or _total_chars <= 3000:
+            # 短文本单窗口一次 LLM 调用
+            _win_size = _n_paras
+            _win_overlap = 0
+        _disc_conc = max(_cfg.annotation_discovery_concurrency, 8)
+
+        _discovery_task = asyncio.create_task(discovery_pass(
+            paragraphs, _categories, self.llm,
+            prompt_registry=self.prompts,
+            concurrency=_disc_conc,
+            window_size=_win_size,
+            overlap=_win_overlap,
+            progress_callback=_discovery_progress,
+        ))
+
+        _last_win_done = 0
+        _last_win_total = 0
         try:
-            discoveries = await discovery_pass(
-                paragraphs, _categories, self.llm,
-                prompt_registry=self.prompts,
-                concurrency=_cfg.annotation_discovery_concurrency,
-                window_size=_cfg.annotation_discovery_window_size,
-                overlap=_cfg.annotation_discovery_overlap,
-            )
+            while not _discovery_task.done():
+                try:
+                    _done, _total, _found = await asyncio.wait_for(
+                        _progress_q.get(), timeout=0.5
+                    )
+                    _last_win_done, _last_win_total = _done, _total
+                    yield _ann_event(
+                        "discovery",
+                        f"扫描窗口 {_done}/{_total}，已发现 {_found} 个候选实体",
+                        windowsDone=_done, windowsTotal=_total, candidates=_found,
+                    )
+                except asyncio.TimeoutError:
+                    pass
+            discoveries = await _discovery_task
+            # 任务结束时队列里可能还剩最后一帧进度，排空取最新值
+            while not _progress_q.empty():
+                _done, _total, _found = _progress_q.get_nowait()
+                _last_win_done, _last_win_total = _done, _total
         except Exception as e:
             logger.error("[P2-02] discovery_pass failed: %s", e)
+            if not _discovery_task.done():
+                _discovery_task.cancel()
+            _msg = f"实体发现阶段失败: {str(e)[:200]}"
+            yield _ann_event("error", _msg, status="error", errorMessage=_msg)
             yield {"type": _ET.ERROR, "data": {
                 "code": "DISCOVERY_ERROR",
-                "message": f"实体发现阶段失败: {str(e)[:200]}",
+                "message": _msg,
             }}
             return
 
-        yield {"type": _ET.STATUS, "data": f"发现 {len(discoveries)} 个候选实体"}
+        yield _ann_event(
+            "discovery",
+            f"扫描完成，共发现 {len(discoveries)} 个候选实体，开始逐段精确定位…",
+            windowsDone=_last_win_done or _last_win_total,
+            windowsTotal=_last_win_total or _last_win_done,
+            candidates=len(discoveries),
+        )
 
         if not discoveries:
-            yield {"type": _ET.CHUNK, "data": "未发现匹配的实体。请尝试调整标注类别。"}
+            yield _ann_event(
+                "done", "未发现匹配的实体，可尝试调整标注类别后重试",
+                status="done",
+                candidates=0,
+                finalStats={"entities": 0, "paragraphs": 0, "marginalia": 0,
+                            "categoryCounts": {}},
+            )
+            yield {"type": _ET.CHUNK, "data": "未发现匹配的实体，可尝试指定其他标注类别后重试。"}
             return
 
         # ── Pass 2: Precise Resolution ──
-        yield {"type": _ET.STATUS, "data": "Pass 2/3: 正在精确定位..."}
+        yield _ann_event(
+            "resolution",
+            f"发现 {len(discoveries)} 个候选实体，开始逐段精确定位…",
+            candidates=len(discoveries),
+            entities=0, paragraphsDone=0,
+            categoryCounts={}, lastParagraphIndex=None,
+        )
 
         tracker = CoverageTracker(len(paragraphs), _categories)
         _collected = {}  # Dict[int, List[dict]] — paragraph_index → annotations
@@ -1378,6 +1583,19 @@ class SupervisorGraph:
 
                 # 收集标注供 Pass 3 使用
                 _collected[p_idx] = p_anns
+
+                # 每段完成立即上报真实累计进度（前端面板 + 段落高亮均以此为准）
+                _cum_entities = sum(len(_a) for _a in _collected.values())
+                yield _ann_event(
+                    "resolution",
+                    f"第 {p_idx + 1}/{len(paragraphs)} 段定位完成：本段 {len(p_anns)} 个实体，"
+                    f"累计 {_cum_entities} 个",
+                    candidates=len(discoveries),
+                    entities=_cum_entities,
+                    paragraphsDone=len(_collected),
+                    categoryCounts=_category_counts(_collected),
+                    lastParagraphIndex=p_idx,
+                )
 
                 frontend_anns = []
                 for i, ann in enumerate(p_anns):
@@ -1427,12 +1645,13 @@ class SupervisorGraph:
                 for ann in anns:
                     all_annotations.append((p_idx, ann))
 
-            yield {"type": _ET.STATUS, "data": f"定位到 {len(all_annotations)} 个实体，生成标注数据..."}
+            _total_entities = len(all_annotations)
+            _total_paras = len(_collected)
+            _cat_counts = _category_counts(_collected)
 
             marginalia_list: list = []  # 初始化，确保后续 save_annotations 可安全引用
 
             if has_marginalia_intent and all_annotations:
-                yield {"type": _ET.STATUS, "data": "Pass 3/3: 正在生成批注..."}
                 cat_priority = {"person": 0, "location": 1, "event": 2,
                                 "term": 3, "motif": 4}
                 seen_entities = set()
@@ -1448,11 +1667,21 @@ class SupervisorGraph:
                 max_count = _cfg.annotation_marginalia_max_count
                 batch_size = _cfg.annotation_marginalia_batch_size
 
+                _marg_skipped = 0
                 if len(candidates) > max_count:
-                    yield {"type": _ET.CHUNK, "data": (
-                        f"共 {len(candidates)} 个实体，分批生成前 {max_count} 个的批注..."
-                    )}
+                    _marg_skipped = len(candidates) - max_count
                     candidates = candidates[:max_count]
+
+                yield _ann_event(
+                    "marginalia",
+                    f"开始为 {len(candidates)} 个实体生成旁注…"
+                    + (f"（{_marg_skipped} 个超出上限将跳过）" if _marg_skipped else ""),
+                    entities=_total_entities,
+                    paragraphsDone=_total_paras,
+                    categoryCounts=_cat_counts,
+                    marginaliaDone=0,
+                    marginaliaTotal=len(candidates),
+                )
 
                 _all_paras_map = {
                     p["index"]: p["text"] for p in paragraphs
@@ -1460,37 +1689,37 @@ class SupervisorGraph:
 
                 _marg_total = len(candidates)
                 _marg_done = 0
-                for batch_start in range(0, len(candidates), batch_size):
-                    batch = candidates[batch_start:batch_start + batch_size]
-                    batch_margs = []
+                _marg_sem = asyncio.Semaphore(_cfg.annotation_marginalia_concurrency)
 
-                    for _prio, p_idx, ann in batch:
-                        entity = ann.get("entity", "")
-                        category = ann.get("category", "custom")
-                        cat_name = {
-                            "person": "人物", "location": "地点",
-                            "event": "事件", "term": "术语", "motif": "母题"
-                        }.get(category, category)
+                async def _gen_one_marginalia(cand: tuple) -> dict | None:
+                    """B1: 单条旁注 LLM 调用（并发安全，Semaphore 限流）。"""
+                    _prio, p_idx, ann = cand
+                    entity = ann.get("entity", "")
+                    category = ann.get("category", "custom")
+                    cat_name = {
+                        "person": "人物", "location": "地点",
+                        "event": "事件", "term": "术语", "motif": "母题"
+                    }.get(category, category)
 
-                        m_system = (
-                            f"你是白蛇传学术研究助手。为原文中标注的{cat_name}"
-                            f"「{entity}」撰写一句旁注。\n"
-                            "旁注应是一句30-60字的学术性点评，"
-                            "说明该实体在文中的叙事功能或文化含义。\n"
-                            "只返回旁注文字，不要其他内容，不要引号包裹。"
-                        )
-                        para_text = _all_paras_map.get(p_idx, "")
-                        s_char = ann.get("start_char", 0)
-                        e_char = ann.get("end_char", s_char)
-                        context = para_text[
-                            max(0, s_char - 30):min(len(para_text), e_char + 30)
-                        ]
-                        m_user = f"原文片段: ...{context}...\n实体: {entity}\n旁注:"
+                    m_system = (
+                        f"你是白蛇传学术研究助手。为原文中标注的{cat_name}"
+                        f"「{entity}」撰写一句旁注。\n"
+                        "旁注应是一句30-60字的学术性点评，"
+                        "说明该实体在文中的叙事功能或文化含义。\n"
+                        "只返回旁注文字，不要其他内容，不要引号包裹。"
+                    )
+                    para_text = _all_paras_map.get(p_idx, "")
+                    s_char = ann.get("start_char", 0)
+                    e_char = ann.get("end_char", s_char)
+                    context = para_text[
+                        max(0, s_char - 30):min(len(para_text), e_char + 30)
+                    ]
+                    m_user = f"原文片段: ...{context}...\n实体: {entity}\n旁注:"
 
-                        _note_ok = False
-                        try:
-                            with llm_call_context("supervisor", "generate_annotation_note",
-                                                  upstream="annotation_scan", downstream="note_output"):
+                    try:
+                        with llm_call_context("supervisor", "generate_annotation_note",
+                                              upstream="annotation_scan", downstream="note_output"):
+                            async with _marg_sem:
                                 m_resp = await self.llm.generate(
                                     m_system, m_user,
                                     model=_cfg.effective_model,
@@ -1498,43 +1727,65 @@ class SupervisorGraph:
                                     temperature=0.5,
                                     thinking_disabled=True,
                                 )
-                            note = (
-                                m_resp.content.strip()
-                                .strip('"').strip("'")
-                                .strip("「").strip("」")
-                            )
-                            if note:
-                                _note_ok = True
-                                batch_margs.append({
-                                    "id": f"agent_marg_{ch_num}_{p_idx}_{entity}",
-                                    "chapterNumber": ch_num,
-                                    "paragraphIndex": p_idx,
-                                    "anchorCharOffset": s_char,
-                                    "content": f"{entity}: {note}",
-                                    "color": ann.get("color", "#F5A623"),
-                                    "source": "agent",
-                                })
-                        except Exception:
-                            pass
+                        note = (
+                            m_resp.content.strip()
+                            .strip('"').strip("'")
+                            .strip("「").strip("」")
+                        )
+                        if note:
+                            return {
+                                "id": f"agent_marg_{ch_num}_{p_idx}_{entity}",
+                                "chapterNumber": ch_num,
+                                "paragraphIndex": p_idx,
+                                "anchorCharOffset": s_char,
+                                "content": f"{entity}: {note}",
+                                "color": ann.get("color", "#F5A623"),
+                                "source": "agent",
+                                "_entity": entity,
+                            }
+                    except Exception:
+                        pass
+                    return None
 
-                        # A: 旁注逐条实时播报 — 消除批量生成静默期（本地计数，无跨请求状态）
-                        _marg_done += 1
-                        yield {"type": _ET.THINKING_STEP, "data": {
-                            "step": "generate_marginalia",
-                            "message": f"旁注 {_marg_done}/{_marg_total}: 「{entity}」{'✓' if _note_ok else '× 跳过'}",
-                        }}
-
-                    if batch_margs:
-                        marginalia_list.extend(batch_margs)
+                # B1: 全量并行 + as_completed 实时进度播报
+                _marg_tasks = [asyncio.create_task(_gen_one_marginalia(c)) for c in candidates]
+                for coro in asyncio.as_completed(_marg_tasks):
+                    result = await coro
+                    _marg_done += 1
+                    entity_name = result["_entity"] if result else "?"
+                    _ok = result is not None
+                    if result:
+                        result.pop("_entity", None)
+                        marginalia_list.append(result)
                         yield {
                             "type": "marginalia_data",
-                            "data": {"marginalia": batch_margs},
+                            # replace=False: 逐条流式追加，前端不得清空同段已到的旁注
+                            "data": {"marginalia": [result], "replace": False},
                         }
+                    yield _ann_event(
+                        "marginalia",
+                        f"旁注 {_marg_done}/{_marg_total}：「{entity_name}」"
+                        f"{'完成' if _ok else '跳过（内容未通过校验）'}",
+                        entities=_total_entities,
+                        paragraphsDone=_total_paras,
+                        categoryCounts=_cat_counts,
+                        marginaliaDone=_marg_done,
+                        marginaliaTotal=_marg_total,
+                        currentEntity=entity_name,
+                    )
 
-                if marginalia_list:
-                    yield {"type": _ET.CHUNK, "data": (
-                        f"已为 {len(marginalia_list)} 个实体生成批注。"
-                    )}
+            # ── 保存阶段 ──
+            yield _ann_event(
+                "saving",
+                f"定位完成：{_total_entities} 个实体、{_total_paras} 段"
+                + (f"、{len(marginalia_list)} 条旁注" if marginalia_list else "")
+                + "，正在保存…",
+                entities=_total_entities,
+                paragraphsDone=_total_paras,
+                categoryCounts=_cat_counts,
+                marginaliaDone=len(marginalia_list),
+                marginaliaTotal=len(marginalia_list),
+            )
 
             # v12: 保存标注到后端文件，确保后续删除操作能命中
             # 新路径也需保存，否则标注仅在 SSE 流中存在，刷新后丢失
@@ -1569,33 +1820,46 @@ class SupervisorGraph:
                         )
                     except Exception as e:
                         logger.error(f"[Supervisor] save_annotations (new path) 失败 ch={ch_num}: {e}")
+                        _save_msg = f"第{ch_num}章标注保存失败: {str(e)[:200]}。请手动刷新页面重试。"
+                        yield _ann_event("error", _save_msg, status="error", errorMessage=_save_msg)
                         yield {"type": _ET.ERROR, "data": {
                             "code": "SAVE_FAILED",
-                            "message": f"第{ch_num}章标注保存失败: {str(e)[:200]}。请手动刷新页面重试。",
+                            "message": _save_msg,
                         }}
+                        return
 
             # ── 最终完成事件 ──
+            # 完成态由 annotation_progress(phase=done) 承载真实统计；
+            # 不再发 annotations:[] + isComplete 的 annotation_data（那会把末段高亮覆盖为空），
+            # 也不再发"已高亮 N 段"这类未经渲染核实的文案。
             final_snap = tracker.snapshot()
-            last_p_idx = sorted(_collected.keys())[-1] if _collected else 0
-            yield {
-                "type": "annotation_data",
-                "data": {
-                    "chapterNumber": ch_num,
-                    "chapterTitle": ch_title,
-                    "passageKey": f"{ch_num}:{last_p_idx}",
-                    "paragraphIndex": last_p_idx,
-                    "annotations": [],
-                    "insights": [],
-                    "marginalia": [],
-                    "coverage": final_snap,
-                    "isComplete": True,
-                },
+            _final_stats = {
+                "entities": _total_entities,
+                "paragraphs": _total_paras,
+                "marginalia": len(marginalia_list),
+                "categoryCounts": _cat_counts,
             }
-
-            yield {"type": _ET.CHUNK, "data": (
-                f"已完成第{ch_num}章标注（{final_snap['totalEntities']} 个实体）。"
-                f"正文已高亮 {final_snap['paragraphsAnnotated']} 段，点击高亮词可查看释义。"
-            )}
+            yield _ann_event(
+                "done",
+                f"第{ch_num}章标注完成：{_total_entities} 个实体、{_total_paras} 段正文"
+                + (f"、{len(marginalia_list)} 条旁注" if marginalia_list else ""),
+                status="done",
+                entities=_total_entities,
+                paragraphsDone=_total_paras,
+                categoryCounts=_cat_counts,
+                marginaliaDone=len(marginalia_list),
+                marginaliaTotal=len(marginalia_list),
+                candidates=len(discoveries),
+                finalStats=_final_stats,
+            )
+            # 对话区给一句与进度面板口径一致的真实总结
+            _summary = (
+                f"第{ch_num}章标注已完成并保存：共定位 {_total_entities} 个实体，"
+                f"分布在 {_total_paras} 段正文中"
+                + (f"，生成 {len(marginalia_list)} 条旁注" if marginalia_list else "")
+                + "。正文高亮词可点击查看释义。"
+            )
+            yield {"type": _ET.CHUNK, "data": _summary}
             # 覆盖率/质量口径仅记日志（开发者视角），不再推给用户
             logger.info(
                 "[P2-02] annotation quality: coverage=%.0f%% (%d/%d), entities=%d, quality=%s",
@@ -1606,9 +1870,11 @@ class SupervisorGraph:
 
         except Exception as e:
             logger.error("[P2-02] precise_resolution_pass failed: %s", e)
+            _msg = f"精确定位阶段失败: {str(e)[:200]}"
+            yield _ann_event("error", _msg, status="error", errorMessage=_msg)
             yield {"type": _ET.ERROR, "data": {
                 "code": "RESOLUTION_ERROR",
-                "message": f"精确定位阶段失败: {str(e)[:200]}",
+                "message": _msg,
             }}
 
     # ===== v12: UI 操作 handler (open_chapter, map_control) =====

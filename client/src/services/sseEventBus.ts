@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/auth'
+import { nextTick } from 'vue'
 
 export interface ParsedSSEEvent {
   type: string
@@ -274,20 +275,34 @@ export function registerGlobalRoutes(stores: StoreRefs): void {
   const bus = SSEEventBus.getInstance()
   const { agentStore, evolutionStore, annotationStore, sourceTreeStore, workspaceStore, mapStore, dynastyCompareStore } = stores
 
+  // 一次标注运行内只打开/激活阅读器 tab 一次（防止逐段事件反复合并
+  // paragraphIndex 导致正文 smooth scroll 乱跳）；thinking_start/done 时复位
+  let annotationReaderTabOpenedFor: number | null = null
+
   // --- Lifecycle events ---
   bus.on('thinking_start', () => {
+    annotationReaderTabOpenedFor = null
     agentStore.startStreaming()
     // /
     evolutionStore.resetLiveState()
   })
 
   bus.on('done', () => {
+    annotationReaderTabOpenedFor = null
     agentStore.finishStreaming()
+    // 兜底：流结束时关闭标注 loading（正常路径由 annotation_progress done 关闭）
+    agentStore.setAnnotationLoading(false)
   })
 
   bus.on('error', (event) => {
     const msg = typeof event.data === 'string' ? event.data : (event.data as Record<string, unknown>).message as string || ''
     agentStore.setError(msg)
+    // SSE 断线/超时时重置标注 loading，防止 spinner 永久卡住
+    agentStore.setAnnotationLoading(false)
+    // 标注进行中遇到致命错误：进度面板进入 error 态
+    if (agentStore.annotationProgress.active) {
+      agentStore.failAnnotationProgress(msg || '标注中断')
+    }
   })
 
   // --- Progress events ---
@@ -439,6 +454,70 @@ export function registerGlobalRoutes(stores: StoreRefs): void {
   })
 
   // --- Workspace driver events ---
+
+  // 智能标注实时进度：prepare → discovery → resolution → marginalia → saving → done/error
+  // 驱动 agentStore.annotationProgress 状态机（进度面板唯一数据源）
+  bus.on('annotation_progress', (event) => {
+    const d = event.data as Record<string, unknown>
+    const phase = (d.phase || 'prepare') as string
+    const status = (d.status || 'running') as string
+    const message = (d.message || '') as string
+    const chapterNumber = d.chapterNumber as number
+    const chapterTitle = (d.chapterTitle || '') as string
+    const totalParagraphs = (typeof d.totalParagraphs === 'number' ? d.totalParagraphs : 0) as number
+    const num = (k: string): number | undefined =>
+      typeof d[k] === 'number' ? (d[k] as number) : undefined
+
+    // prepare：新一轮标注开始 —— 初始化状态机 + 打开阅读器 tab（仅一次，不带段落索引，不触发滚动）
+    if (phase === 'prepare' && status === 'running') {
+      agentStore.beginAnnotationProgress(chapterNumber, chapterTitle, totalParagraphs, message || undefined)
+      if (chapterNumber && annotationReaderTabOpenedFor !== chapterNumber) {
+        annotationReaderTabOpenedFor = chapterNumber
+        workspaceStore.openTab('text-reader', chapterTitle || `第${chapterNumber}章`, {
+          chapterNumber,
+        })
+      }
+      return
+    }
+
+    // error：标注失败
+    if (status === 'error' || phase === 'error') {
+      agentStore.failAnnotationProgress((d.errorMessage as string) || message || '标注失败')
+      nextTick(() => agentStore.setAnnotationLoading(false))
+      return
+    }
+
+    // 运行中各阶段（discovery / resolution / marginalia / saving）+ done 帧的统一字段更新
+    agentStore.updateAnnotationProgress({
+      phase: phase as 'discovery' | 'resolution' | 'marginalia' | 'saving' | 'done',
+      message: message || undefined,
+      totalParagraphs: num('totalParagraphs'),
+      windowsDone: num('windowsDone'),
+      windowsTotal: num('windowsTotal'),
+      candidates: num('candidates'),
+      entities: num('entities'),
+      paragraphsDone: num('paragraphsDone'),
+      marginaliaDone: num('marginaliaDone'),
+      marginaliaTotal: num('marginaliaTotal'),
+      currentEntity: d.currentEntity !== undefined ? (d.currentEntity as string | null) : undefined,
+      lastParagraphIndex: d.lastParagraphIndex !== undefined
+        ? (d.lastParagraphIndex as number | null)
+        : undefined,
+      categoryCounts: d.categoryCounts as Record<string, number> | undefined,
+    })
+
+    // done：封存真实统计（实体数/高亮段落数/旁注数），面板展示结果摘要
+    if (phase === 'done' || status === 'done') {
+      agentStore.finishAnnotationProgress({
+        marginalia: num('marginaliaDone'),
+        finalStats: d.finalStats as
+          | { entities: number; paragraphs: number; marginalia: number; categoryCounts: Record<string, number> }
+          | undefined,
+      })
+      nextTick(() => agentStore.setAnnotationLoading(false))
+    }
+  })
+
   bus.on('annotation_data', (event) => {
     const data = event.data as Record<string, unknown>
     const splitSide = (data.splitSide) as 'left' | 'right' | undefined
@@ -449,6 +528,20 @@ export function registerGlobalRoutes(stores: StoreRefs): void {
     if (isNewFormat) {
       // === 新格式（逐段 annotation_data） ===
       const passageKey = data.passageKey as string
+      const chapterNumber = data.chapterNumber as number
+
+      // isComplete 完成帧（旧后端兼容）：其 annotations 为空，绝不能用它覆盖
+      // 已逐段流式写入的高亮（历史 bug：末段标注被清空）。完成态统一由
+      // annotation_progress(phase=done) 承载。
+      if (data.isComplete === true) {
+        const coverage = data.coverage as import('@/types/annotation').CoverageInfo | undefined
+        if (coverage && chapterNumber) {
+          annotationStore.updateCoverage(chapterNumber, coverage)
+        }
+        nextTick(() => agentStore.setAnnotationLoading(false))
+        return
+      }
+
       if (passageKey) {
         annotationStore.loadAiAnnotations(
           (data.annotations || []) as Parameters<typeof annotationStore.loadAiAnnotations>[0],
@@ -457,28 +550,13 @@ export function registerGlobalRoutes(stores: StoreRefs): void {
         )
       }
       const coverage = data.coverage as import('@/types/annotation').CoverageInfo | undefined
-      const chapterNumber = data.chapterNumber as number
       if (coverage && chapterNumber) {
         annotationStore.updateCoverage(chapterNumber, coverage)
       }
-      if (data.isComplete === true) {
-        agentStore.setAnnotationLoading(false)
-      }
-      // Note: isComplete 事件不打开新 tab，由调用方管理
-      if (!data.isComplete && passageKey) {
-        // 第一个非完成段到达 → 标注已开始，打开 loading 指示器
-        // （isComplete:true 时上面已关闭；防 false→false 无意义调用，
-        //  仅在确实有逐段流式推送时才亮起）
-        agentStore.setAnnotationLoading(true)
-        // Open or activate text-reader tab at the first annotated paragraph
-        const chapterTitle = (data.chapterTitle || '') as string
-        workspaceStore.openTab('text-reader', chapterTitle, {
-          chapterNumber,
-          paragraphIndex: data.paragraphIndex as number,
-          annotationData: data,
-          splitSide,
-        })
-      }
+      // 逐段数据到达 → 标注进行中（prepare 事件已置位，这里做兼容兜底）
+      agentStore.setAnnotationLoading(true)
+      // 注意：不再逐段 openTab —— prepare 事件已打开阅读器 tab；
+      // 逐段合并 paragraphIndex 会导致正文反复 smooth scroll（历史 bug）。
     } else {
       // === 旧格式（passageAnnotations 数组） ===
       const passageAnnotations = (data.passageAnnotations || []) as Array<{
@@ -529,19 +607,23 @@ export function registerGlobalRoutes(stores: StoreRefs): void {
         }
       }
 
-      // Open or activate text-reader tab at the first annotated paragraph
+      // 打开/激活阅读器 tab：每次标注运行仅一次，且定位到首个段落
+      // （旧路径逐段发多个事件，重复 openTab 会反复合并 paragraphIndex 导致正文乱跳）
       const chapterTitle = (data.chapterTitle || '') as string
       const chapterNumber = data.chapterNumber as number | undefined
       const firstParaIdx = passageAnnotations.length > 0
         ? (passageAnnotations[0].paragraphIndex as number)
         : (data.paragraphRange as [number, number] | undefined)?.[0]
 
-      workspaceStore.openTab('text-reader', chapterTitle, {
-        chapterNumber,
-        paragraphIndex: firstParaIdx,
-        annotationData: data,
-        splitSide,
-      })
+      if (chapterNumber && annotationReaderTabOpenedFor !== chapterNumber) {
+        annotationReaderTabOpenedFor = chapterNumber
+        workspaceStore.openTab('text-reader', chapterTitle, {
+          chapterNumber,
+          paragraphIndex: firstParaIdx,
+          annotationData: data,
+          splitSide,
+        })
+      }
     }  // end else (旧格式)
   })
 
@@ -559,13 +641,15 @@ export function registerGlobalRoutes(stores: StoreRefs): void {
     if (!marginaliaList || marginaliaList.length === 0) return
 
     // Track which paragraphs were affected so we only clear those
+    const replaceAll = data.replace === true
     const affectedParagraphs = new Set<string>()
     for (const m of marginaliaList) {
       if (!m.chapterNumber || m.paragraphIndex === undefined || !m.content) continue
       const passageKey = `${m.chapterNumber}:${m.paragraphIndex}`
       affectedParagraphs.add(passageKey)
-      // Clear existing agent marginalia for this specific paragraph before adding new ones
-      if (annotationStore.agentMarginalia[passageKey]) {
+      // 仅批量替换事件（旧路径 replace:true）才清空该段旧旁注；
+      // 逐条流式事件（新路径 replace:false）只能追加，否则同段多条旁注会互相覆盖
+      if (replaceAll && annotationStore.agentMarginalia[passageKey]) {
         annotationStore.agentMarginalia[passageKey] = []
       }
       annotationStore.loadAgentMarginalia(passageKey, [{

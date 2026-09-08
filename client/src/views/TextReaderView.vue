@@ -11,6 +11,7 @@ import MarginaliaBubble from '@/components/textreader/MarginaliaBubble.vue'
 import MarginaliaForm from '@/components/textreader/MarginaliaForm.vue'
 import LayerPanel from '@/components/textreader/LayerPanel.vue'
 import ExportPanel from '@/components/textreader/ExportPanel.vue'
+import AnnotationProgress from '@/components/textreader/AnnotationProgress.vue'
 import type { AnnotationCategory, AnnotationVisibility, Marginalia } from '@/types/annotation'
 import type { ActiveSearch, SearchHighlight } from '@/types/literature'
 import { computeJumpHighlights } from '@/utils/highlight'
@@ -31,18 +32,6 @@ const sourceTreeStore = useSourceTreeStore()
 const annotationStore = useAnnotationStore()
 const workspaceStore = useWorkspaceStore()
 const agentStore = useAgentStore()
-
-// DEBUG: watch agent annotations
-watch(() => annotationStore.agentAnnotations, (anns) => {
-  const chNum = (workspaceStore.activeTab?.data as Record<string, unknown>)?.chapterNumber as number | undefined
-  if (chNum) {
-    const keys = Object.keys(anns).filter(k => k.startsWith(chNum + ':'))
-    if (keys.length > 0) {
-      const total = keys.reduce((s: number, k: string) => s + (anns[k]?.length || 0), 0)
-      console.log('[TextReader] agentAnnotations updated: chapter', chNum, '-', keys.length, 'keys,', total, 'annotations')
-    }
-  }
-}, { deep: true })
 
 const currentTab = computed(() => {
   if (props.tabId) {
@@ -85,9 +74,38 @@ const showAiInsights = ref(localStorage.getItem('white_snake_show_ai_insights') 
 watch(showAiInsights, (val) => {
   localStorage.setItem('white_snake_show_ai_insights', String(val))
 })
-// 跟随 agentStore.isAnnotationLoading：标注流式推送期间亮起，isComplete 时关闭
-const isAnnotationLoading = computed(() => agentStore.isAnnotationLoading)
+// 标注 loading 状态由 AnnotationProgress 面板基于 annotationProgress 状态机呈现，
+// isAnnotationLoading 仅保留给 store 逻辑使用
 const annotationTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
+
+// 段落实时反馈：刚完成定位的段落浅蓝闪烁 2s，与进度面板联动
+const justAnnotatedParas = ref<Set<number>>(new Set())
+const flashTimers = new Map<number, ReturnType<typeof setTimeout>>()
+watch(
+  () => agentStore.annotationProgress.lastParagraphIndex,
+  (idx) => {
+    const prog = agentStore.annotationProgress
+    if (idx === null || idx === undefined) return
+    if (prog.chapterNumber !== chapterNumber.value) return
+    if (!justAnnotatedParas.value.has(idx)) {
+      const next = new Set(justAnnotatedParas.value)
+      next.add(idx)
+      justAnnotatedParas.value = next
+    }
+    const prev = flashTimers.get(idx)
+    if (prev) clearTimeout(prev)
+    flashTimers.set(idx, setTimeout(() => {
+      const next = new Set(justAnnotatedParas.value)
+      next.delete(idx)
+      justAnnotatedParas.value = next
+      flashTimers.delete(idx)
+    }, 2000))
+  }
+)
+onUnmounted(() => {
+  flashTimers.forEach(t => clearTimeout(t))
+  flashTimers.clear()
+})
 
 // Popup state
 const popupVisible = ref(false)
@@ -1379,6 +1397,12 @@ onUnmounted(() => {
         <p>请在左侧文献目录中选择章节</p>
       </div>
 
+      <!-- 智能标注实时进度面板（annotation_progress 事件驱动） -->
+      <AnnotationProgress
+        v-if="paragraphs.length > 0 && chapterNumber !== undefined"
+        :chapter-number="chapterNumber"
+      />
+
       <div
         v-for="para in paragraphs"
         :id="`para-${para.index}`"
@@ -1387,6 +1411,7 @@ onUnmounted(() => {
         :class="{
           'para-active': activeParagraphIdx === para.index,
           'tr-has-float-marg': hasMarginaliaOrInsights(para.index) && marginaliaExpandedInner,
+          'para-just-annotated': justAnnotatedParas.has(para.index),
         }"
       >
         <span class="tr-para-num">{{ para.index }}</span>
@@ -1436,11 +1461,6 @@ onUnmounted(() => {
                 >忽略</button>
               </div>
             </div>
-          </div>
-
-          <!-- Loading indicator -->
-          <div v-if="isAnnotationLoading && activeParagraphIdx === para.index" class="tr-loading-annotation">
-            ...
           </div>
 
           <!-- Search highlight action bar (CU-08) -->
@@ -2549,11 +2569,15 @@ onUnmounted(() => {
   color: var(--color-error);
 }
 
-.tr-loading-annotation {
-  font-size: 0.72rem;
-  color: var(--color-text-tertiary);
-  margin-top: var(--space-2);
-  font-style: italic;
+/* 标注进度：刚完成定位的段落浅蓝闪烁（与 AnnotationProgress 面板联动） */
+.tr-paragraph.para-just-annotated .tr-para-body {
+  animation: tr-para-annotated-flash 2s var(--ease) 1;
+  border-radius: var(--radius-sm);
+}
+@keyframes tr-para-annotated-flash {
+  0% { background: color-mix(in srgb, var(--color-accent) 16%, transparent); }
+  70% { background: color-mix(in srgb, var(--color-accent) 7%, transparent); }
+  100% { background: transparent; }
 }
 
 /* A1: 旁注徽章 — 窄面板/对比页折叠时显示数量，hover/点击再展开气泡 */

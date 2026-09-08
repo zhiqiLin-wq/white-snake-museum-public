@@ -77,8 +77,12 @@ tests/annotation_eval/output/
 # IDE
 .idea/
 .vscode/
+.trae/
 *.swp
 *.swo
+
+# TypeScript build cache
+*.tsbuildinfo
 
 # OS
 .DS_Store
@@ -88,4 +92,7 @@ debug.log
 # Private / local-only (never publish even if repo goes public)
 docs/
 CLAUDE.md
-excel_data/
+# excel_data：仅入库古籍原文（白蛇传文献选集），研究文献与派生分词结果保留在本地
+excel_data/*
+!excel_data/白蛇传文献选集.txt
+!excel_data/白蛇传文献选集.docx

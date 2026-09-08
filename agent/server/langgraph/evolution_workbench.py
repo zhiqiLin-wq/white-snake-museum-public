@@ -327,6 +327,34 @@ class EvolutionWorkbench:
             upstream="evolution_node", downstream="retriever.retrieve",
         )
 
+    def _make_cached_retriever(self):
+        """B-162: E2 运行内检索去重（跨朝代复用宽查询结果）。
+
+        同一母题扫描 4-5 个朝代格子时，无朝代过滤的宽查询（检索策略第 4/5 级，
+        filters 仅 source_type=primary_literature）在各格子里查询文本与过滤
+        条件完全相同；第 1-3 级带 dynasty 过滤，键天然不同。此前每个格子各跑
+        一遍 bge-large 推理 + BM25（同母题 4 朝 = 4 次重复）。
+
+        按 (query, filters, top_k, skip_tagging) 记忆化：命中直接复用上次
+        取回的 docs。语义不变——宽查询本就要取回全部朝代再由各格子按本朝
+        metadata 本地严格过滤（_scan_one_cell 内 dynasty 过滤 + 去重）。
+        调用方对返回列表只迭代不修改，共享只读安全。每轮 E2 节点调用新建
+        缓存（reexplore 轮次间不串数据）。
+        """
+        _cache: dict = {}
+
+        async def _cached_retrieve(query, filters=None, top_k=None, skip_tagging=True):
+            key = (query, tuple(sorted((filters or {}).items())), top_k, skip_tagging)
+            if key in _cache:
+                return _cache[key]
+            docs = await self._filtered_retrieve(
+                query, filters=filters, top_k=top_k, skip_tagging=skip_tagging,
+            )
+            _cache[key] = docs
+            return docs
+
+        return _cached_retrieve
+
     # ====================================================================
     #  B-033: scan_motif_matrix (E2)
     # ====================================================================
@@ -425,11 +453,16 @@ class EvolutionWorkbench:
             step="scan_motif_matrix",
             message=f"关键词就绪，开始扫描 {total_cells} 个单元格（{len(motifs_with_keywords)} 母题 × {len(dynasties)} 朝代）"
         ))
+        # B-162: 本轮扫描共享检索去重缓存（无朝代过滤的宽查询跨朝代复用）
+        cached_retrieve = self._make_cached_retriever()
         sem = asyncio.Semaphore(8)
         async def scan_with_limit(motif, dynasty, idx):
             async with sem:
                 try:
-                    res = await self._scan_one_cell(motif, dynasty, reexplore=is_reexplore)
+                    res = await self._scan_one_cell(
+                        motif, dynasty, reexplore=is_reexplore,
+                        retrieve_fn=cached_retrieve,
+                    )
                     return idx, res
                 except BaseException as e:
                     return idx, e
@@ -553,7 +586,8 @@ class EvolutionWorkbench:
             ]
         }
 
-    async def _scan_one_cell(self, motif: dict, dynasty: str, reexplore: bool = False) -> dict:
+    async def _scan_one_cell(self, motif: dict, dynasty: str, reexplore: bool = False,
+                             retrieve_fn=None) -> dict:
         """扫描单个母题 x 朝代单元格。
 
         多级检索策略（从精确到宽松）：
@@ -562,6 +596,9 @@ class EvolutionWorkbench:
         3. LLM关键词 + dynasty filter
         4. motif名 + core（无 dynasty filter）
         5. motif名（无 dynasty filter，最宽松）
+
+        retrieve_fn: 可选检索函数（E2 运行内为带跨朝代去重缓存的
+        _make_cached_retriever 闭包）；默认走 self._filtered_retrieve。
 
         fast fail: 单级检索失败继续下一级。全部失败返回 count=0。
 
@@ -581,6 +618,8 @@ class EvolutionWorkbench:
         motif_name = motif.get('name', '')
         motif_core = motif.get('core', '')
         search_keywords = motif.get('_search_keywords', '')
+        # B-162: 默认直连检索代理；E2 批量扫描注入带跨朝代去重的缓存闭包
+        _do_retrieve = retrieve_fn or self._filtered_retrieve
 
         top_k = 30 if reexplore else 20
         # B-158: 时间护栏（防御措施，不改检索策略与早停语义）
@@ -633,7 +672,7 @@ class EvolutionWorkbench:
                     _filters["dynasty"] = dynasty
                 # B-158: 单次检索超时防御 — wait_for 到点取消，该级按无结果处理
                 batch = await asyncio.wait_for(
-                    self._filtered_retrieve(
+                    _do_retrieve(
                         search_query,
                         filters=_filters,
                         top_k=top_k,
@@ -1297,12 +1336,33 @@ class EvolutionWorkbench:
 
         total = len(claims)
 
+        # A3: 跨 claim 检索缓存 — 不同 claim 的 query 可能重叠（同一 target + 相似 statement），
+        # 命中直接返回缓存 docs。每轮 _test_claims_retrieve 新建，不跨轮串数据。
+        _retrieve_cache: dict = {}
+
+        async def _cached_retrieve(query, filters=None, top_k=None, skip_tagging=True):
+            key = (query, tuple(sorted((filters or {}).items())), top_k, skip_tagging)
+            if key in _retrieve_cache:
+                return _retrieve_cache[key]
+            try:
+                docs = await self._filtered_retrieve(
+                    query, filters=filters, top_k=top_k, skip_tagging=skip_tagging,
+                )
+            except Exception:
+                docs = []
+            if isinstance(docs, BaseException):
+                docs = []
+            _retrieve_cache[key] = docs
+            return docs
+
         async def retrieve_for_claim(claim: dict) -> dict:
             """检索主张相关证据 — 按朝代分别检索，确保唐/宋/明/清全覆盖。
 
             核心问题：唐代仅 7 个 chunk（1.3%），单次语义检索几乎不可能排进 top-20。
             改为对每个朝代单独检索 top_k=5，保证每朝至少 5 条证据进入候选池。
             研究文献仅作补充。
+
+            A1: 朝代检索并行（gather 替代 for 循环）+ 反例查询 LLM 与正向检索重叠。
             """
             statement = claim.get("statement", "")
             target = state.get("tracking_target", "")
@@ -1313,39 +1373,39 @@ class EvolutionWorkbench:
             if not query_text:
                 query_text = statement
 
-            # 按朝代分别检索主文献，确保覆盖均匀
             _seen_keys: set[str] = set()
             all_primary_docs: list[dict] = []
 
-            for dynasty in ("唐", "宋", "明", "清"):
-                try:
-                    batch = await self._filtered_retrieve(
-                        f"{target} {query_text}",
-                        filters={"source_type": "primary_literature", "dynasty": dynasty},
-                        skip_tagging=True,  # B-155
-                    )
-                except Exception:
-                    batch = []
-                if isinstance(batch, BaseException):
-                    batch = []
+            full_query = f"{target} {query_text}"
+
+            # A1: 4 朝代并行检索 + 无朝代过滤检索 + 反例查询 LLM — 同时跑
+            async def _retrieve_dynasty(dynasty: str) -> list:
+                return await _cached_retrieve(
+                    full_query,
+                    filters={"source_type": "primary_literature", "dynasty": dynasty},
+                )
+
+            async def _retrieve_extra() -> list:
+                return await _cached_retrieve(
+                    full_query,
+                    filters={"source_type": "primary_literature"},
+                    top_k=10,
+                )
+
+            # A1: 反例查询 LLM 与正向检索并行重叠
+            pro_results, con_query = await asyncio.gather(
+                asyncio.gather(*[_retrieve_dynasty(d) for d in ("唐", "宋", "明", "清")]),
+                _retrieve_extra(),
+                self._generate_opposing_query(statement, target),
+            )
+            dynasty_batches, extra_batch = pro_results[0], pro_results[1]
+
+            for batch in dynasty_batches:
                 for d in batch:
                     key = (d.get("content", "") or "")[:80]
                     if key and key not in _seen_keys:
                         _seen_keys.add(key)
                         all_primary_docs.append(d)
-
-            # 补充一轮无朝代过滤的检索，兜底覆盖研究文献或其他朝代
-            try:
-                extra_batch = await self._filtered_retrieve(
-                    f"{target} {query_text}",
-                    filters={"source_type": "primary_literature"},
-                    top_k=10,
-                    skip_tagging=True,  # B-155
-                )
-            except Exception:
-                extra_batch = []
-            if isinstance(extra_batch, BaseException):
-                extra_batch = []
             for d in extra_batch:
                 key = (d.get("content", "") or "")[:80]
                 if key and key not in _seen_keys:
@@ -1355,16 +1415,10 @@ class EvolutionWorkbench:
             # 第二轮：补充研究文献
             research_docs = []
             if len(all_primary_docs) < 15:
-                try:
-                    research_docs = await self._filtered_retrieve(
-                        f"{target} {query_text}",
-                        filters={"source_type": "research_literature"},
-                        skip_tagging=True,  # B-155
-                    )
-                except Exception:
-                    research_docs = []
-                if isinstance(research_docs, BaseException):
-                    research_docs = []
+                research_docs = await _cached_retrieve(
+                    full_query,
+                    filters={"source_type": "research_literature"},
+                )
                 for d in research_docs:
                     key = (d.get("content", "") or "")[:80]
                     if key and key not in _seen_keys:
@@ -1374,26 +1428,18 @@ class EvolutionWorkbench:
             all_docs = all_primary_docs + research_docs
 
             # ---- P1-3: 反例检索（双向校验） ----
-            # 当前只有正向检索（query=主张本身），导致 evidence_pool 偏向正例。
-            # 如果语料中有与主张相悖的段落，但语义上不匹配正向 query，它们不会进池。
-            # 修复: 用快模生成"反方查询"，再检索一轮，结果标 retrieval_side="con"。
-            # _judge_claim 的 LLM 已有 support/oppose/neutral 分类能力，会把 con 候选
-            # 正确归为 oppose。这里只负责"把反例送进池"，不改判定逻辑。
-            con_query = await self._generate_opposing_query(statement, target)
+            # A1: 反例查询已与正向检索并行完成，此处直接用 con_query 做反例检索（4 朝并行）
             if con_query and con_query != query_text:
+                con_full_query = f"{target} {con_query}"
+                con_dynasty_batches = await asyncio.gather(*[
+                    _cached_retrieve(
+                        con_full_query,
+                        filters={"source_type": "primary_literature", "dynasty": d},
+                        top_k=3,
+                    ) for d in ("唐", "宋", "明", "清")
+                ])
                 con_docs: list[dict] = []
-                for dynasty in ("唐", "宋", "明", "清"):
-                    try:
-                        batch = await self._filtered_retrieve(
-                            f"{target} {con_query}",
-                            filters={"source_type": "primary_literature", "dynasty": dynasty},
-                            top_k=3,
-                            skip_tagging=True,
-                        )
-                    except Exception:
-                        batch = []
-                    if isinstance(batch, BaseException):
-                        batch = []
+                for batch in con_dynasty_batches:
                     for d in batch:
                         key = (d.get("content", "") or "")[:80]
                         if key and key not in _seen_keys:
@@ -1492,12 +1538,13 @@ class EvolutionWorkbench:
     # ====================================================================
 
     async def _test_one_claim(self, state: EvolutionWorkbenchState) -> dict:
-        """逐条验证主张，每判定一条推送进度事件。
+        """A2: 并行验证所有 pending 主张，一次性判定完成。
 
-        支持跳过已判定 claim：只处理 verdict 为 "pending" 或 "pending_retest" 的 claim。
+        原实现逐条判定 + LangGraph 条件循环重入，每条 _judge_claim 是 LLM 调用
+        (~5-15s)，3-4 条串行 = 15-60s。改为 gather + Semaphore(3) 并行判定，
+        总时间从 sum(claims) 降到 max(claims)。每条完成时实时推送 SSE 进度。
         """
         claims = state.get("claims", [])
-        claim_index = state.get("claim_index", 0)
         total = len(claims)
 
         if not claims:
@@ -1511,14 +1558,12 @@ class EvolutionWorkbench:
                 ]
             }
 
-        # 跳过已确定的 claim，找到下一个待判定的
-        while claim_index < total:
-            v = claims[claim_index].get("verdict", "")
-            if v in ("pending", "pending_retest"):
-                break
-            claim_index += 1
+        # 找出所有待判定 claim
+        pending_indices = [i for i, c in enumerate(claims)
+                           if c.get("verdict", "") in ("pending", "pending_retest")]
 
-        if claim_index >= total:
+        if not pending_indices:
+            # 所有 claim 已判定，走完成逻辑
             test_iter = state.get("test_iteration", 0) + 1
             all_supported = sum(1 for c in claims if c.get("verdict") == "supported")
             all_insufficient = sum(1 for c in claims if c.get("verdict") == "insufficient")
@@ -1568,89 +1613,86 @@ class EvolutionWorkbench:
                 "pending_events": events
             }
 
-        claim = claims[claim_index]
-        statement = claim.get("statement", "")
-        t0 = time.time()
+        # A2: 并行判定所有 pending claims，Semaphore(3) 限流保护 LLM 速率
+        _judge_sem = asyncio.Semaphore(3)
+        _done_count = 0
+        _done_lock = asyncio.Lock()
 
-        await self._judge_claim(claim)
-        elapsed = time.time() - t0
-        logger.info(f"[E7] claim {claim_index+1}/{total} judged in {elapsed:.1f}s: "
-                    f"verdict={claim.get('verdict', '?')} statement={statement[:60]}...")
+        async def _judge_one(idx: int):
+            nonlocal _done_count
+            claim = claims[idx]
+            statement = claim.get("statement", "")
+            t0 = time.time()
+            async with _judge_sem:
+                await self._judge_claim(claim)
+            elapsed = time.time() - t0
+            logger.info(f"[E7] claim {idx+1}/{total} judged in {elapsed:.1f}s: "
+                        f"verdict={claim.get('verdict', '?')} statement={statement[:60]}...")
 
-        next_index = claim_index + 1
-        done = next_index >= total
-
-        so_far_supported = sum(1 for c in claims[:next_index] if c.get("verdict") == "supported")
-        so_far_insufficient = sum(1 for c in claims[:next_index] if c.get("verdict") == "insufficient")
-        so_far_refuted = sum(1 for c in claims[:next_index] if c.get("verdict") == "refuted")
-
-        if done:
-            test_iter = state.get("test_iteration", 0) + 1
-            all_supported = sum(1 for c in claims if c.get("verdict") == "supported")
-            all_insufficient = sum(1 for c in claims if c.get("verdict") == "insufficient")
-            all_refuted = sum(1 for c in claims if c.get("verdict") == "refuted")
-
-            events = [
-                build_sse_event(SSEEventType.EVIDENCE_DATA,
-                                claims=claims,
-                                message=f"判定完成 ({total}/{total}): "
-                                        f"{all_supported} 支持, {all_insufficient} 不足, {all_refuted} 否定")
-            ]
-
-            if (all_refuted > 0 or all_insufficient > 0) and test_iter < 3:
-                problematic = [c for c in claims if c.get("verdict") in ("insufficient", "refuted")]
-                events.append(
-                    build_sse_event(SSEEventType.EVOLUTION_INTERRUPT,
-                                    interruptId="decide_next_action",
-                                    interruptType="decide_next_action",
-                                    threadId=state.get("thread_id", ""),
-                                    data={
-                                        "summary": f"已验证{total}条主张: {all_supported}条支持, {all_insufficient}条证据不足, {all_refuted}条被否定",
-                                        "status": {"total": total, "supported": all_supported,
-                                                   "insufficient": all_insufficient, "refuted": all_refuted},
-                                        "problematicClaims": problematic[:5],
-                                        "options": [
-                                            {"id": "investigate", "label": "深入调查",
-                                             "description": "对证据不足的主张扩大检索范围，尝试补充证据",
-                                             "action": "investigate"},
-                                            {"id": "reexplore", "label": "重新探索",
-                                             "description": "放弃当前假设方向，重新扫描母题矩阵",
-                                             "action": "reexplore"},
-                                            {"id": "accept", "label": "接受不确定性",
-                                             "description": "在最终报告中保留不确定性标注，进入综合报告",
-                                             "action": "accept"},
-                                            {"id": "change_hypothesis", "label": "换假设",
-                                             "description": "从剩余的备选假设中另选一条进行验证",
-                                             "action": "change_hypothesis"},
-                                        ],
-                                        "phase": "E7_complete",
-                                    })
-                )
-
-            return {
-                "claims": claims,
-                "claim_index": next_index,
-                "test_iteration": test_iter,
-                "current_phase": "E7_complete",
-                "pending_events": events
-            }
-        else:
-            # 本条刚判定的结论，让用户看到具体每条的判定结果
+            async with _done_lock:
+                _done_count += 1
+                _cur = _done_count
             verdict_label = {"supported": "支持", "insufficient": "证据不足",
                               "refuted": "否定", "pending": "待定"}.get(claim.get("verdict", ""), claim.get("verdict", ""))
-            return {
-                "claims": claims,
-                "claim_index": next_index,
-                "current_phase": "E7_testing",
-                "pending_events": [
-                    build_sse_event(SSEEventType.THINKING_STEP,
-                                    step="test_claims",
-                                    message=f"第 {claim_index+1}/{total} 条判定：{verdict_label} —— {statement[:30]}"),
-                    build_sse_event(SSEEventType.STATUS,
-                                    message=f"主张判定进度: {next_index}/{total} "
-                                            f"({so_far_supported}支持 {so_far_insufficient}不足 {so_far_refuted}否定)")
-                ]
-            }
+            self._emit_live(build_sse_event(
+                SSEEventType.THINKING_STEP,
+                step="test_claims",
+                message=f"第 {idx+1}/{total} 条判定：{verdict_label} —— {statement[:30]} "
+                        f"(进度 {_cur}/{len(pending_indices)})",
+            ))
+
+        await asyncio.gather(*[_judge_one(i) for i in pending_indices], return_exceptions=True)
+
+        # 全部判定完成，走完成逻辑
+        test_iter = state.get("test_iteration", 0) + 1
+        all_supported = sum(1 for c in claims if c.get("verdict") == "supported")
+        all_insufficient = sum(1 for c in claims if c.get("verdict") == "insufficient")
+        all_refuted = sum(1 for c in claims if c.get("verdict") == "refuted")
+
+        events = [
+            build_sse_event(SSEEventType.EVIDENCE_DATA,
+                            claims=claims,
+                            message=f"判定完成 ({total}/{total}): "
+                                    f"{all_supported} 支持, {all_insufficient} 不足, {all_refuted} 否定")
+        ]
+
+        if (all_refuted > 0 or all_insufficient > 0) and test_iter < 3:
+            problematic = [c for c in claims if c.get("verdict") in ("insufficient", "refuted")]
+            events.append(
+                build_sse_event(SSEEventType.EVOLUTION_INTERRUPT,
+                                interruptId="decide_next_action",
+                                interruptType="decide_next_action",
+                                threadId=state.get("thread_id", ""),
+                                data={
+                                    "summary": f"已验证{total}条主张: {all_supported}条支持, {all_insufficient}条证据不足, {all_refuted}条被否定",
+                                    "status": {"total": total, "supported": all_supported,
+                                               "insufficient": all_insufficient, "refuted": all_refuted},
+                                    "problematicClaims": problematic[:5],
+                                    "options": [
+                                        {"id": "investigate", "label": "深入调查",
+                                         "description": "对证据不足的主张扩大检索范围，尝试补充证据",
+                                         "action": "investigate"},
+                                        {"id": "reexplore", "label": "重新探索",
+                                         "description": "放弃当前假设方向，重新扫描母题矩阵",
+                                         "action": "reexplore"},
+                                        {"id": "accept", "label": "接受不确定性",
+                                         "description": "在最终报告中保留不确定性标注，进入综合报告",
+                                         "action": "accept"},
+                                        {"id": "change_hypothesis", "label": "换假设",
+                                         "description": "从剩余的备选假设中另选一条进行验证",
+                                         "action": "change_hypothesis"},
+                                    ],
+                                    "phase": "E7_complete",
+                                })
+            )
+
+        return {
+            "claims": claims,
+            "claim_index": total,
+            "test_iteration": test_iter,
+            "current_phase": "E7_complete",
+            "pending_events": events
+        }
 
     async def _generate_opposing_query(self, statement: str, target: str) -> str:
         """P1-3: 用快模生成"反方查询"——用于检索与主张相悖的证据。

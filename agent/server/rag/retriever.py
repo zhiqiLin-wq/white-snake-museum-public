@@ -419,13 +419,18 @@ class HybridRetriever:
             logger.warning("Embedder 未就绪，跳过语义检索")
             dense_results: list[tuple[str, float]] = []
         else:
-            try:
-                query_vec = embedder.embed_query(_dense_q)
-                semantic_raw = self.vs.query(
-                    query_vec,
+            # B-162: embed_query 是 bge-large CPU 同步推理、vs.query 是 chroma
+            # 同步调用，直接跑会阻塞事件循环（E2/E7 并发检索被串行化、SSE 心跳
+            # 卡住）。与 BM25/reranker 一致丢工作线程（只读操作，线程安全）。
+            def _dense_search():
+                qvec = embedder.embed_query(_dense_q)
+                return self.vs.query(
+                    qvec,
                     top_k=dense_candidate_k,
                     where=_to_chroma_where(filters),
                 )
+            try:
+                semantic_raw = await asyncio.to_thread(_dense_search)
             except Exception as e:
                 # 向量库异常（集合为空/锁冲突等）不再让整路检索崩溃——
                 # 降级为仅 BM25/空结果，工具仍可返回可用信息
@@ -674,15 +679,17 @@ class HybridRetriever:
 
         _dense_q = dense_query if dense_query else query
 
-        # 尝试纯语义检索
+        # 尝试纯语义检索（B-162: embedding/向量库同步调用丢工作线程）
         if embedder.is_ready:
             try:
-                query_vec = embedder.embed_query(_dense_q)
-                semantic_raw = self.vs.query(
-                    query_vec,
-                    top_k=top_k,
-                    where=filters if filters else None,
-                )
+                def _degraded_dense():
+                    qvec = embedder.embed_query(_dense_q)
+                    return self.vs.query(
+                        qvec,
+                        top_k=top_k,
+                        where=filters if filters else None,
+                    )
+                semantic_raw = await asyncio.to_thread(_degraded_dense)
                 results = []
                 for r in semantic_raw:
                     results.append({

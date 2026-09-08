@@ -68,6 +68,73 @@ function genId(): string {
   return crypto.randomUUID()
 }
 
+// ===== 智能标注实时进度状态机 =====
+// 由后端 annotation_progress 事件驱动（prepare → discovery → resolution →
+// marginalia → saving → done/error），前端进度面板据此渲染。
+export type AnnotationPhase =
+  | 'idle' | 'prepare' | 'discovery' | 'resolution'
+  | 'marginalia' | 'saving' | 'done' | 'error'
+export type AnnotationStatus = 'idle' | 'running' | 'done' | 'error' | 'cancelled'
+
+export interface AnnotationFinalStats {
+  entities: number
+  paragraphs: number
+  marginalia: number
+  categoryCounts: Record<string, number>
+}
+
+export interface AnnotationProgressState {
+  active: boolean
+  status: AnnotationStatus
+  phase: AnnotationPhase
+  chapterNumber: number | null
+  chapterTitle: string
+  message: string
+  totalParagraphs: number
+  windowsDone: number
+  windowsTotal: number
+  candidates: number
+  entities: number
+  paragraphsDone: number
+  marginaliaDone: number
+  marginaliaTotal: number
+  currentEntity: string | null
+  lastParagraphIndex: number | null
+  categoryCounts: Record<string, number>
+  startedAt: number | null
+  recent: Array<{ ts: number; message: string }>
+  finalStats: AnnotationFinalStats | null
+  errorMessage: string
+}
+
+const ANNOTATION_RECENT_MAX = 40
+
+function createIdleAnnotationProgress(): AnnotationProgressState {
+  return {
+    active: false,
+    status: 'idle',
+    phase: 'idle',
+    chapterNumber: null,
+    chapterTitle: '',
+    message: '',
+    totalParagraphs: 0,
+    windowsDone: 0,
+    windowsTotal: 0,
+    candidates: 0,
+    entities: 0,
+    paragraphsDone: 0,
+    marginaliaDone: 0,
+    marginaliaTotal: 0,
+    currentEntity: null,
+    lastParagraphIndex: null,
+    categoryCounts: {},
+    startedAt: null,
+    recent: [],
+    finalStats: null,
+    errorMessage: '',
+  }
+}
+
 export const useAgentStore = defineStore('agent', () => {
   // ===== Session management =====
   // Conversations are loaded from server (SQLite); runtime state only — no localStorage
@@ -83,6 +150,8 @@ export const useAgentStore = defineStore('agent', () => {
   // ===== SSE streaming state =====
   const isStreaming = ref(false)
   const isAnnotationLoading = ref(false)
+  // 智能标注实时进度（annotation_progress 事件驱动）
+  const annotationProgress = ref<AnnotationProgressState>(createIdleAnnotationProgress())
   const currentChunk = ref('')
   const currentSources = ref<SourceCitation[]>([])
   const currentToolCalls = ref<ToolCallRecord[]>([])
@@ -399,6 +468,117 @@ export const useAgentStore = defineStore('agent', () => {
     isAnnotationLoading.value = loading
   }
 
+  // ===== 智能标注实时进度状态机 actions =====
+
+  function _pushAnnotationRecent(message: string) {
+    const p = annotationProgress.value
+    p.recent.push({ ts: Date.now(), message })
+    if (p.recent.length > ANNOTATION_RECENT_MAX) {
+      // 保留最新的 N 条（滚动窗口）
+      p.recent.splice(0, p.recent.length - ANNOTATION_RECENT_MAX)
+    }
+  }
+
+  /** 新一轮标注开始（prepare 事件） */
+  function beginAnnotationProgress(
+    chapterNumber: number,
+    chapterTitle: string,
+    totalParagraphs: number,
+    message?: string,
+  ) {
+    const fresh = createIdleAnnotationProgress()
+    annotationProgress.value = {
+      ...fresh,
+      active: true,
+      status: 'running',
+      phase: 'prepare',
+      chapterNumber,
+      chapterTitle: chapterTitle || `第${chapterNumber}章`,
+      totalParagraphs: totalParagraphs || 0,
+      startedAt: Date.now(),
+      message: message || `第${chapterNumber}章 · 共 ${totalParagraphs} 段，准备标注流水线…`,
+    }
+    _pushAnnotationRecent(annotationProgress.value.message)
+    isAnnotationLoading.value = true
+  }
+
+  /** 标注进行中任意阶段的增量更新（discovery/resolution/marginalia/saving） */
+  function updateAnnotationProgress(
+    data: Partial<Pick<AnnotationProgressState,
+      'phase' | 'message' | 'totalParagraphs' | 'windowsDone' | 'windowsTotal'
+      | 'candidates' | 'entities' | 'paragraphsDone' | 'marginaliaDone'
+      | 'marginaliaTotal' | 'currentEntity' | 'lastParagraphIndex'
+      | 'categoryCounts'>>,
+  ) {
+    const p = annotationProgress.value
+    // 已结束的进度（done/error/cancelled）不再被迟到的 running 帧覆盖
+    if (!p.active && data.phase && data.phase !== 'done' && data.phase !== 'error') return
+    if (data.phase) p.phase = data.phase
+    if (typeof data.totalParagraphs === 'number') p.totalParagraphs = data.totalParagraphs
+    if (typeof data.windowsDone === 'number') p.windowsDone = data.windowsDone
+    if (typeof data.windowsTotal === 'number') p.windowsTotal = data.windowsTotal
+    if (typeof data.candidates === 'number') p.candidates = data.candidates
+    if (typeof data.entities === 'number') p.entities = data.entities
+    if (typeof data.paragraphsDone === 'number') p.paragraphsDone = data.paragraphsDone
+    if (typeof data.marginaliaDone === 'number') p.marginaliaDone = data.marginaliaDone
+    if (typeof data.marginaliaTotal === 'number') p.marginaliaTotal = data.marginaliaTotal
+    if (data.currentEntity !== undefined) p.currentEntity = data.currentEntity
+    if (data.lastParagraphIndex !== undefined) p.lastParagraphIndex = data.lastParagraphIndex
+    if (data.categoryCounts) p.categoryCounts = { ...data.categoryCounts }
+    if (data.message) {
+      p.message = data.message
+      _pushAnnotationRecent(data.message)
+    }
+  }
+
+  /** 标注正常完成（done 事件）—— 封存真实统计供结果摘要展示 */
+  function finishAnnotationProgress(extra?: {
+    marginalia?: number
+    finalStats?: AnnotationFinalStats | null
+  }) {
+    const p = annotationProgress.value
+    const marginalia = extra?.marginalia ?? p.marginaliaDone
+    p.finalStats = extra?.finalStats ?? {
+      entities: p.entities,
+      paragraphs: p.paragraphsDone,
+      marginalia,
+      categoryCounts: { ...p.categoryCounts },
+    }
+    p.status = 'done'
+    p.phase = 'done'
+    p.active = false
+    p.marginaliaDone = marginalia
+    p.message = p.message || '标注完成'
+    isAnnotationLoading.value = false
+  }
+
+  /** 标注失败（error 事件） */
+  function failAnnotationProgress(message: string) {
+    const p = annotationProgress.value
+    p.status = 'error'
+    p.phase = 'error'
+    p.active = false
+    p.errorMessage = message
+    p.message = message
+    _pushAnnotationRecent(message)
+    isAnnotationLoading.value = false
+  }
+
+  /** 用户主动停止（点击停止按钮 / abort） */
+  function cancelAnnotationProgress() {
+    const p = annotationProgress.value
+    if (!p.active) return
+    p.status = 'cancelled'
+    p.active = false
+    p.message = '已停止本次标注'
+    _pushAnnotationRecent(p.message)
+    isAnnotationLoading.value = false
+  }
+
+  function resetAnnotationProgress() {
+    annotationProgress.value = createIdleAnnotationProgress()
+  }
+
   function startStreaming() {
     isStreaming.value = true
     currentChunk.value = ''
@@ -414,6 +594,8 @@ export const useAgentStore = defineStore('agent', () => {
     completedPlanStepNames.value = new Set()
     reasoningDelta.value = ''
     reasoningActive.value = false
+    // 新一轮对话开始：清空上一轮标注进度残留
+    resetAnnotationProgress()
   }
 
   // v17: ReAct 决策轮思考增量累积（thinking_delta）
@@ -896,6 +1078,7 @@ export const useAgentStore = defineStore('agent', () => {
     messages,
     isStreaming,
     isAnnotationLoading,
+    annotationProgress,
     currentChunk,
     currentSources,
     currentToolCalls,
@@ -931,6 +1114,12 @@ export const useAgentStore = defineStore('agent', () => {
     // SSE write
     startStreaming,
     setAnnotationLoading,
+    beginAnnotationProgress,
+    updateAnnotationProgress,
+    finishAnnotationProgress,
+    failAnnotationProgress,
+    cancelAnnotationProgress,
+    resetAnnotationProgress,
     appendChunk,
     appendReasoning,
     addSource,

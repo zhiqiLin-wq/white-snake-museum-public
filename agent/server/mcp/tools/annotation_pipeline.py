@@ -161,6 +161,7 @@ async def discovery_pass(
     concurrency: int = 5,
     window_size: int = 3,
     overlap: int = 1,
+    progress_callback=None,
 ) -> List[dict]:
     """Pass 1: 滑动窗口全面扫描，发现所有候选实体。
 
@@ -172,6 +173,8 @@ async def discovery_pass(
         concurrency: 并发窗口数
         window_size: 每个窗口包含的段落数
         overlap: 窗口间重叠段落数
+        progress_callback: 可选 async 回调 (done: int, total: int, found: int) -> None，
+            每个窗口完成后调用，传入结构化进度（已完成窗口数/总窗口数/累计候选数）
 
     Returns:
         discoveries: [
@@ -196,18 +199,35 @@ async def discovery_pass(
         len(paragraphs), len(windows), window_size, overlap, concurrency
     )
 
-    # 构建任务列表
-    async def _task(window: dict) -> List[dict]:
-        return await _scan_window(
-            window["paragraphs"], categories, llm, prompt_registry
-        )
+    # B2: 自建信号量 + as_completed，支持逐窗口进度回调
+    _sem = asyncio.Semaphore(concurrency)
 
-    tasks = [lambda w=w: _task(w) for w in windows]
+    async def _task(window: dict, idx: int) -> List[dict]:
+        async with _sem:
+            return await _scan_window(
+                window["paragraphs"], categories, llm, prompt_registry
+            )
 
-    # 并发执行
-    raw_results = await async_run_with_semaphore(
-        tasks, concurrency=concurrency, on_error="return_none"
-    )
+    _pending = [asyncio.create_task(_task(w, i)) for i, w in enumerate(windows)]
+    raw_results = [None] * len(windows)
+    _done_count = 0
+    _total_windows = len(windows)
+    _total_discoveries = 0
+
+    for coro in asyncio.as_completed(_pending):
+        result = await coro
+        _done_count += 1
+        if result is not None:
+            _total_discoveries += len(result)
+        if progress_callback:
+            await progress_callback(_done_count, _total_windows, _total_discoveries)
+
+    # 收集结果（按原始顺序）
+    for i, t in enumerate(_pending):
+        try:
+            raw_results[i] = t.result()
+        except Exception:
+            raw_results[i] = None
 
     # 合并所有窗口的结果
     all_discoveries = []
@@ -332,7 +352,7 @@ def _rule_engine_match(
                     "explanation": f"{_ENTITY_KB[cat]['label']}（规则匹配）",
                     "confidence": "high",
                     "color": DEFAULT_CATEGORY_COLORS.get(cat, "#B8B878"),
-                    "source": "rule",
+                    "source": "agent",
                 })
                 matched_entities.add(entity)
 
