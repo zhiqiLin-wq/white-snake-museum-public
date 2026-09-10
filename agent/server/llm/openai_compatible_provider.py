@@ -40,6 +40,10 @@ from ..data.llm_cache import LLMResponseCache
 logger = logging.getLogger(__name__)
 _llm_cache = LLMResponseCache(ttl_seconds=3600)
 
+# B-165: 流式 SSE 单行最大等待秒数——超过则判定服务端挂起，抛 APITimeoutError
+# （httpx read timeout 不覆盖流式 aiter_lines 间隙挂死场景）
+STREAM_LINE_TIMEOUT = 120.0
+
 
 class StreamResult:
     """流式生成结果：既是异步迭代器（yield content 文本），
@@ -261,6 +265,10 @@ class GenericOpenAIProvider(LLMProvider):
             usage = data.get("usage", {})
             total_tokens = usage.get("total_tokens", 0)
             completion_tokens = usage.get("completion_tokens", 0)
+            # DeepSeek thinking 模式: completion_tokens 含 reasoning_tokens（思维链），
+            # 账本只记"可见输出"，须单独读取并剔除（B-167）。
+            details = usage.get("completion_tokens_details") or {}
+            reasoning_tokens = details.get("reasoning_tokens", 0) or 0
             finish_reason = data.get("choices", [{}])[0].get("finish_reason", "stop")
 
             return LLMResponse(
@@ -269,6 +277,7 @@ class GenericOpenAIProvider(LLMProvider):
                 tokens=total_tokens,
                 completion_tokens=completion_tokens,
                 finish_reason=finish_reason,
+                reasoning_tokens=reasoning_tokens,
             )
         except (RateLimitError, APITimeoutError):
             raise
@@ -336,7 +345,20 @@ class GenericOpenAIProvider(LLMProvider):
                     # v16.1: 累积 content 与 reasoning，空 content 兜底 reasoning
                     total_content = ""
                     total_reasoning = ""
-                    async for line in response.aiter_lines():
+                    # B-165: aiter_lines 间隙超时保护
+                    _line_iter = response.aiter_lines().__aiter__()
+                    while True:
+                        try:
+                            line = await asyncio.wait_for(
+                                _line_iter.__anext__(), timeout=STREAM_LINE_TIMEOUT
+                            )
+                        except asyncio.TimeoutError:
+                            raise APITimeoutError(
+                                f"LLM 流式响应超时（{STREAM_LINE_TIMEOUT:.0f}s 无数据），"
+                                f"可能服务端挂起"
+                            )
+                        except StopAsyncIteration:
+                            break
                         if not line or not line.startswith("data: "):
                             continue
                         data_str = line[6:]
@@ -488,6 +510,10 @@ class GenericOpenAIProvider(LLMProvider):
             message = choice.get("message", {})
             finish_reason = choice.get("finish_reason", "stop")
             usage = data.get("usage", {})
+            # DeepSeek thinking 模式: completion_tokens 含 reasoning_tokens（思维链），
+            # 账本只记"可见输出"，须单独读取并剔除（B-167）。
+            details = usage.get("completion_tokens_details") or {}
+            reasoning_tokens = details.get("reasoning_tokens", 0) or 0
 
             text = message.get("content", "") or ""
             # DeepSeek thinking 模式: reasoning_content 必须保留，
@@ -518,6 +544,7 @@ class GenericOpenAIProvider(LLMProvider):
                     completion_tokens=usage.get("completion_tokens", 0),
                     finish_reason="tool_calls" if finish_reason == "tool_calls" else finish_reason,
                     reasoning_content=reasoning_content,
+                    reasoning_tokens=reasoning_tokens,
                 )
             return GenerateWithToolsResult(
                 text=text,
@@ -526,6 +553,7 @@ class GenericOpenAIProvider(LLMProvider):
                 completion_tokens=usage.get("completion_tokens", 0),
                 finish_reason=finish_reason,
                 reasoning_content=reasoning_content,
+                reasoning_tokens=reasoning_tokens,
             )
 
         except (RateLimitError, APITimeoutError):
@@ -593,10 +621,24 @@ class GenericOpenAIProvider(LLMProvider):
                 finish_reason = "stop"
                 tokens = 0
                 completion_tokens = 0
+                reasoning_tokens = 0
                 # tool_calls delta 聚合: index -> {"id", "name", "arguments"}
                 tc_agg: dict[int, dict] = {}
 
-                async for line in response.aiter_lines():
+                # B-165: aiter_lines 间隙超时保护——防止服务端 200 OK 后流式挂死
+                _line_iter = response.aiter_lines().__aiter__()
+                while True:
+                    try:
+                        line = await asyncio.wait_for(
+                            _line_iter.__anext__(), timeout=STREAM_LINE_TIMEOUT
+                        )
+                    except asyncio.TimeoutError:
+                        raise APITimeoutError(
+                            f"LLM 流式响应超时（{STREAM_LINE_TIMEOUT:.0f}s 无数据），"
+                            f"可能服务端挂起"
+                        )
+                    except StopAsyncIteration:
+                        break
                     if not line or not line.startswith("data: "):
                         continue
                     data_str = line[6:]
@@ -608,8 +650,13 @@ class GenericOpenAIProvider(LLMProvider):
                         continue
 
                     if chunk.get("usage"):
-                        tokens = chunk["usage"].get("total_tokens", tokens)
-                        completion_tokens = chunk["usage"].get("completion_tokens", completion_tokens)
+                        u = chunk["usage"]
+                        tokens = u.get("total_tokens", tokens)
+                        completion_tokens = u.get("completion_tokens", completion_tokens)
+                        # DeepSeek thinking: completion_tokens 含 reasoning_tokens，
+                        # 须单独读取以供账本剔除（B-167）
+                        det = u.get("completion_tokens_details") or {}
+                        reasoning_tokens = det.get("reasoning_tokens", reasoning_tokens) or reasoning_tokens
 
                     choices = chunk.get("choices", [])
                     if not choices:
@@ -657,6 +704,22 @@ class GenericOpenAIProvider(LLMProvider):
 
             if tool_calls:
                 finish_reason = "tool_calls"
+            # B-167: 补全 LLM 调用日志（此前 ReAct 决策调用未记入 llm_calls.log，
+            # 导致 LLM_TRACE summary 只统计辅助调用，调试盲区）
+            from .provider import _record_llm_trace
+            import time as _time
+            _record_llm_trace(
+                model=model,
+                system=system,
+                user="\n".join(
+                    f"[{m.get('role', '?')}]: {str(m.get('content', ''))[:800]}"
+                    for m in messages[-6:]
+                ),
+                response_content=total_content or total_reasoning or "",
+                tokens_total=tokens,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
             return GenerateWithToolsResult(
                 text=total_content,
                 tool_calls=tool_calls,
@@ -665,6 +728,7 @@ class GenericOpenAIProvider(LLMProvider):
                 completion_tokens=completion_tokens,
                 finish_reason=finish_reason,
                 reasoning_content=total_reasoning,
+                reasoning_tokens=reasoning_tokens,
             )
 
         except (RateLimitError, APITimeoutError, LLMFatalError) as e:

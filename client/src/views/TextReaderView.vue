@@ -363,6 +363,24 @@ watch(
   { deep: true }
 )
 
+// B-159: 组件根节点引用 —— 引文 mark 兜底滚动的查询作用域
+const rootEl = ref<HTMLElement | null>(null)
+
+// B-159: 引文 mark 兜底滚动。
+// 旧逻辑只在段落 el 找到后才查 mark；paragraphIndex=-1（93% chunk 段落号缺失）
+// 时 getElementById('para--1') 永远为 null，只重试不滚动 → 用户点"跳转到原文"
+// 既不定位也看不到金色高亮。现在无论段落是否找到，都在章节容器内查 mark。
+function scrollToCitationMark(): boolean {
+  if (!citationHighlight.value?.text) return false
+  const scope: ParentNode = rootEl.value ?? document
+  const mark = scope.querySelector('mark.citation-highlight') as HTMLElement | null
+  if (mark) {
+    mark.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return true
+  }
+  return false
+}
+
 // C06+: 段落定位 helper —— 支持异步段落加载重试
 // 修复：原 watch 无 immediate，首次打开 tab 时 paragraphIndex 已有值却不触发；
 // 且段落 DOM 可能尚未渲染，getElementById 返回 null 后无重试 → 跳转后停在顶部
@@ -372,26 +390,24 @@ function scrollToParagraphIndex(idx: number | null | undefined) {
     return
   }
   activeParagraphIdx.value = idx
+  let paraScrolled = false
+  const hasHighlight = !!citationHighlight.value?.text
   const tryScroll = (attempt: number) => {
     void nextTick(() => {
+      // 段落定位（idx=-1 时 para--1 不存在，天然跳过，走 mark 定位）
       const el = document.getElementById(`para-${idx}`)
-      if (el) {
+      if (el && !paraScrolled) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        // C06: 如果有 citationHighlight，进一步滚动到 <mark> 位置
-        // B-156: mark 可能不在目标段落内（段落号错位），在章节容器内兜底搜索
-        if (citationHighlight.value?.text) {
-          setTimeout(() => {
-            const contentEl = el.closest('.text-reader-content')
-            const mark = (contentEl?.querySelector('mark.citation-highlight') as HTMLElement | null)
-              || (el.querySelector('mark.citation-highlight') as HTMLElement | null)
-            if (mark) {
-              mark.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            }
-          }, 400)
-        }
-      } else if (attempt < 12) {
-        // 段落可能仍在异步加载，每 80ms 重试一次（共 ~960ms）
+        paraScrolled = true
+      }
+      // 引文 mark 滚动高亮（段落内或章节容器内兜底）
+      const markOk = scrollToCitationMark()
+      if ((!el || (hasHighlight && !markOk)) && attempt < 12) {
+        // 段落或 mark 尚未渲染，每 80ms 重试一次（共 ~960ms）
         setTimeout(() => tryScroll(attempt + 1), 80)
+      } else if (hasHighlight && !markOk) {
+        // 重试耗尽仍未找到 mark：再等 500ms 做最后一次兜底（大章节渲染较慢）
+        setTimeout(() => scrollToCitationMark(), 500)
       }
     })
   }
@@ -402,11 +418,11 @@ function scrollToParagraphIndex(idx: number | null | undefined) {
 watch(() => paragraphs.value, () => {
   scheduleMarginaliaReposition()
   // C06+: 章节段落刚加载完成时，若 paragraphIndex 已设值，补一次定位（兜底重试耗尽场景）
+  // B-159: idx=-1 时段落 el 永远不存在（走 mark 定位），同样需要补触发
   if (paragraphIndex.value !== undefined && paragraphIndex.value !== null) {
     void nextTick(() => {
       const el = document.getElementById(`para-${paragraphIndex.value}`)
-      // 元素已存在且大致在视口内则不重复滚动；否则补滚
-      if (!el) {
+      if (!el || paragraphIndex.value === -1) {
         scrollToParagraphIndex(paragraphIndex.value)
       }
     })
@@ -1276,7 +1292,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="text-reader-view" :class="{ 'tr-hide-toolbar': hideToolbar }">
+  <div ref="rootEl" class="text-reader-view" :class="{ 'tr-hide-toolbar': hideToolbar }">
     <!-- Toolbar (紧凑单行 + 折叠区) -->
     <div class="tr-toolbar" :class="{ 'tr-toolbar-collapsed': !toolbarExpanded }">
       <div class="tr-toolbar-main">

@@ -767,8 +767,10 @@ class SupervisorGraph:
                 yield event
         except Exception as e:
             logger.exception(f"[Supervisor] literature_qa 流异常: {e}")
+            # B-165: 异常消息为空时补类型名，避免前端弹窗显示空括号"()"
+            err_detail = str(e)[:120] or type(e).__name__
             yield {"type": SSEEventType.ERROR,
-                   "data": {"message": f"回答过程中断（{str(e)[:120]}），请重试一次。"}}
+                   "data": {"message": f"回答过程中断（{err_detail}），请重试一次。"}}
 
     async def _load_existing_agent_annotations(self, ch_num: int) -> list[dict]:
         """拉取该章已保存的 agent 标注（转为 save 格式），失败时返回空表。

@@ -48,6 +48,15 @@ class Embedder:
         self._load_error: str | None = None
         self._loading = False
         self._lock = threading.Lock()
+        # B-164: 模型前向并发硬顶。检索提速改造后 embedding 走 asyncio.to_thread
+        # 真并行，E7 节点 6 claims × (4 朝代+extra+反例) fan-out 峰值约 30 路
+        # 检索同时进入 forward，BGE-large 单次前向峰值内存数百 MB，2026-09-09
+        # 因此触发 PyTorch OOM（DefaultCPUAllocator: not enough memory，
+        # 页面文件耗尽 os error 1455）。信号量把同时进行的 forward 数封顶，
+        # 内存峰值即 = 上限 × 单次前向峰值。可用环境变量覆盖。
+        self._infer_sem = threading.BoundedSemaphore(
+            max(1, int(_os.environ.get("EMBEDDER_MAX_CONCURRENT_FORWARD", "2")))
+        )
 
     def start_loading(self):
         """在后台线程启动模型加载。
@@ -191,11 +200,14 @@ class Embedder:
             return_tensors="pt",
         )
 
-        with torch.no_grad():
-            out = self._model(**enc)
-        cls_emb = out.last_hidden_state[:, 0, :]  # CLS token pooling
-        cls_emb = torch.nn.functional.normalize(cls_emb, p=2, dim=1)
-        return cls_emb.numpy().tolist()
+        # B-164: forward + 池化在信号量内，限制并发前向数防 OOM；
+        # tokenize 在信号量外（内存占用小，不阻塞其他批次）。
+        with self._infer_sem:
+            with torch.no_grad():
+                out = self._model(**enc)
+            cls_emb = out.last_hidden_state[:, 0, :]  # CLS token pooling
+            cls_emb = torch.nn.functional.normalize(cls_emb, p=2, dim=1)
+            return cls_emb.numpy().tolist()
 
     def embed_query(self, text: str) -> list[float]:
         # 加 BGE 检索指令前缀 (仅 query 侧)。缺失时 bge-*-v1.5 的 dense 检索会掉点。

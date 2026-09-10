@@ -13,6 +13,7 @@ import ActionDecider from '@/components/interrupt/ActionDecider.vue'
 import EvolutionProgress from '@/components/evolution/EvolutionProgress.vue'
 import { SSEEventBus } from '@/services/sseEventBus'
 import * as echarts from 'echarts'
+import { buildEvolutionJumpParams, normalizeParagraphIndex, extractQuoteBeforeLabel } from './evolutionJumpHelpers'
 
 import { marked } from 'marked'
 
@@ -508,8 +509,9 @@ function navigateToSource(evidence: EvidenceRef) {
   const rawCh = evidence.chapterNumber
   const parsedCh = typeof rawCh === 'string' ? parseInt(rawCh, 10) : (rawCh as number)
   const safeCh = (typeof parsedCh === 'number' && !isNaN(parsedCh) && parsedCh >= 0) ? parsedCh : -1
-  const rawPara = evidence.paragraphIndex
-  const safePara = (typeof rawPara === 'number' && !isNaN(rawPara) && rawPara >= 0) ? rawPara : 0
+  // B-159: paragraphIndex=-1（93% chunk 段落号缺失）必须原样透传，旧代码
+  // 钳成 0 导致跳到章节首段且 TextReaderView 不走 citationHighlight 文本匹配
+  const safePara = normalizeParagraphIndex(evidence.paragraphIndex)
   // 弹窗展示完整内容（excerptFull 不截断，fallback 到 excerpt）
   const fullText = evidence.excerptFull || evidence.excerpt || ''
   showEvidencePopup(
@@ -532,9 +534,11 @@ function showEvidencePopup(excerpt: string, chapterTitle: string, chapterNumber:
   evidenceModalSourceType.value = sourceType || ''
   const srcLabel = sourceType === 'research_literature' ? '[研究文献]' : ''
   const dynastyLabel = dynasty ? `[${dynasty}代]` : ''
+  // -1 表示 chunk 级段落号缺失（跳转时走引文文本匹配定位），不展示"段落-1"
+  const paraLabel = paragraphIndex >= 0 ? `段落${paragraphIndex}` : '段落未定位'
   evidenceModalTitle.value = chapterTitle
-    ? `${dynastyLabel} ${srcLabel} ${chapterTitle} 段落${paragraphIndex}`
-    : `来源段落${paragraphIndex}`
+    ? `${dynastyLabel} ${srcLabel} ${chapterTitle} ${paraLabel}`
+    : `来源${paraLabel}`
   evidenceModalVisible.value = true
 }
 
@@ -545,24 +549,22 @@ function jumpToSourceFromModal() {
     ? (evCh ? `${evCh.dynasty} · ${evidenceModalChapterTitle.value}` : evidenceModalChapterTitle.value)
     : `章节${evidenceModalChapterNumber.value}`
 
-  // B-150: 仅当 excerpt 足够长才尝试原文高亮匹配，短文本跳了也匹配不到
-  // B-152f: 阈值 20 → 8 → 4 — 与 TextReaderView 的 normQuote.length >= 4 一致
-  // B-152n: 优先用 LLM 引文（10-60字短句，与原文匹配成功率高）；excerpt 全文
-  // 匹配必败——chunk 清洗文本与原文渲染存在字符差异，且前缀兜底会命中结构标题
-  // B-156: LLM 引文被后端删除时，回退到 excerpt 前 25 字（而非全文 500 字），
-  // 短前缀更可能落在同一段落内，匹配器 12 字前缀兜底成功率更高
-  const _llmQuote = evidenceModalQuote.value || ''
-  const _excerptHead = (evidenceModalQuotedText.value || '').slice(0, 25)
-  const highlightText = _llmQuote || (_excerptHead.length >= 4 ? _excerptHead : '') || ''
-  const shouldHighlight = highlightText.length >= 4
-
-  workspaceStore.openTab('text-reader', evTitle, {
+  // 2026-09-09: 复用 SearchResultsView 的 C06 兜底机制（提取为纯函数 buildEvolutionJumpParams）
+  // 修复点:
+  // 1. 加 flashParagraph 一次性闪烁标记（TextReaderView 消费后删除，段落底色暂时高亮）
+  // 2. citationHighlight.text 回退从 excerpt 前 25 字 → 前 12 字（与 TextReaderView 12 字前缀兜底对齐）
+  // 3. paragraphIndex=-1 时显式传 -1（让 TextReaderView 走文本匹配路径而非段落号路径）
+  const jumpParams = buildEvolutionJumpParams({
     chapterNumber: evidenceModalChapterNumber.value,
     paragraphIndex: evidenceModalParagraphIndex.value,
-    citationHighlight: shouldHighlight
-      ? { text: highlightText }
-      : undefined,
+    llmQuote: evidenceModalQuote.value || '',
+    excerptHead: (evidenceModalQuotedText.value || '').slice(0, 25),
   })
+
+  if (!jumpParams) return
+
+  // openTab 第三参数要求 Record<string, unknown>，展开为对象字面量满足 index signature
+  workspaceStore.openTab('text-reader', evTitle, { ...jumpParams })
   evidenceModalVisible.value = false
 }
 
@@ -571,39 +573,42 @@ const narrativeHtml = computed(() => {
   if (!text) return ''
   const refs = displayEvidenceRefs.value
 
-  // B-150: 锚点ID + 前端引文提取。
-  // B-152e: 单遍替换 — 可选引文组与锚点同时匹配，引文直接写入该次出现的 data-quote。
-  // 旧实现先存全局 quoteMap[label] 再生成 badge，同一标签出现两次时后者覆盖前者（高亮串扰）。
-  // 引文按"出现位置"隔离：每个徽章携带自己前面的引文，互不影响。
+  // B-159: 锚点标签扫描。引文按"出现位置"隔离——每个徽章携带自己前面的引文
+  // （extractQuoteBeforeLabel 回溯配对），同一标签出现多次也互不串扰。
+  const labelRegex = /\[([\w一-鿿]{1,4}-ch\d+:\d+)\](?!\()/g
 
-  // B-152h: 引号后允许任意字符(汉字/标点/空白)再跟标签 — LLM 实际输出
-  // "引文"的围观场景[标签]，旧正则只允许标点+空白导致引文丢失→高亮全失败
-  // B-152o: 引号必须用 \u 转义！此前字面写法被写成了 ASCII 直引号(0x22)，
-  // 而 LLM 输出的是标准弯引号 \u201C/\u201D → 引文提取全灭(withQuote=0)的最终元凶
-  const citeRegex = /(?:[\u201c"]([^\u201c\u201d"]{4,200})[\u201d"][^[]{0,60})?\[([\w\u4e00-\u9fff]{1,4}-ch\d+:\d+)\](?!\()/g
+  // 标签锚定扫描：标签以外正文（含引号、闭引号→标签间 gap 散文）逐字保留，
+  // 旧 citeRegex 吞 gap 正文导致叙述残缺、直引号错位配对导致 data-quote 抓散文
+  // 两个问题一并消除（配对算法见 evolutionJumpHelpers）。
+  let processedText = ''
+  let cursor = 0
+  let lm: RegExpExecArray | null
+  while ((lm = labelRegex.exec(text)) !== null) {
+    const labelStart = lm.index
+    const label = lm[1]
+    processedText += text.slice(cursor, labelStart)  // 标签前正文原样保留
 
-  let processedText = text.replace(
-    citeRegex,
-    (_match: string, quoted: string | undefined, label: string) => {
-      const ref = (refs && refs[label]) ? refs[label] : null
-      let displayLabel: string
-      if (label.startsWith('src-')) {
-        // 研究文献: 优先用实际朝代，否则显示"研"
-        displayLabel = ref?.dynasty || '研'  // 研
-      } else {
-        displayLabel = label.split('-ch')[0]
-      }
-
-      if (!ref) {
-        return `<span class="ew-citation-badge ew-citation-missing" title="未找到证据: ${escapeAttr(label)}">${escapeAttr(displayLabel)}</span>`
-      }
-
-      const quote = (quoted || '').trim()
-      const quoteAttr = quote ? ` data-quote="${escapeAttr(quote)}"` : ''
-      const quotePrefix = quote ? `"${escapeHtml(quote)}"` : ''
-      return `${quotePrefix}<span class="ew-citation-badge" data-ref-label="${escapeAttr(label)}"${quoteAttr} title="${escapeAttr(ref.chapterTitle || '')} 段落${ref.paragraphIndex ?? 0}">${escapeAttr(displayLabel)}</span>`
+    const ref = (refs && refs[label]) ? refs[label] : null
+    let displayLabel: string
+    if (label.startsWith('src-')) {
+      // 研究文献: 优先用实际朝代，否则显示"研"
+      displayLabel = ref?.dynasty || '研'
+    } else {
+      displayLabel = label.split('-ch')[0]
     }
-  )
+
+    if (!ref) {
+      processedText += `<span class="ew-citation-badge ew-citation-missing" title="未找到证据: ${escapeAttr(label)}">${escapeAttr(displayLabel)}</span>`
+    } else {
+      const mq = extractQuoteBeforeLabel(text, labelStart)
+      const quote = mq ? mq.quote : ''
+      const quoteAttr = quote ? ` data-quote="${escapeAttr(quote)}"` : ''
+      processedText += `<span class="ew-citation-badge" data-ref-label="${escapeAttr(label)}"${quoteAttr} title="${escapeAttr(ref.chapterTitle || '')} 段落${ref.paragraphIndex ?? 0}">${escapeAttr(displayLabel)}</span>`
+    }
+
+    cursor = labelStart + lm[0].length
+  }
+  processedText += text.slice(cursor)
 
   // Step 3: 漏网旧格式短ID [明3][宋2][唐1][清5] → 灰色不可点击
   // B-151: LLM 偶尔仍按旧习惯写短ID，不在 evidence_refs 中，只能灰显

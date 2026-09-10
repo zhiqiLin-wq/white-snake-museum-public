@@ -24,7 +24,10 @@ logger = logging.getLogger(__name__)
 
 # B-084: v19 Token 预算调整 —— 长报告分段写入 + 深度研究任务需要更多轮次
 MAX_REACT_ITERATIONS = 12   # v8: 7 -> 12（深度对勘/报告任务需多轮工具调用）
-MAX_TOKENS_BUDGET = 30000  # v8: 12000 -> 30000（输出 tokens 口径；长报告正文走文件不进上下文）
+# B-167: 预算口径改为"纯可见输出"——provider 已剔除 reasoning_tokens（思维链），
+# 30000 足够 12 轮 ReAct + 7 章 append；但深度对勘/报告任务检索轮次多，适度上调到
+# 50000 留余量，避免长报告写到一半因预算耗尽被迫停止（B-167 根因之一）。
+MAX_TOKENS_BUDGET = 50000  # v8: 12000 -> 30000 -> 50000（纯可见输出 tokens 口径）
 DUPLICATE_TOOL_THRESHOLD = 2  # 保持不变
 _GUARDRAIL_KEEP_RECENT = 2  # v16: 上下文护栏触发时保留最近 N 条工具消息完整
 
@@ -418,6 +421,8 @@ class AgentLoop:
         有可疑时在 answer 末尾追加「⚠️ 来源校验」告警块。无问题原样返回。
         异常时静默降级（不阻塞答案输出）。
         """
+        import time as _time
+        _t0 = _time.perf_counter()
         try:
             from .mcp.tools.verify_citation_tags import handler as vct_handler
             result = await vct_handler(
@@ -425,19 +430,153 @@ class AgentLoop:
                 node_client=self.node_client, retriever=self.retriever,
                 level="lenient",
             )
+            _elapsed = (_time.perf_counter() - _t0) * 1000
             if result.get("verified"):
-                logger.debug(f"[P1-1] verify_citation_tags 通过: {result.get('stats')}")
+                logger.info(f"[P1-1] verify_citation_tags 通过: {result.get('stats')} ({_elapsed:.0f}ms)")
                 return answer
             stats = result.get("stats", {})
             warnings = result.get("warnings", [])
             logger.info(
                 f"[P1-1] verify_citation_tags 发现 {len(warnings)} 处可疑: "
-                f"tags={stats.get('total_tags', 0)}, refs={stats.get('total_refs', 0)}"
+                f"tags={stats.get('total_tags', 0)}, refs={stats.get('total_refs', 0)}, "
+                f"quotes={stats.get('quotes_total', 0)}(verified={stats.get('quotes_verified', 0)},"
+                f"suspicious={stats.get('quotes_suspicious', 0)}) ({_elapsed:.0f}ms)"
             )
             return answer + result.get("append_hint", "")
         except Exception as ex:
             logger.warning(f"[P1-1] verify_citation_tags 后处理异常（降级跳过）: {ex}")
             return answer
+
+    async def _verify_report_citations(self, user_id: str, report_id: str,
+                                       report_content: str, sources: list,
+                                       truncated: bool = False) -> dict:
+        """v21/P1-2: 报告封卷后校验 md 文档中的引文是否真实命中原文。
+
+        与 _post_verify_citations 不同——本方法校验的是**写入 md 文件的完整报告内容**，
+        而非对话框中的简短答案。校验结果追加为报告末尾的「来源校验」节。
+
+        设计原则:
+        - 绝不修改/删除报告正文（保证文档完整性）
+        - 只在末尾追加「来源校验」节，列出可疑引文
+        - 性能：并行检索 + 上限 8 条 + fast path（sources excerpt）
+        - truncated=True 时额外标注"报告可能因 token 限制截断"
+
+        Returns:
+            {"stats": {..., "elapsed_ms"}, "append_hint": str}
+        """
+        import time as _time
+        from .mcp.tools.verify_citation_tags import (
+            QUOTE_EXTRACT_RE, _norm_quote_content, _quote_verbatim_in,
+            MAX_QUOTE_LOOKUPS,
+        )
+        _t0 = _time.perf_counter()
+        stats = {
+            "quotes_total": 0, "quotes_verified": 0, "quotes_suspicious": 0,
+            "truncated": truncated, "elapsed_ms": 0.0,
+        }
+
+        if not report_content:
+            stats["elapsed_ms"] = (_time.perf_counter() - _t0) * 1000
+            return {"stats": stats, "append_hint": ""}
+
+        # 1. 合并 sources excerpt（fast path）
+        sources_corpus = ""
+        for s in (sources or []):
+            exc = s.get("excerpt", "") or s.get("excerptFull", "")
+            if exc:
+                sources_corpus += exc
+
+        # 2. 提取引文（与 verify_citation_tags 同构，跳过 <8 字短片段）
+        quotes_found = QUOTE_EXTRACT_RE.findall(report_content)
+        stats["quotes_total"] = len(quotes_found)
+        unique_quotes: list[str] = []
+        seen_norm: set[str] = set()
+        for _, q, _ in quotes_found:
+            nq = _norm_quote_content(q)
+            if len(nq) >= 8 and nq not in seen_norm:
+                seen_norm.add(nq)
+                unique_quotes.append(q)
+        quotes_to_lookup = unique_quotes[:MAX_QUOTE_LOOKUPS]
+
+        # 3. 快速路径 + 并行慢速路径（与 verify_citation_tags v20.1 同构）
+        warnings: list[dict] = []
+        quotes_need_retrieval: list[str] = []
+        for qt in quotes_to_lookup:
+            if _quote_verbatim_in(sources_corpus, qt):
+                stats["quotes_verified"] += 1
+            else:
+                quotes_need_retrieval.append(qt)
+
+        if self.retriever is not None and quotes_need_retrieval:
+            import asyncio as _aio
+            async def _lookup_one(qt: str) -> tuple[str, bool]:
+                try:
+                    hits = await self.retriever.retrieve(qt, top_k=3)
+                    if isinstance(hits, list):
+                        for h in hits:
+                            content = h.get("content", "") if isinstance(h, dict) else ""
+                            if content and _quote_verbatim_in(content, qt):
+                                return qt, True
+                except Exception:
+                    pass
+                return qt, False
+            results = await _aio.gather(*[_lookup_one(q) for q in quotes_need_retrieval])
+            for qt, ok in results:
+                if ok:
+                    stats["quotes_verified"] += 1
+                else:
+                    stats["quotes_suspicious"] += 1
+                    preview = qt[:50] + ("..." if len(qt) > 50 else "")
+                    warnings.append({
+                        "type": "quote_not_in_source",
+                        "severity": "high",
+                        "message": f"引文「{preview}」未在文献原文中逐字命中，可能为模型训练数据或编造。",
+                        "quote": preview,
+                    })
+        elif quotes_need_retrieval:
+            for qt in quotes_need_retrieval:
+                stats["quotes_suspicious"] += 1
+                preview = qt[:50] + ("..." if len(qt) > 50 else "")
+                warnings.append({
+                    "type": "quote_not_in_source",
+                    "severity": "high",
+                    "message": f"引文「{preview}」未在文献原文中逐字命中，可能为模型训练数据或编造。",
+                    "quote": preview,
+                })
+
+        stats["elapsed_ms"] = (_time.perf_counter() - _t0) * 1000
+
+        # 4. 有可疑或截断 → 在 md 文件末尾追加「来源校验」节
+        if not warnings and not truncated:
+            return {"stats": stats, "append_hint": ""}
+
+        lines = ["\n\n---\n\n## 来源校验\n"]
+        if truncated:
+            lines.append(
+                "> ⚠️ **完整性提示**：本报告因 Token 预算耗尽或循环达上限被迫封卷，"
+                "部分章节可能未写完。如需完整内容请重新提问或缩小范围。\n\n"
+            )
+        if warnings:
+            lines.append(f"> 引文逐字反查发现 {len(warnings)} 处可疑（共扫描 {stats['quotes_total']} 条引文）：\n")
+            for w in warnings:
+                lines.append(f"> - {w['message']}\n")
+        else:
+            lines.append(f"> 引文逐字反查全部通过（共 {stats['quotes_verified']} 条）。\n")
+
+        append_hint = "\n".join(lines)
+        # 写入 md 文件（追加，不修改已有正文）
+        if report_id:
+            try:
+                from .mcp.tools.save_long_report import _md_path, _safe_id
+                p = _md_path(_safe_id(user_id), report_id)
+                if p.exists():
+                    with p.open("a", encoding="utf-8") as f:
+                        f.write(append_hint)
+                    logger.debug(f"[P1-2] 来源校验节已追加到 {report_id}")
+            except Exception as ex:
+                logger.debug(f"[P1-2] 追加校验节到 md 文件失败: {ex}")
+
+        return {"stats": stats, "append_hint": append_hint}
 
     async def _call_tool(self, tool_name: str, params: dict,
                          on_progress=None) -> ToolCallResult:
@@ -1101,7 +1240,8 @@ class AgentLoop:
                         max_tokens=app_settings.max_output_tokens, temperature=0.5,
                         thinking_disabled=False,  # v17: ReAct 决策轮保留推理（唯一显式开思考的入口）
                     )
-                budget.consume(result.completion_tokens)
+                # B-167: 排除 thinking 模式的 reasoning_tokens（思维链）
+                budget.consume(result.completion_tokens - getattr(result, "reasoning_tokens", 0))
                 if result.finish_reason == "length":
                     logger.warning(
                         f"[AgentLoop] ReAct 决策轮因长度上限被截断 "
@@ -1215,8 +1355,10 @@ class AgentLoop:
                 yield event
         except Exception as e:
             logger.exception(f"[AgentLoop] run_stream 未捕获异常: {e}")
+            # B-165: 异常消息为空时补类型名，避免前端弹窗显示空括号"()"
+            err_detail = str(e)[:120] or type(e).__name__
             yield {"type": SSEEventType.ERROR,
-                   "data": {"message": f"分析过程意外中断（{str(e)[:120]}）。请重试一次，或换个更具体的问法。"}}
+                   "data": {"message": f"分析过程意外中断（{err_detail}）。请重试一次，或换个更具体的问法。"}}
             yield {"type": SSEEventType.DONE,
                    "data": {"workflow": "agent_loop", "thread_id": thread_id, "interrupted": True}}
 
@@ -1304,6 +1446,11 @@ class AgentLoop:
         iteration = 0
         last_tool_calls = []
         full_answer = ""  # v19: 累积流式最终答案全文，供来源校验后处理使用
+        # B-167: 追踪本会话 create 但未 finalize 的 report_id，
+        # 循环结束时兜底封卷（LLM 偶尔会漏调 finalize）
+        pending_report_ids: list[str] = []
+        # v21: 收集 ReAct 检索工具返回的 sources，供报告引文反查快速路径使用
+        react_sources: list[dict] = []
 
         while iteration < MAX_REACT_ITERATIONS and not budget.is_exhausted:
             iteration += 1
@@ -1338,7 +1485,10 @@ class AgentLoop:
                         r_delta = thinking_queue.get_nowait()
                         yield {"type": SSEEventType.THINKING_DELTA, "data": {"delta": r_delta}}
                     result = llm_task.result()
-                budget.consume(result.completion_tokens)
+                # B-167: 排除 thinking 模式的 reasoning_tokens（思维链），
+                # 只把"可见输出"计入预算——否则多轮 ReAct 决策的思考会凭空榨干
+                # MAX_TOKENS_BUDGET，导致 LLM 被迫提前停止写报告。
+                budget.consume(result.completion_tokens - getattr(result, "reasoning_tokens", 0))
             except (LLMFatalError, RateLimitError, APITimeoutError) as e:
                 logger.error(f"Agent Loop ReAct 流式 LLM 失败 (iter {iteration}): {e}")
                 yield {"type": SSEEventType.ERROR, "data": {"message": str(e)}}
@@ -1415,11 +1565,47 @@ class AgentLoop:
                 # v19: 长报告 finalize → 下发报告卡片事件（前端渲染下载卡片）
                 # v19.2: 必须用 full_result（未截断）—— result 是 LLM context 副本，
                 # content 被截断会导致前端下载/持久化的报告内容缺失
-                if tc.name == "save_long_report" and isinstance(tool_result.result, dict) \
-                        and tool_result.result.get("reportReady"):
-                    payload = tool_result.full_result \
-                        if isinstance(tool_result.full_result, dict) else tool_result.result
-                    yield {"type": SSEEventType.REPORT_READY, "data": payload}
+                if tc.name == "save_long_report" and isinstance(tool_result.result, dict):
+                    r = tool_result.result
+                    # B-167: 追踪 create 产生的 report_id（finalize 兜底用）
+                    if r.get("reportId") and tc.arguments.get("action") == "create":
+                        pending_report_ids.append(r["reportId"])
+                    # finalize 成功 → 下发报告卡片，并从待封卷列表移除
+                    if r.get("reportReady"):
+                        rid = r.get("reportId")
+                        if rid and rid in pending_report_ids:
+                            pending_report_ids.remove(rid)
+                        payload = tool_result.full_result \
+                            if isinstance(tool_result.full_result, dict) else r
+                        yield {"type": SSEEventType.REPORT_READY, "data": payload}
+                        # v21: 报告封卷后异步校验引文（不阻塞 SSE 流）
+                        if isinstance(payload, dict) and payload.get("content"):
+                            try:
+                                vfy = await self._verify_report_citations(
+                                    user_id, payload.get("reportId", ""),
+                                    payload["content"], react_sources,
+                                )
+                                if vfy.get("append_hint"):
+                                    logger.info(
+                                        f"[P1-2] report_citation 校验: "
+                                        f"quotes={vfy['stats']['quotes_total']}"
+                                        f"(verified={vfy['stats']['quotes_verified']},"
+                                        f"suspicious={vfy['stats']['quotes_suspicious']}) "
+                                        f"({vfy['stats']['elapsed_ms']:.0f}ms)"
+                                    )
+                            except Exception as ex:
+                                logger.debug(f"[P1-2] report_citation 校验异常: {ex}")
+
+                # v21: 收集 search 类工具返回的 sources（引文反查快速路径用）
+                if tc.name in ("search_paragraphs", "search_literature", "search_poetry") \
+                        and isinstance(tool_result.result, dict):
+                    for r in (tool_result.result.get("results") or tool_result.result.get("sources") or [])[:8]:
+                        if isinstance(r, dict):
+                            react_sources.append({
+                                "chapter_number": r.get("chapterNumber") or r.get("chapter_number", ""),
+                                "chapter_title": r.get("chapterTitle") or r.get("chapter_title", ""),
+                                "excerpt": r.get("excerpt", ""),
+                            })
 
                 # 每个工具结果一条 tool 消息（assistant 消息已在循环前统一追加）
                 # tool_name 字段供 ContextGuardrail 识别受保护工具，不影响 LLM API 调用
@@ -1436,6 +1622,40 @@ class AgentLoop:
             if budget.is_exhausted:
                 yield {"type": SSEEventType.STATUS, "data": "Token 预算耗尽，基于已有信息回答"}
                 break
+
+        # B-167: 兜底封卷——LLM 写完所有节后偶尔会漏调 finalize 直接进入回答，
+        # 此处扫描 pending_report_ids，对未封卷的报告自动调 finalize 并下发卡片
+        # v21: 兜底封卷意味着 LLM 因 token 预算耗尽或循环达上限被迫停止，
+        # 报告可能不完整 → 校验时标注"可能因 token 限制截断"
+        budget_exhausted = budget.is_exhausted
+        for rid in list(pending_report_ids):
+            try:
+                fr = await self._call_tool("save_long_report", {
+                    "action": "finalize", "report_id": rid,
+                })
+                if isinstance(fr.result, dict) and fr.result.get("reportReady"):
+                    payload = fr.full_result if isinstance(fr.full_result, dict) else fr.result
+                    yield {"type": SSEEventType.REPORT_READY, "data": payload}
+                    logger.info(f"[AgentLoop] 兜底封卷成功: {rid} ({fr.result.get('sectionCount', '?')} 节)")
+                    # v21: 兜底封卷的报告可能不完整，校验并标注截断风险
+                    if isinstance(payload, dict) and payload.get("content"):
+                        try:
+                            vfy = await self._verify_report_citations(
+                                user_id, rid, payload["content"], react_sources,
+                                truncated=budget_exhausted,
+                            )
+                            if vfy.get("append_hint"):
+                                logger.info(
+                                    f"[P1-2] report_citation(兜底) 校验: "
+                                    f"quotes={vfy['stats']['quotes_total']}"
+                                    f"(verified={vfy['stats']['quotes_verified']},"
+                                    f"suspicious={vfy['stats']['quotes_suspicious']}) "
+                                    f"({vfy['stats']['elapsed_ms']:.0f}ms)"
+                                )
+                        except Exception as ex:
+                            logger.debug(f"[P1-2] report_citation(兜底) 校验异常: {ex}")
+            except Exception as e:
+                logger.warning(f"[AgentLoop] 兜底封卷失败 {rid}: {e}")
 
         # Step 3: 流式生成最终答案
         # 如果 ReAct 循环中已经直接回答了 (情况 A)，跳过

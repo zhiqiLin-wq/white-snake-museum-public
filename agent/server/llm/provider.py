@@ -66,6 +66,10 @@ class LLMResponse:
     # v17.2: 生成结束原因（stop/length/tool_calls/content_filter）。
     # == "length" 即命中 max_tokens 上限被静默截断，上层应 WARN + 追加提示用户。
     finish_reason: str = "stop"
+    # DeepSeek thinking 模式下 completion_tokens 含 reasoning_tokens（思维链）。
+    # 账本只记"可见输出"部分，须把思维链 token 单独剔除，否则多轮 ReAct 决策
+    # 的思考会凭空榨干 MAX_TOKENS_BUDGET（B-167）。
+    reasoning_tokens: int = 0
 
 
 class LLMError(Exception):

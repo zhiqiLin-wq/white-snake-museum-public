@@ -1340,18 +1340,23 @@ class EvolutionWorkbench:
         # 命中直接返回缓存 docs。每轮 _test_claims_retrieve 新建，不跨轮串数据。
         _retrieve_cache: dict = {}
 
+        # B-164: E7 检索全局并发硬顶。6 claims × (4 朝代 + extra + research +
+        # 反例 4 朝) fan-out 峰值约 30~60 路检索，每路都要跑 BGE-large 前向；
+        # 2026-09-09 无信号量并发导致 PyTorch OOM（页面文件耗尽）。缓存命中
+        # 不占名额。embedder 层另有线程级前向信号量(EMBEDDER_MAX_CONCURRENT_FORWARD)
+        # 作全局硬顶，本信号量负责减少 asyncio/线程池任务堆积。
+        _retrieve_sem = asyncio.Semaphore(4)
+
         async def _cached_retrieve(query, filters=None, top_k=None, skip_tagging=True):
             key = (query, tuple(sorted((filters or {}).items())), top_k, skip_tagging)
             if key in _retrieve_cache:
                 return _retrieve_cache[key]
-            try:
+            # B-164: 异常不缓存（下次调用可重试）、不吞掉——基础设施错误
+            # （OOM/连接失败）必须向上传播，禁止伪装成"查无证据"。
+            async with _retrieve_sem:
                 docs = await self._filtered_retrieve(
                     query, filters=filters, top_k=top_k, skip_tagging=skip_tagging,
                 )
-            except Exception:
-                docs = []
-            if isinstance(docs, BaseException):
-                docs = []
             _retrieve_cache[key] = docs
             return docs
 
@@ -1393,9 +1398,17 @@ class EvolutionWorkbench:
                 )
 
             # A1: 反例查询 LLM 与正向检索并行重叠
+            # B-159 fix: 外层 gather 有 3 个 awaitable，旧代码解包成 2 个变量
+            # → "too many values to unpack (expected 2)"，异常被
+            # gather(return_exceptions=True) 静默吞掉，6/6 主张 evidence_pool
+            # 为空、首轮全部误判"证据不足"（用户看不到证据证实过程）。
+            # 正确结构：内层 gather 合并(4朝代批次, extra批次) → pro_results，
+            # 反例查询单独成组 → con_query。
             pro_results, con_query = await asyncio.gather(
-                asyncio.gather(*[_retrieve_dynasty(d) for d in ("唐", "宋", "明", "清")]),
-                _retrieve_extra(),
+                asyncio.gather(
+                    asyncio.gather(*[_retrieve_dynasty(d) for d in ("唐", "宋", "明", "清")]),
+                    _retrieve_extra(),
+                ),
                 self._generate_opposing_query(statement, target),
             )
             dynasty_batches, extra_batch = pro_results[0], pro_results[1]
@@ -1413,13 +1426,16 @@ class EvolutionWorkbench:
                     all_primary_docs.append(d)
 
             # 第二轮：补充研究文献
-            research_docs = []
+            # B-159: 旧代码边遍历 research_docs 边 append 同一列表，未去重的
+            # 文档会被重复追加（迭代器再次取出时 key 已存在才停止），导致
+            # evidence_pool 出现重复条目；改为独立 new_research 收集。
+            research_docs: list[dict] = []
             if len(all_primary_docs) < 15:
-                research_docs = await _cached_retrieve(
+                research_raw = await _cached_retrieve(
                     full_query,
                     filters={"source_type": "research_literature"},
                 )
-                for d in research_docs:
+                for d in research_raw:
                     key = (d.get("content", "") or "")[:80]
                     if key and key not in _seen_keys:
                         _seen_keys.add(key)
@@ -1506,20 +1522,66 @@ class EvolutionWorkbench:
 
         # 过滤掉异常结果
         valid_claims = []
+        infra_failures = 0
+        # B-164: 基础设施类异常（OOM/模型未加载/连接失败/超时）与"查无证据"
+        # 必须严格区分。2026-09-09 OOM 时旧逻辑保留原始 claim（verdict=pending）
+        # 进入 AI 判定，0 证据必判 insufficient，6/6 误判"证据不足"。
+        _INFRA_ERRORS = (RuntimeError, ConnectionError, OSError, TimeoutError, asyncio.TimeoutError)
         for i, result in enumerate(retrieved_claims):
             if isinstance(result, BaseException):
-                logger.warning(f"retrieve_for_claim[{i}] 异常: {result}")
-                valid_claims.append(claims[i])  # 保留原始 claim
+                is_infra = isinstance(result, _INFRA_ERRORS)
+                if is_infra:
+                    infra_failures += 1
+                logger.error(
+                    f"retrieve_for_claim[{i}] 检索失败（{'基础设施故障' if is_infra else '未知异常'}，"
+                    f"该主张标记 retrieval_error、不进入 AI 判定）: "
+                    f"{type(result).__name__}: {str(result)[:200]}",
+                    exc_info=result,
+                )
+                self._emit_live(build_sse_event(
+                    SSEEventType.THINKING_STEP,
+                    step="test_claims",
+                    message=f"第 {i+1}/{len(claims)} 条主张证据检索失败"
+                            f"（{type(result).__name__}），已跳过（可选择「深入调查」重试）",
+                ))
+                failed_claim = claims[i]
+                failed_claim["verdict"] = "retrieval_error"
+                failed_claim["retrieval_error"] = f"{type(result).__name__}: {str(result)[:200]}"
+                valid_claims.append(failed_claim)
             else:
                 valid_claims.append(result)
 
+        # B-164: 全部主张都因检索失败而无证据时，整体中止 E7 —— 继续走 AI 判定
+        # 只会产出 N/N insufficient 误判。抛错后 run_stream drainer 兜底转为
+        # INTERNAL_ERROR 事件推给前端，用户看到"检索服务暂时不可用，请重试"
+        # 而非以假乱真的"全部证据不足"结论。
+        if infra_failures == len(claims):
+            first_err = retrieved_claims[0]
+            raise RuntimeError(
+                f"E7 证据检索全部失败（{infra_failures}/{len(claims)} 条主张），"
+                f"检索服务暂时不可用（{type(first_err).__name__}: "
+                f"{str(first_err)[:150]}），请稍后重试或选择「重新探索」"
+            )
+
         # 汇总每条主张检索到的证据数，让用户看到检索规模
-        ev_counts = []
+        # B-159: 检索阶段证据在 evidence_pool（evidence_pro/con 要等 _judge_claim
+        # 分类后才填充），旧口径统计 pro+con 导致永远显示"检索到 0 条候选证据"，
+        # 用户看不到"证据证实"过程。retrievalSide=con 的为反向检索证据。
+        ev_total = 0
+        pro_total = 0
+        con_total = 0
         for c in valid_claims:
-            pro = len(c.get("evidence_pro", []) or [])
-            con = len(c.get("evidence_con", []) or [])
-            ev_counts.append(f"{pro+con}")
-        ev_total = sum(int(x) for x in ev_counts if x.isdigit())
+            pool = c.get("evidence_pool") or []
+            if pool:
+                ev_total += len(pool)
+                con_total += sum(1 for e in pool if e.get("retrievalSide") == "con")
+                pro_total += sum(1 for e in pool if e.get("retrievalSide") != "con")
+            else:
+                _p = len(c.get("evidence_pro", []) or [])
+                _c = len(c.get("evidence_con", []) or [])
+                pro_total += _p
+                con_total += _c
+                ev_total += _p + _c
 
         return {
             "claims": valid_claims,
@@ -1527,7 +1589,8 @@ class EvolutionWorkbench:
             "pending_events": [
                 build_sse_event(SSEEventType.THINKING_STEP,
                                 step="test_claims",
-                                message=f"证据检索完成：共 {total} 条主张，检索到 {ev_total} 条候选证据，开始AI逐条判定..."),
+                                message=f"证据检索完成：共 {total} 条主张，检索到 {ev_total} 条候选证据"
+                                        f"（正向 {pro_total} 条/反向 {con_total} 条），开始AI逐条判定..."),
                 build_sse_event(SSEEventType.STATUS,
                                 message=f"证据检索完成 ({total}条主张)，正在进行AI判定...")
             ]
@@ -1568,24 +1631,30 @@ class EvolutionWorkbench:
             all_supported = sum(1 for c in claims if c.get("verdict") == "supported")
             all_insufficient = sum(1 for c in claims if c.get("verdict") == "insufficient")
             all_refuted = sum(1 for c in claims if c.get("verdict") == "refuted")
+            # B-164: retrieval_error 是检索基础设施故障标记（非 AI 判定结论），
+            # 单独计数展示，让用户知道部分主张未验证是服务故障而非证据不足。
+            all_errors = sum(1 for c in claims if c.get("verdict") == "retrieval_error")
 
             events = [
                 build_sse_event(SSEEventType.EVIDENCE_DATA, claims=claims,
                                 message=f"判定完成 ({total}/{total}): "
-                                        f"{all_supported} 支持, {all_insufficient} 不足, {all_refuted} 否定")
+                                        f"{all_supported} 支持, {all_insufficient} 不足, "
+                                        f"{all_refuted} 否定, {all_errors} 检索失败")
             ]
 
-            if (all_refuted > 0 or all_insufficient > 0) and test_iter < 3:
-                problematic = [c for c in claims if c.get("verdict") in ("insufficient", "refuted")]
+            if (all_refuted > 0 or all_insufficient > 0 or all_errors > 0) and test_iter < 3:
+                problematic = [c for c in claims
+                               if c.get("verdict") in ("insufficient", "refuted", "retrieval_error")]
                 events.append(
                     build_sse_event(SSEEventType.EVOLUTION_INTERRUPT,
                                     interruptId="decide_next_action",
                                     interruptType="decide_next_action",
                                     threadId=state.get("thread_id", ""),
                                     data={
-                                        "summary": f"已验证{total}条主张: {all_supported}条支持, {all_insufficient}条证据不足, {all_refuted}条被否定",
+                                        "summary": f"已验证{total}条主张: {all_supported}条支持, {all_insufficient}条证据不足, {all_refuted}条被否定, {all_errors}条检索失败",
                                         "status": {"total": total, "supported": all_supported,
-                                                   "insufficient": all_insufficient, "refuted": all_refuted},
+                                                   "insufficient": all_insufficient, "refuted": all_refuted,
+                                                   "retrieval_error": all_errors},
                                         "problematicClaims": problematic[:5],
                                         "options": [
                                             {"id": "investigate", "label": "深入调查",
@@ -1648,25 +1717,30 @@ class EvolutionWorkbench:
         all_supported = sum(1 for c in claims if c.get("verdict") == "supported")
         all_insufficient = sum(1 for c in claims if c.get("verdict") == "insufficient")
         all_refuted = sum(1 for c in claims if c.get("verdict") == "refuted")
+        # B-164: 检索失败的主张未参与 AI 判定，单独计数展示（同上一处完成逻辑）
+        all_errors = sum(1 for c in claims if c.get("verdict") == "retrieval_error")
 
         events = [
             build_sse_event(SSEEventType.EVIDENCE_DATA,
                             claims=claims,
                             message=f"判定完成 ({total}/{total}): "
-                                    f"{all_supported} 支持, {all_insufficient} 不足, {all_refuted} 否定")
+                                    f"{all_supported} 支持, {all_insufficient} 不足, "
+                                    f"{all_refuted} 否定, {all_errors} 检索失败")
         ]
 
-        if (all_refuted > 0 or all_insufficient > 0) and test_iter < 3:
-            problematic = [c for c in claims if c.get("verdict") in ("insufficient", "refuted")]
+        if (all_refuted > 0 or all_insufficient > 0 or all_errors > 0) and test_iter < 3:
+            problematic = [c for c in claims
+                           if c.get("verdict") in ("insufficient", "refuted", "retrieval_error")]
             events.append(
                 build_sse_event(SSEEventType.EVOLUTION_INTERRUPT,
                                 interruptId="decide_next_action",
                                 interruptType="decide_next_action",
                                 threadId=state.get("thread_id", ""),
                                 data={
-                                    "summary": f"已验证{total}条主张: {all_supported}条支持, {all_insufficient}条证据不足, {all_refuted}条被否定",
+                                    "summary": f"已验证{total}条主张: {all_supported}条支持, {all_insufficient}条证据不足, {all_refuted}条被否定, {all_errors}条检索失败",
                                     "status": {"total": total, "supported": all_supported,
-                                               "insufficient": all_insufficient, "refuted": all_refuted},
+                                               "insufficient": all_insufficient, "refuted": all_refuted,
+                                               "retrieval_error": all_errors},
                                     "problematicClaims": problematic[:5],
                                     "options": [
                                         {"id": "investigate", "label": "深入调查",
@@ -2393,7 +2467,7 @@ class EvolutionWorkbench:
             matrix_text += line + "\n"
 
         claims_text = ""
-        verdict_labels = {"supported": "已证实", "insufficient": "证据不足", "refuted": "已否定", "pending": "待验证", "pending_retest": "待重测"}
+        verdict_labels = {"supported": "已证实", "insufficient": "证据不足", "refuted": "已否定", "pending": "待验证", "pending_retest": "待重测", "retrieval_error": "检索失败（服务暂时不可用）"}
         for c in claims:
             v = c.get('verdict', '')
             label = verdict_labels.get(v, v)
@@ -2470,123 +2544,38 @@ class EvolutionWorkbench:
                     f"_synthesize short-id strip: removed {len(_short_unknown)} hallucinated short IDs: "
                     f"{sorted(_short_unknown)[:10]}"
                 )
-        # B-150: 锚点验证 — 检查 LLM 引用的锚点是否都在 evidence_refs 中存在
-        # B-152: ch-?\d+ 兼容 src-ch-1（研究文献/元数据不全，章节号为 -1）——
-        # 旧正则匹配不了负号，导致合法引用被判为"未引用"（12/13 误报）
+        # B-159: 标签锚定式引文校验（纯函数 validate_narrative_citations）。
+        # 旧实现"先扫引号对再向后找标签"在 LLM 大量使用直引号包裹专名/强调时
+        # 配对错位（实测 171 个直引号/0 个弯引号），专名引号的闭引号被当成
+        # 下一段引文的开引号，把真实引文+真实标签整段吞删（一次误删 67 条，
+        # 综合报告被掏空）。改为以 [标签] 为锚点反向提取最近引文校验，
+        # 与前端 citeRegex 同构；直引号专名/强调不再误伤。
+        narrative, _vstats = validate_narrative_citations(narrative, _selected_evidence_refs)
         _anchor_pattern = re.compile(r'\[([\w一-鿿]{1,4}-ch-?\d+:\d+)\]')
-        narrative_anchors = set(_anchor_pattern.findall(narrative))
-        ref_labels = set(_evidence_labels)
-        missing = narrative_anchors - ref_labels
-        if missing:
+        if _vstats["removed_hallucinated_anchors"]:
             logger.warning(
-                f"_synthesize anchor validation: {len(missing)} anchors not found in evidence_refs: "
-                f"{sorted(missing)[:10]}"
+                f"_synthesize anchor fix: stripped {_vstats['removed_hallucinated_anchors']} "
+                f"hallucinated anchor labels (编造锚点标签已摘除，原文保留)"
             )
-            # B-150 fix: 从 narrative 中移除 LLM 编造的锚点标签，前端不再看到假标签
-            # B-152m: 连同编造标签前面的引号引文一起移除 —— 只删标签会残留
-            # "引文"。 悬空引文，看起来像没出处的引用。整对删除。
-            fake_total = len(_anchor_pattern.findall(narrative))
-            for fake_label in sorted(missing, key=len, reverse=True):
-                # 先尝试整对删除（引文 + 间隔 + 标签）
-                pair_re = re.compile(
-                    r'[\u201c"]([^"\u201c\u201d]{0,300})[\u201d"][^[]{0,60}'
-                    + re.escape(f"[{fake_label}]")
-                )
-                narrative, n_pair = pair_re.subn("", narrative)
-                if n_pair == 0:
-                    narrative = narrative.replace(f"[{fake_label}]", "")
-            _rate = len(missing) / max(fake_total, 1) * 100
-            logger.warning(
-                f"_synthesize anchor fix: removed {len(missing)}/{fake_total} hallucinated anchors "
-                f"(编造率 {_rate:.0f}%) — 若持续 >15% 需检查 prompt 约束"
-            )
-        extra = ref_labels - narrative_anchors
-        if extra:
+        if _vstats.get("relabeled"):
             logger.info(
-                f"_synthesize anchor validation: {len(extra)} evidence refs not cited in narrative"
+                f"_synthesize quote validation: relabeled {_vstats['relabeled']} "
+                f"mis-slotted quotes (引文真实但槽位挂错，标签改写为正确证据)"
             )
-
-        # B-152p/B-158: 引文全面校验（治本版，确定性后处理，无额外 LLM 调用）
-        # 旧版只校验"弯引号+60字符内跟标签"的引文，三类编造引文漏网：
-        #   (a) 无标签引文 —— 完全绕过校验，用户看到"引文在原文中找不到"的主因；
-        #   (b) 「」直角引号 —— 旧正则不识别，引文整体漏检；
-        #   (c) 标签内空格变体 [清-ch4: 5] —— 标签匹配失败连坐引文。
-        # 校验规则：
-        #   带标签 → 与该标签证据 excerptFull 逐字比对；失败 → 引文连同标签整对删除
-        #   无标签 → 与全部选中证据合并语料比对；命中 → 保留（真实原文，仅缺标签）；
-        #            未命中 → 追加（模型训练数据）标记（兑现 system prompt 规则 b：
-        #            非证据原文必须标注训练数据来源，与证据标签严格区分）
-        import unicodedata as _ud
-        def _norm_content(s: str) -> str:
-            """NFC 归一化 + 只保留字母数字（与前端 isContentChar 一致）。"""
-            s = _ud.normalize("NFC", s)
-            return "".join(c for c in s if c.isalnum())
-
-        # (c) 标签空格归一化：[清-ch4: 5] / [清 - ch4:5] → [清-ch4:5]
-        narrative = re.sub(
-            r'\[([\w一-鿿]{1,4})\s*-\s*ch\s*(-?\d+)\s*:\s*(\d+)\]',
-            lambda m: f"[{m.group(1)}-ch{m.group(2)}:{m.group(3)}]",
-            narrative,
-        )
-
-        def _quote_in(full: str, quote: str) -> bool:
-            """4 级逐字匹配：精确 / 归一化整串 / 12字前缀 / 15字滑窗。"""
-            exc, nq = _norm_content(full), _norm_content(quote)
-            return (
-                (quote in full)
-                or (nq in exc)
-                or (len(nq) >= 12 and nq[:12] in exc)
-                or (len(nq) >= 15 and any(nq[i:i + 15] in exc for i in range(0, len(nq) - 14, 5)))
-            )
-
-        # 全部选中证据的合并语料（无标签引文的比对基准）
-        _corpus_norm = "".join(
-            _norm_content(r.get("excerptFull") or r.get("excerpt", "") or "")
-            for r in _selected_evidence_refs.values()
-        )
-
-        # 引文跨度：弯引号/直引号/直角引号，内容 4-300 字
-        _quote_span_re = re.compile(r'([\u201c\u300c"])([^\u201c\u201d\u300d"]{4,300})([\u201d\u300d"])')
-        # 引文闭号之后 120 字符内的可选标签（允许中间隔少量叙述文字）
-        _label_after_re = re.compile(r'[^[]{0,120}\[([\w一-鿿]{1,4}-ch-?\d+:\d+)\]')
-
-        _removed_quotes = 0
-        _marked_memory_quotes = 0
-        _out: list[str] = []
-        _last = 0
-        for _m in _quote_span_re.finditer(narrative):
-            _out.append(narrative[_last:_m.start()])
-            quote = _m.group(2)
-            tail = narrative[_m.end():_m.end() + 120]
-            lm = _label_after_re.match(tail)
-            if lm:
-                label = lm.group(1)
-                ref = _selected_evidence_refs.get(label)
-                full = (ref or {}).get("excerptFull") or (ref or {}).get("excerpt", "") or ""
-                if full and _quote_in(full, quote):
-                    _out.append(_m.group(0))       # 合法带标签引文 → 原样保留
-                    _last = _m.end()
-                else:
-                    _removed_quotes += 1           # 编造引文 → 引文+间隔+标签整对删除
-                    _last = _m.end() + lm.end()
-            else:
-                if _quote_in(_corpus_norm, quote):
-                    _out.append(_m.group(0))       # 真实原文但缺标签 → 保留
-                else:
-                    _marked_memory_quotes += 1     # 非证据原文 → 标注训练数据来源
-                    _out.append(f"{_m.group(1)}{quote}{_m.group(3)}（模型训练数据）")
-                _last = _m.end()
-        _out.append(narrative[_last:])
-        narrative = "".join(_out)
-        if _removed_quotes:
+        if _vstats["removed_fabricated"]:
             logger.warning(
-                f"_synthesize quote validation: removed {_removed_quotes} fabricated tagged quotes "
-                f"(引文与标签证据不符，整对删除)"
+                f"_synthesize quote validation: stripped {_vstats['removed_fabricated']} "
+                f"tags from non-evidence quotes (引文不在任何证据中，摘标签保原文)"
             )
-        if _marked_memory_quotes:
+        if _vstats["marked_memory"]:
             logger.warning(
-                f"_synthesize quote validation: marked {_marked_memory_quotes} untagged quotes "
-                f"as （模型训练数据）(引文不在任何证据原文中)"
+                f"_synthesize quote validation: marked {_vstats['marked_memory']} untagged "
+                f"curly quotes as （模型训练数据）(引文不在任何证据原文中)"
+            )
+        _uncited = set(_evidence_labels) - set(_anchor_pattern.findall(narrative))
+        if _uncited:
+            logger.info(
+                f"_synthesize anchor validation: {len(_uncited)} evidence refs not cited in narrative"
             )
 
         # Build structured cells for final emission
@@ -3010,6 +2999,200 @@ _CN_NUM_MAP = {
     "研究": 0,  # 研究文献无章节号，映射到 0
 }
 
+
+# ---------------------------------------------------------------------------
+# B-159: 标签锚定式引文校验（综合叙述后处理，纯函数便于回归测试）
+# ---------------------------------------------------------------------------
+
+# 引用标签：[朝代-chN:M] / [src-chN:M]，兼容负章节号（src-ch-1）
+_CITE_LABEL_RE = re.compile(r'\[([\w一-鿿]{1,4}-ch-?\d+:\d+)\]')
+# 标签空格归一化：[清-ch4: 5] / [清 - ch4:5] → [清-ch4:5]
+_CITE_LABEL_SPACING_RE = re.compile(
+    r'\[([\w一-鿿]{1,4})\s*-\s*ch\s*(-?\d+)\s*:\s*(\d+)\]'
+)
+# 标签前最近的引文：弯/直角/直引号成对 + 闭引号后 0-60 个非"["字符贴到标签前
+# （与前端 EvolutionWorkspaceView citeRegex 的 60 字符窗口同构）
+_CITE_QUOTE_BEFORE_RE = re.compile(r'[“「"]([^“”」"]{4,300})[”」"][^[]{0,60}$')
+# 无标签引文扫描（仅弯引号/直角引号；直引号专名/强调不处理）
+_CITE_CURLED_QUOTE_RE = re.compile(r'([“「])([^“”」"]{4,300})([”」])')
+# 标签后 60 字符窗口（用于 Pass2 跳过已合法引用的引文）
+_CITE_LABEL_AFTER_RE = re.compile(r'[^[]{0,60}\[[\w一-鿿]{1,4}-ch-?\d+:\d+\]')
+
+
+def _norm_quote_content(s: str) -> str:
+    """NFC 归一化 + 只保留字母数字/CJK（与前端 isContentChar 一致）。"""
+    import unicodedata as _ud
+    s = _ud.normalize("NFC", s)
+    return "".join(c for c in s if c.isalnum())
+
+
+def _quote_verbatim_in(full: str, quote: str) -> bool:
+    """4 级逐字匹配：精确 / 归一化整串 / 12字前缀 / 15字滑窗（步长5）。"""
+    exc, nq = _norm_quote_content(full), _norm_quote_content(quote)
+    return (
+        (quote in full)
+        or (nq in exc)
+        or (len(nq) >= 12 and nq[:12] in exc)
+        or (len(nq) >= 15 and any(nq[i:i + 15] in exc for i in range(0, len(nq) - 14, 5)))
+    )
+
+
+def validate_narrative_citations(narrative: str, evidence_refs: dict) -> tuple[str, dict]:
+    """以引用标签为锚点校验综合叙述中的引文，返回 (清洗后叙述, 统计字典)。
+
+    旧实现先扫描引号对再向后找标签 —— LLM 大量使用直引号(0x22)包裹专名/强调
+    （实测单次输出 171 个直引号、0 个弯引号，如"异类报恩""白素贞"），
+    引号配对错位：专名引号的闭引号被当成下一段引文的开引号，把【真实引文+
+    真实标签】整段吞删（日志实锤一次误删 67 条真实引用，综合报告被掏空）。
+
+    现与前端 citeRegex 同构，以 [标签] 为锚点反向提取最近引文：
+      - 标签存在且引文逐字命中该标签证据 excerptFull → 保留；
+      - 引文逐字命中【另一条】证据（槽位挂错）→ 改写为正确标签；
+      - 引文不在任何证据中（训练数据中的真实原句/编造）→ 保留原文，
+        仅摘掉标签（弯引号由 Pass 2 标注"模型训练数据"），绝不删正文；
+      - 标签不存在（编造锚点）→ 仅摘除标签；
+      - 标签前无引文（裸标签）→ 保留，前端仍可点击徽章；
+      - 无标签弯/直角引号引文：命中证据语料保留，否则标注（模型训练数据）；
+      - 无标签直引号引文：多为专名/强调，保持原样不动。
+    """
+    stats = {"removed_fabricated": 0, "removed_hallucinated_anchors": 0,
+             "marked_memory": 0, "cited_labels": 0, "relabeled": 0}
+
+    # 标签空格归一化
+    narrative = _CITE_LABEL_SPACING_RE.sub(
+        lambda m: f"[{m.group(1)}-ch{m.group(2)}:{m.group(3)}]",
+        narrative,
+    )
+
+    # 全部选中证据的合并语料（无标签引文的比对基准）
+    corpus_norm = "".join(
+        _norm_quote_content(r.get("excerptFull") or r.get("excerpt", "") or "")
+        for r in evidence_refs.values()
+    )
+
+    # ---- Pass 1: 标签锚定扫描 ----
+    # 引文提取：标签前 60 字符内找【最近的闭引号】（与前端 60 字符窗口一致），
+    # 再向回 380 字符找【最近的开引号】（之间无任何引号字符，内容 4-300 字）。
+    # 旧实现用"最左配对"正则，直引号同时用于强调（如"白素贞"）时，强调引号的
+    # 闭引号会与真实引文的开引号配成一对，跨句吞掉真实引文（日志实锤误删 67 条）。
+    out: list[str] = []
+    cursor = 0
+    cited: set[str] = set()
+    _open_chars = "“「\""
+    _close_chars = "”」\""
+    _clause_seps = "，。！？；：、\n,.!?;:"
+    for m in _CITE_LABEL_RE.finditer(narrative):
+        label = m.group(1)
+        # 闭引号搜索窗（标签前 60 字符，不跨过上一个标签）
+        close_lo = max(cursor, m.start() - 60)
+        close_window = narrative[close_lo:m.start()]
+        closer_rel = -1
+        for i in range(len(close_window) - 1, -1, -1):
+            if close_window[i] in _close_chars:
+                closer_rel = i
+                break
+
+        quote_text = None
+        quote_abs_start = None
+        if closer_rel >= 0:
+            closer_abs = close_lo + closer_rel
+            # 开引号搜索窗（闭引号前 380 字符）
+            open_lo = max(cursor, closer_abs - 380)
+            opener_abs = -1
+            for i in range(closer_abs - 1, open_lo - 1, -1):
+                if narrative[i] in _open_chars:
+                    opener_abs = i
+                    break
+            if opener_abs >= 0:
+                content = narrative[opener_abs + 1:closer_abs]
+                if 4 <= len(_norm_quote_content(content)) <= 300:
+                    quote_text = content
+                    quote_abs_start = opener_abs
+            if quote_text is None:
+                # 孤闭引号（LLM 偶发丢失开引号）：回退到最近的句读/分句边界，
+                # 边界与闭引号之间的片段视为引文内容
+                back_lo = max(cursor, closer_abs - 300)
+                back = narrative[back_lo:closer_abs]
+                sep_rel = -1
+                for i in range(len(back) - 1, -1, -1):
+                    if back[i] in _clause_seps:
+                        sep_rel = i
+                        break
+                content = back[sep_rel + 1:] if sep_rel >= 0 else back
+                # 片段内若出现任何引号字符，说明存在错位/强调引号，不猜测引文，
+                # 按裸标签处理（与前端 quote group {4,200} 失配后的行为一致）
+                if not any(c in _open_chars or c in _close_chars for c in content) \
+                        and len(_norm_quote_content(content)) >= 4:
+                    quote_text = content
+                    quote_abs_start = back_lo + (sep_rel + 1 if sep_rel >= 0 else 0)
+
+        ref = evidence_refs.get(label)
+        quote_ok = quote_text is not None and ref is not None and _quote_verbatim_in(
+            ref.get("excerptFull") or ref.get("excerpt", "") or "",
+            quote_text,
+        )
+        if quote_ok:
+            # 合法带标签引文 → 原样保留
+            out.append(narrative[cursor:m.end()])
+            cited.add(label)
+        elif quote_text is None and ref is not None:
+            # 裸标签（合法证据，无引文）→ 保留徽章
+            out.append(narrative[cursor:m.end()])
+            cited.add(label)
+        elif quote_text is not None:
+            # 有引文但该标签证据逐字校验失败。
+            # 真实数据实锤：LLM 常引用训练数据中的真实小说/戏曲原句，而检索
+            # 回来的 chunk 是标题级碎片或标签槽位错位（:N 顺延分配），此时
+            # 整句删除会把综合报告掏空（旧代码一次删 67 条）。处理：
+            #  (a) 引文在【另一条】选中证据中逐字命中 → 槽位挂错，改写为
+            #      正确标签（徽章可跳转到正确 chunk，消除张冠李戴）；
+            #  (b) 不在任何证据中 → 保留叙述原文，仅摘掉标签（弯引号由
+            #      Pass 2 标注"模型训练数据"，直引号按强调/专名原样保留）。
+            alt_label = None
+            if ref is not None:
+                for other_label, other_ref in evidence_refs.items():
+                    if other_label == label:
+                        continue
+                    if _quote_verbatim_in(
+                        other_ref.get("excerptFull") or other_ref.get("excerpt", "") or "",
+                        quote_text,
+                    ):
+                        alt_label = other_label
+                        break
+            if alt_label is not None:
+                out.append(narrative[cursor:m.start()] + f"[{alt_label}]")
+                cited.add(alt_label)
+                stats["relabeled"] += 1
+            else:
+                out.append(narrative[cursor:m.start()])
+                if ref is not None:
+                    # 引文非证据原文：摘标签保文本（不再删正文）
+                    stats["removed_fabricated"] += 1
+                else:
+                    stats["removed_hallucinated_anchors"] += 1
+        else:
+            # 无引文且标签不存在（编造裸锚点）→ 仅删标签
+            out.append(narrative[cursor:m.start()])
+            stats["removed_hallucinated_anchors"] += 1
+        cursor = m.end()
+    out.append(narrative[cursor:])
+    narrative = "".join(out)
+
+    # ---- Pass 2: 无标签弯/直角引号引文 → 语料校验 / 训练数据标注 ----
+    def _replace_untagged(mm: re.Match) -> str:
+        tail = narrative[mm.end():mm.end() + 61]
+        # 后面紧跟标签的是 Pass1 已判定的合法引用 → 不动
+        if _CITE_LABEL_AFTER_RE.match(tail):
+            return mm.group(0)
+        if _quote_verbatim_in(corpus_norm, mm.group(2)):
+            return mm.group(0)  # 真实原文仅缺标签 → 保留
+        stats["marked_memory"] += 1
+        return f"{mm.group(1)}{mm.group(2)}{mm.group(3)}（模型训练数据）"
+
+    narrative = _CITE_CURLED_QUOTE_RE.sub(_replace_untagged, narrative)
+
+    stats["cited_labels"] = len(cited)
+    return narrative, stats
 
 
 def _cn_to_arabic(raw, source_type: str = "primary_literature") -> int:

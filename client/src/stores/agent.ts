@@ -675,8 +675,11 @@ export const useAgentStore = defineStore('agent', () => {
   }
 
   function addThinkingStep(stepName: string, displayMessage?: string) {
-    // 累积最近 thinking_step（保留滚动窗口 6 条），让用户在进度面板看到连续变化
-    // 旧实现"替换最后一条"导致长时间无可见变化
+    // 累积最近 thinking_step（保留滚动窗口 40 条），让进度面板看到连续变化。
+    // B-159: 原窗口仅 6 条，E7 阶段"证据检索完成：正向 X/反向 K 条""第 i/N 条
+    // 判定：支持/不足/否定"等逐条证据证实消息边滚边删，用户看不到证据判定过程；
+    // EvolutionProgress 组件设计上取最近 40 条子步骤渲染，窗口需与之匹配。
+    // 旧实现"替换最后一条"导致长时间无可见变化。
     const display = displayMessage || stepName
     // 上一条若未完成且消息相同则刷新时间戳，避免重复堆叠相同消息
     const lastIdx = statusSteps.value.length - 1
@@ -691,13 +694,13 @@ export const useAgentStore = defineStore('agent', () => {
         stepType: 'thinking_step',
       })
     }
-    // 保留最近 6 条 thinking_step，更早的裁剪（避免无限增长）
+    // 保留最近 40 条 thinking_step，更早的裁剪（避免无限增长）
     const thinkIdxs: number[] = []
     statusSteps.value.forEach((s, i) => {
       if (s.stepType === 'thinking_step') thinkIdxs.push(i)
     })
-    if (thinkIdxs.length > 6) {
-      const removeCount = thinkIdxs.length - 6
+    if (thinkIdxs.length > 40) {
+      const removeCount = thinkIdxs.length - 40
       const toRemove = new Set(thinkIdxs.slice(0, removeCount))
       statusSteps.value = statusSteps.value.filter((_, i) => !toRemove.has(i))
     }

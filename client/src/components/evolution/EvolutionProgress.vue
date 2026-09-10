@@ -97,15 +97,25 @@ const subSteps = computed(() => {
   ).slice(-40)
 })
 
-// 自动滚动到最新子步骤
+// 自动滚动到最新子步骤。
+// B-159: 不能只监听 length——subSteps 有 slice(-40) 显示上限，列表填满后
+// 长度恒为 40，新消息替换旧消息时 length 不变，滚动停驻导致"不触底"。
+// 改为监听"长度 + 最后一条消息标识"，任何新消息（含替换）都会触发。
 const substepsRef = ref<HTMLElement | null>(null)
-watch(() => subSteps.value.length, () => {
-  void nextTick(() => {
-    if (substepsRef.value) {
-      substepsRef.value.scrollTop = substepsRef.value.scrollHeight
-    }
-  })
-})
+watch(
+  () => {
+    const arr = subSteps.value
+    const last = arr[arr.length - 1]
+    return `${arr.length}:${last ? last.ts : 0}:${last ? last.message : ''}`
+  },
+  () => {
+    void nextTick(() => {
+      if (substepsRef.value) {
+        substepsRef.value.scrollTop = substepsRef.value.scrollHeight
+      }
+    })
+  }
+)
 
 // ---- 当前阶段的标题 ----
 const currentStep = computed(() =>
@@ -180,8 +190,8 @@ const currentStep = computed(() =>
               class="evo-substeps"
             >
               <div
-                v-for="msg in subSteps"
-                :key="msg.ts"
+                v-for="(msg, sIdx) in subSteps"
+                :key="sIdx + '-' + msg.ts"
                 class="evo-substep"
                 :class="{ done: msg.done, ['evo-sub-' + (msg.stepType || 'status')]: true }"
               >

@@ -309,11 +309,16 @@ class ToolDispatcher:
                     **({"skip_tagging": True} if getattr(self.retriever, "supports_skip_tagging", False) else {}),
                 )
             except (ValueError, ConnectionError, RuntimeError, OSError, TimeoutError, asyncio.TimeoutError) as e:
-                logger.warning(f"dispatch_retrieve 失败 [{boosted[:40]}]: {type(e).__name__}")
+                # B-164: 基础设施错误（OOM/模型未加载/连接失败/超时）必须向上传播，
+                # 禁止 return [] 把故障伪装成"查无证据"——2026-09-09 E7 OOM 时
+                # 本分支吞掉 RuntimeError 返回空列表，导致 6/6 主张 0 证据误判
+                # insufficient。埋点保留后 re-raise，由调用方（E2 cell 失败兜底 /
+                # E7 claim 标 retrieval_error）决定失败语义。
+                logger.warning(f"dispatch_retrieve 失败 [{boosted[:40]}]: {type(e).__name__}: {str(e)[:150]}")
                 _safe_record("filtered_retrieve", args, None,
                              (time.monotonic() - t0) * 1000, success=False,
                              error=str(e), error_type=type(e).__name__)
-                return []
+                raise
             out = []
             for d in docs or []:
                 md = d.get("metadata", {}) or {}

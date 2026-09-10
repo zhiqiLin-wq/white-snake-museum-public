@@ -77,6 +77,10 @@ class GenerateWithToolsResult:
     # DeepSeek thinking 模式: 多轮工具调用时必须回传上一轮 assistant 的
     # reasoning_content，否则 API 报 400 ("must be passed back to the API")
     reasoning_content: str = ""
+    # DeepSeek thinking 模式下 completion_tokens 包含 reasoning_tokens（思维链）。
+    # 账本只记"可见输出"部分，须把思维链 token 单独剔除，否则 12 轮 ReAct 决策
+    # 的思考会凭空榨干 MAX_TOKENS_BUDGET，导致 LLM 被迫提前停止写报告（B-167）。
+    reasoning_tokens: int = 0
 
     def to_assistant_message(self) -> dict:
         """转为可回传给 API 的 assistant 消息（协议细节封装在此，业务层不手拼）。
