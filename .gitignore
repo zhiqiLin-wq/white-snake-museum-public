@@ -36,37 +36,9 @@ _paper_*.txt
 *.bak
 agent/=0.21
 
-# Eval run artifacts
-rag_eval/results/
-tests/eval/chroma_eval*/
-tests/_test_data/
-
-# 评测目录：仅核心框架入库，一次性实验/诊断/调参脚本保留在本地
-rag_eval/*.py
-!rag_eval/__init__.py
-!rag_eval/conftest.py
-!rag_eval/evaluate.py
-!rag_eval/metrics.py
-!rag_eval/loader.py
-!rag_eval/reporter.py
-!rag_eval/benchmark.py
-!rag_eval/full_eval.py
-!rag_eval/fusion_ablation_core.py
-!rag_eval/detail_log.py
-rag_eval/ground_truth/*/
-rag_eval/ground_truth/*.bak_para
-rag_eval/ground_truth/_para_patch.json
-tests/eval/D*_*.md
-tests/eval/RECALL_ROOT_CAUSE.md
-tests/eval/DATASET_EXPANSION.md
-tests/eval/relabel_*.py
-tests/eval/scan_*.py
-tests/eval/inspect_*.py
-tests/annotation_eval/real_llm_eval/
-
-# 评测语料快照与查询集（含未公开发表的文献原文，不入库）
-rag_eval/ground_truth/corpus.jsonl
-rag_eval/ground_truth/queries_*.jsonl
+# Eval & test directories (local-only, not published)
+rag_eval/
+tests/
 
 # 运行时检查/调试产物（可能含语料摘录或调用日志）
 agent/chunk_inspection.txt
@@ -75,9 +47,6 @@ agent/_parse_out.txt
 
 # Personal files
 resume_project_pm.html
-
-# 标注评测运行产物（每次运行带时间戳，不进入版本库）
-tests/annotation_eval/output/
 
 # Environment
 .env
