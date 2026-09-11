@@ -18,7 +18,7 @@
 
 ## 界面演示
 
-部分功能截图，完整录屏（4 分 11 秒）见 [demo.mp4](assets/demo/demo.mp4)。
+部分功能截图，完整录屏（4 分 11 秒，约 9 MB）见 [demo.mp4](assets/demo/demo.mp4)。
 
 **主界面**
 
@@ -53,6 +53,22 @@
 **报告库**
 
 ![报告库](assets/demo/09-report.png)
+
+**演化分析**
+
+![确认母题分解](assets/demo/10-evolution-motifs.png)
+
+![扫描矩阵](assets/demo/11-evolution-matrix-scan.png)
+
+![选择演化假设](assets/demo/12-evolution-hypothesis.png)
+
+![决定后续方向](assets/demo/13-evolution-next-step.png)
+
+![母题矩阵](assets/demo/14-evolution-result-matrix.png)
+
+![证据卡片](assets/demo/15-evolution-evidence.png)
+
+![引文跳转原文](assets/demo/16-evolution-citation.png)
 
 ## 技术栈
 
