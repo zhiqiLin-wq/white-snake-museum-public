@@ -246,7 +246,7 @@ async def test_w3_smoke(memory_system, mcp_reg):
 
     # 1. 存一条记忆
     mid = memory_system.recall_store.add_memory(
-        "用户的名字是知知", memory_type="Entity", importance=0.9, confidence=0.8,
+        "用户的名字是小研", memory_type="Entity", importance=0.9, confidence=0.8,
     )
     tc("W3", "1", "双写长期记忆成功",
        mid is not None, f"memory_id={mid}")
@@ -256,7 +256,7 @@ async def test_w3_smoke(memory_system, mcp_reg):
                                                     score_threshold=0.0)
     memories = result.get("memories", [])
     tc("W3", "2", "混合检索能召回刚存的记忆",
-       len(memories) > 0 and any("知知" in str(m.get("content", "")) for m in memories),
+       len(memories) > 0 and any("小研" in str(m.get("content", "")) for m in memories),
        f"召回 {len(memories)} 条: {[m.get('content') for m in memories]}")
 
     # 3. retrieve_memory 工具端到端可用（走 hybrid 路径，不报错，返回 result）
@@ -268,10 +268,10 @@ async def test_w3_smoke(memory_system, mcp_reg):
 
     # 4. context_manager 入队 + 构建上下文窗口（含 Core Memory + 被动注入）
     await memory_system.context_manager.enqueue(
-        "thread-w3", {"role": "user", "content": "知知喜欢哪个文学人物"},
+        "thread-w3", {"role": "user", "content": "小研喜欢哪个文学人物"},
     )
     ctx = memory_system.context_manager.build_context_window_with_core_memory(
-        "thread-w3", "知知喜欢哪个文学人物",
+        "thread-w3", "小研喜欢哪个文学人物",
     )
     has_persona = any("Core Memory" in str(m.get("content", "")) for m in ctx)
     has_user = any(m.get("role") == "user" for m in ctx)

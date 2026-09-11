@@ -209,12 +209,12 @@ async def test_group_1_memory_db(test_dir: Path) -> dict:
        f"missing_tables={sorted(missing_tables)}, messages={stats['total_messages']}, memories={stats['total_memories']}")
 
     # TC1.2: 插入消息
-    mid1 = db.insert_message("用户名叫知知，喜欢法海这个文学人物", role="user", source="memory_extraction")
+    mid1 = db.insert_message("用户名叫小研，喜欢法海这个文学人物", role="user", source="memory_extraction")
     mid2 = db.insert_message("雷峰塔于1924年倒塌", role="user", source="recall")
     mid3 = db.insert_message("宋代民间信仰与文学互动是重要研究课题", role="user", source="memory_extraction")
     fetched = db.get_message(mid1)
     tc("TG1", "1.2", "插入消息并读取",
-       fetched is not None and "知知" in fetched["content"] and fetched["role"] == "user",
+       fetched is not None and "小研" in fetched["content"] and fetched["role"] == "user",
        f"mid={mid1}, content={fetched['content'][:50] if fetched else 'NONE'}")
 
     # TC1.3: 批量获取消息
@@ -223,21 +223,21 @@ async def test_group_1_memory_db(test_dir: Path) -> dict:
        f"requested 3, got {len(batch)}")
 
     # TC1.4: FTS5 bigram 搜索（中文）— 验证索引真实命中，而非 LIKE fallback 兜底
-    results = db.search_fts("知知喜欢谁", top_k=10)
+    results = db.search_fts("小研喜欢谁", top_k=10)
     conn = sqlite3.connect(str(db_path))
     try:
         fts_docs = conn.execute("SELECT COUNT(*) FROM messages_fts").fetchone()[0]
         msg_docs = conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
         fts_match = conn.execute(
             "SELECT COUNT(*) FROM messages_fts WHERE messages_fts MATCH ?",
-            ('"知知"',),
+            ('"小研"',),
         ).fetchone()[0]
     finally:
         conn.close()
     tc("TG1", "1.4", "FTS5 bigram 中文搜索（索引真实命中）",
-       len(results) > 0 and any("知知" in r["content"] for r in results)
+       len(results) > 0 and any("小研" in r["content"] for r in results)
        and fts_docs == msg_docs and fts_match > 0,
-       f"{len(results)} results, fts_docs={fts_docs}/{msg_docs}, match='知知'={fts_match}")
+       f"{len(results)} results, fts_docs={fts_docs}/{msg_docs}, match='小研'={fts_match}")
 
     # TC1.5: FTS5 搜索 - source 过滤
     results_filtered = db.search_fts("民间信仰", top_k=10, source_filter="memory_extraction")
@@ -255,7 +255,7 @@ async def test_group_1_memory_db(test_dir: Path) -> dict:
        f"{len(results_like)} results (expect 0 for nonsense query)")
 
     # TC1.7: 长期记忆 CRUD
-    mem_id = db.insert_long_term_memory(mid1, "用户名叫知知", memory_type="Entity", importance=0.9, confidence=0.8)
+    mem_id = db.insert_long_term_memory(mid1, "用户名叫小研", memory_type="Entity", importance=0.9, confidence=0.8)
     mem = db.get_long_term_memory(mem_id)
     tc("TG1", "1.7", "长期记忆 CRUD",
        mem is not None and mem["memory_type"] == "Entity" and abs(mem["importance"] - 0.9) < 0.01,
@@ -415,7 +415,7 @@ async def test_group_3_memory_extractor(test_dir: Path, chroma_client, embedder)
 
     mock_llm = MockLLM()
     mock_llm.set_responses({
-        "我叫知知": "用户的名字是知知。\n用户最喜欢的文学人物是雷峰塔传奇中的法海。\n用户的研究方向是宋代江南民间信仰与文学的互动。\n用户约束：不要发送长代码。",
+        "我叫小研": "用户的名字是小研。\n用户最喜欢的文学人物是雷峰塔传奇中的法海。\n用户的研究方向是宋代江南民间信仰与文学的互动。\n用户约束：不要发送长代码。",
         "不要给我发": "用户约束：不要发送长代码。",
         "宋代话本": "用户对宋代话本小说特别有兴趣。",
     })
@@ -431,7 +431,7 @@ async def test_group_3_memory_extractor(test_dir: Path, chroma_client, embedder)
     # TC3.2: Mem0 策略 — 跳过 assistant 消息
     asst_results = await extractor.extract({
         "role": "assistant",
-        "content": "用户的名字是知知，研究方向是宋代文学。这是很重要的个人信息应该记住。",
+        "content": "用户的名字是小研，研究方向是宋代文学。这是很重要的个人信息应该记住。",
     })
     tc("TG3", "3.2", "Mem0 策略 — 跳过 assistant 消息",
        len(asst_results) == 0,
@@ -440,7 +440,7 @@ async def test_group_3_memory_extractor(test_dir: Path, chroma_client, embedder)
     # TC3.3: 从 user 消息提取记忆
     user_results = await extractor.extract({
         "role": "user",
-        "content": "我叫知知。我特别喜欢法海这个角色，我的研究方向是宋代江南民间信仰与文学的互动。不要给我发长代码。",
+        "content": "我叫小研。我特别喜欢法海这个角色，我的研究方向是宋代江南民间信仰与文学的互动。不要给我发长代码。",
     })
     tc("TG3", "3.3", "从 user 消息提取长期记忆",
        len(user_results) >= 2,
@@ -449,7 +449,7 @@ async def test_group_3_memory_extractor(test_dir: Path, chroma_client, embedder)
     # TC3.4: MD5 去重 — 相同内容不重复提取
     dup_results = await extractor.extract({
         "role": "user",
-        "content": "我叫知知。我特别喜欢法海这个角色。",
+        "content": "我叫小研。我特别喜欢法海这个角色。",
     })
     tc("TG3", "3.4", "MD5 去重 — 相同记忆不重复存储",
        len(dup_results) == 0,
@@ -508,7 +508,7 @@ async def test_group_4_hybrid_retriever(test_dir: Path, chroma_client, embedder)
     store.clear_all()
 
     # 插入测试数据
-    store.add_memory("用户名字是知知，研究方向是宋代江南民间信仰与文学互动",
+    store.add_memory("用户名字是小研，研究方向是宋代江南民间信仰与文学互动",
                      memory_type="Entity", importance=0.9)
     store.add_memory("用户最喜欢的文学人物是雷峰塔传奇中的法海",
                      memory_type="Entity", importance=0.8)
@@ -546,13 +546,13 @@ async def test_group_4_hybrid_retriever(test_dir: Path, chroma_client, embedder)
        f"{len(result_recall['recalls'])} recalls")
 
     # TC4.4: 混合检索 — all sources
-    result_all = retriever.search("知知的研究方向", source="all", score_threshold=0.3)
+    result_all = retriever.search("小研的研究方向", source="all", score_threshold=0.3)
     tc("TG4", "4.4", "混合检索 (all) — 双通道并行",
        len(result_all["memories"]) >= 1,
        f"memories={len(result_all['memories'])}, recalls={len(result_all['recalls'])}")
 
     # TC4.5: 分数阈值过滤 (score >= 0.5)
-    result_strict = retriever.search("知知的研究方向", source="all", score_threshold=0.5)
+    result_strict = retriever.search("小研的研究方向", source="all", score_threshold=0.5)
     below = result_strict.get("below_threshold", False)
     all_strict = result_strict["memories"] + result_strict["recalls"]
     tc("TG4", "4.5", "分数阈值过滤 (score >= 0.5)",
@@ -580,14 +580,14 @@ async def test_group_4_hybrid_retriever(test_dir: Path, chroma_client, embedder)
        f"MCP text: {len(mcp_text)} chars")
 
     # TC4.9: Token 预算控制
-    result_budget = retriever.search("知知 法海 研究 方向 民间信仰", source="all",
+    result_budget = retriever.search("小研 法海 研究 方向 民间信仰", source="all",
                                       score_threshold=0.2, token_budget=50)
     tc("TG4", "4.9", "Token 预算控制",
        result_budget["total_tokens"] <= 50,
        f"total_tokens={result_budget['total_tokens']} (budget=50)")
 
     # TC4.10: 检索命中 → update_memory_access 更新访问计数（recency 重置的数据链路）
-    target_mid = store.add_memory("知知最钟爱的诗人是苏轼", memory_type="Entity", importance=0.8)
+    target_mid = store.add_memory("小研最钟爱的诗人是苏轼", memory_type="Entity", importance=0.8)
     await asyncio.sleep(0.3)
     before = db.get_long_term_memory(target_mid)
     _ = retriever.search("苏轼", source="memories", score_threshold=0.3)
@@ -784,7 +784,7 @@ async def test_group_6_core_memory(test_dir: Path) -> dict:
            f"rolled={rolled}, content_matches={content_rolled_back}, now at v{h_rolled['version'] if h_rolled else '?'}")
 
     # 回滚后再追加有意义的内容（否则格式化输出为空）
-    db.append_core_memory_block("human", json.dumps({"personal_info": {"name": "知知"}}, ensure_ascii=False))
+    db.append_core_memory_block("human", json.dumps({"personal_info": {"name": "小研"}}, ensure_ascii=False))
     h_final = db.get_core_memory_block("human")
 
     # TC6.9: Token 限制检测
@@ -828,7 +828,7 @@ async def test_group_7_context_manager(test_dir: Path, chroma_client, embedder) 
 
     mock_llm = MockLLM()
     mock_llm.set_responses({
-        "我叫知知": "用户的名字是知知。用户特别喜欢法海。用户研究宋代民间信仰。",
+        "我叫小研": "用户的名字是小研。用户特别喜欢法海。用户研究宋代民间信仰。",
     })
 
     # 与生产一致的工厂装配（fifo_max_tokens=2000 足够大，不触发压缩）
@@ -848,8 +848,8 @@ async def test_group_7_context_manager(test_dir: Path, chroma_client, embedder) 
 
     # TC7.1: FIFO 入队 + 上下文窗口构建（真实序列先 load）
     await cm.load(thread_id)
-    await cm.enqueue(thread_id, {"role": "user", "content": "你好，我叫知知。"})
-    await cm.enqueue(thread_id, {"role": "assistant", "content": "你好知知！"})
+    await cm.enqueue(thread_id, {"role": "user", "content": "你好，我叫小研。"})
+    await cm.enqueue(thread_id, {"role": "assistant", "content": "你好小研！"})
     ctx = cm.build_context_window(thread_id)
     tc("TG7", "7.1", "FIFO 入队 + build_context_window",
        len(ctx) >= 2,
@@ -883,8 +883,8 @@ async def test_group_7_context_manager(test_dir: Path, chroma_client, embedder) 
     cm3 = ms3.context_manager
     thread_id_p = "tg7-pressure-thread"
     await cm3.load(thread_id_p)
-    await cm3.enqueue(thread_id_p, {"role": "user", "content": "我是知知。我的研究涉及宋代民间信仰与文学互动。"})
-    await cm3.enqueue(thread_id_p, {"role": "assistant", "content": "好的知知，我记住了。"})
+    await cm3.enqueue(thread_id_p, {"role": "user", "content": "我是小研。我的研究涉及宋代民间信仰与文学互动。"})
+    await cm3.enqueue(thread_id_p, {"role": "assistant", "content": "好的小研，我记住了。"})
     # 添加足够多的消息触发压力
     for i in range(8):
         await cm3.enqueue(thread_id_p, {"role": "user", "content": f"关于白蛇传第{i}章的讨论。" * 8})
@@ -967,10 +967,10 @@ async def test_group_8_background_tasks(test_dir: Path, chroma_client, embedder)
     loader = PersonaLoader()
 
     # 创建几条测试记忆
-    mid1 = store.add_memory("用户叫知知，喜欢法海", memory_type="Entity", importance=0.9)
+    mid1 = store.add_memory("用户叫小研，喜欢法海", memory_type="Entity", importance=0.9)
     mid2 = store.add_memory("用户研究宋代文学", memory_type="Entity", importance=0.8)
     mid3 = store.add_memory("非常相似的用户偏好法海形象", memory_type="Entity", importance=0.6)
-    mid4 = store.add_memory("知知的研究方向是宋代江南民间信仰", memory_type="Entity", importance=0.7)
+    mid4 = store.add_memory("小研的研究方向是宋代江南民间信仰", memory_type="Entity", importance=0.7)
     mid5 = store.add_memory("临时状态：正在调试白蛇传文本", memory_type="Working", importance=0.2)
     await asyncio.sleep(0.3)
 
@@ -1035,7 +1035,7 @@ async def test_group_8_background_tasks(test_dir: Path, chroma_client, embedder)
     db.init_core_memory_block("human", json.dumps(loader.human_template, ensure_ascii=False))
     thread_id = "tg8-idle-thread"
     messages = [
-        {"role": "user", "content": "我是知知，我在杭州做宋代文学研究，希望回复简洁一些。", "_thread_id": thread_id},
+        {"role": "user", "content": "我是小研，我在杭州做宋代文学研究，希望回复简洁一些。", "_thread_id": thread_id},
     ]
     # 直接测 human 画像更新环节（process_idle_extraction 的核心），
     # 避免 scheduler 未注入 context_manager 时该环节被跳过导致假通过。
@@ -1105,12 +1105,12 @@ async def test_group_9_mcp_tools(test_dir: Path, chroma_client, embedder) -> dic
     stm_tool.set_memory_system_factory(_factory)
 
     # 添加测试记忆
-    store.add_memory("用户名字是知知，最喜欢法海", memory_type="Entity", importance=0.9)
+    store.add_memory("用户名字是小研，最喜欢法海", memory_type="Entity", importance=0.9)
     store.add_memory("用户在杭州研究宋代民间信仰与文学互动", memory_type="Entity", importance=0.8)
     await asyncio.sleep(0.3)
 
     # TC9.1: retrieve_memory (hybrid)
-    rm_result = await rm_tool.handler(query="知知喜欢谁", source="all", user_id="test-user")
+    rm_result = await rm_tool.handler(query="小研喜欢谁", source="all", user_id="test-user")
     tc("TG9", "9.1", "retrieve_memory — 混合检索",
        "长期记忆" in rm_result.get("result", ""),
        f"result_len={len(rm_result.get('result',''))}")
@@ -1195,7 +1195,7 @@ async def test_group_10_e2e(test_dir: Path, chroma_client, embedder) -> dict:
 
     mock_llm = MockLLM()
     mock_llm.set_responses({
-        "我叫知知": "用户的名字是知知。\n用户最喜欢的文学人物是雷峰塔传奇中的法海。\n用户的研究方向是宋代江南民间信仰与文学的互动。\n用户约束：不要发送长代码。",
+        "我叫小研": "用户的名字是小研。\n用户最喜欢的文学人物是雷峰塔传奇中的法海。\n用户的研究方向是宋代江南民间信仰与文学的互动。\n用户约束：不要发送长代码。",
         "白蛇传": "NO",
         "雷峰塔": "NO",
         "西湖": "NO",
@@ -1229,10 +1229,10 @@ async def test_group_10_e2e(test_dir: Path, chroma_client, embedder) -> dict:
     trace_txt("\n--- Phase A: 播种关键信息 ---\n")
     await cm.load(thread_id)
     seed_conversation = [
-        ("user", "我叫知知。我特别喜欢《雷峰塔传奇》里的法海形象，觉得他其实很复杂。"
+        ("user", "我叫小研。我特别喜欢《雷峰塔传奇》里的法海形象，觉得他其实很复杂。"
                  "我的研究方向是宋代江南地区的民间信仰与文学文本的互动关系。"
                  "不要给我发长代码，我只需要分析结果。"),
-        ("assistant", "知知您好！法海在《雷峰塔传奇》中确实值得深入探讨。"
+        ("assistant", "小研您好！法海在《雷峰塔传奇》中确实值得深入探讨。"
                        "我会记住您的研究方向和不发长代码的偏好。"),
     ]
     for role, content in seed_conversation:
@@ -1307,7 +1307,7 @@ async def test_group_10_e2e(test_dir: Path, chroma_client, embedder) -> dict:
 
     # ====== Phase E: 真实消费方法 build_memory_context_text（Core Memory + 摘要 + 被动注入）======
     trace_txt("\n--- Phase E: 被动注入 + Core Memory 注入（build_memory_context_text）---\n")
-    memory_context = cm.build_memory_context_text(thread_id, "知知喜欢哪个文学人物")
+    memory_context = cm.build_memory_context_text(thread_id, "小研喜欢哪个文学人物")
     has_injection = "相关长期记忆" in memory_context or "相关历史消息" in memory_context
     trace_txt(f"[MEMORY CONTEXT] {len(memory_context)} chars, has_injection={has_injection}:\n")
     trace_txt(memory_context[:800] + ("..." if len(memory_context) > 800 else "") + "\n")

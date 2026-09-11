@@ -25,7 +25,7 @@ MODEL = settings.memory_extraction_model or settings.effective_fast_model
 
 GOLD_FACTS = (
     # Entity: 身份 / 偏好（10 条）
-    [("Entity", "用户的名字是知知"),
+    [("Entity", "用户的名字是小研"),
      ("Entity", "用户的研究方向是宋代江南民间信仰与文学互动"),
      ("Entity", "用户最喜欢的文学人物是法海"),
      ("Entity", "用户偏好文本细读与宏观历史分析相结合"),

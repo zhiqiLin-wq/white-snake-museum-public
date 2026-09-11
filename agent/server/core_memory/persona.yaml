@@ -47,7 +47,7 @@ human:
   # === 可变区 (全部可变) ===
   personal_info: {}
     # 用户姓名、身份等基本信息
-    # 示例: { "name": "知知", "role": "研究者" }
+    # 示例: { "name": "小研", "role": "研究者" }
 
   research_interests: {}
     # 用户的研究方向和学术兴趣

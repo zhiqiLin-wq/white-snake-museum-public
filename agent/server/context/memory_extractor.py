@@ -34,7 +34,7 @@ _NOISE_PATTERNS = [
     re.compile(r"^[\d\s.,，。、;；:：!！?？\-—+*/=()（）\[\]【】{}]+$"),
 ]
 
-# 只过滤空串，不做内容价值判断（短身份/约束如"我叫知知"也有价值，噪声交给 _NOISE_PATTERNS + LLM 判 NO）
+# 只过滤空串，不做内容价值判断（短身份/约束如"我叫小研"也有价值，噪声交给 _NOISE_PATTERNS + LLM 判 NO）
 _MIN_CONTENT_LENGTH = 1
 
 # ---- Preference/Entity keywords ----
