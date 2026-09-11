@@ -58,17 +58,31 @@
 
 ![确认母题分解](assets/demo/10-evolution-motifs.png)
 
+确认母题分解：AI 围绕分析目标拆解出 6 个母题并区分不变题 / 可变题，可编辑增删或采纳 AI 建议。
+
 ![扫描矩阵](assets/demo/11-evolution-matrix-scan.png)
+
+扫描矩阵：逐朝代逐母题扫描出现情况，实时展示每格的检索关键词与扫描进度。
 
 ![选择演化假设](assets/demo/12-evolution-hypothesis.png)
 
+选择演化假设：给出三条候选假设并附证据数与量化评分，选定后进入验证。
+
 ![决定后续方向](assets/demo/13-evolution-next-step.png)
+
+决定后续方向：按验证结果提供深入调查 / 重新探索 / 接受不确定性 / 换假设四种走向。
 
 ![母题矩阵](assets/demo/14-evolution-result-matrix.png)
 
+母题矩阵：朝代 × 母题的证据网格，每格附原文摘录，一屏纵览母题形态演变。
+
 ![证据卡片](assets/demo/15-evolution-evidence.png)
 
+证据卡片：每条实证结论均列出支持证据与参考证据（含章节出处），可逐一查看原文。
+
 ![引文跳转原文](assets/demo/16-evolution-citation.png)
+
+引文跳转原文：点击证据弹出引言并高亮，一键跳转到文献原文定位核验。
 
 ## 技术栈
 
