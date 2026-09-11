@@ -111,6 +111,95 @@ AI 问答：实时展示意图识别、关键词抽取与 ReAct 检索过程，�
 | 业务后端 | Node.js、Fastify、SQLite |
 | AI Agent | Python、FastAPI、LangGraph、ChromaDB、sentence-transformers |
 
+## 项目结构
+
+```
+white-snake-museum-public/
+├── agent/                          # AI Agent 服务（Python + FastAPI）
+│   ├── server/
+│   │   ├── api/                    # HTTP 路由、SSE 事件、中间件、数据模型
+│   │   ├── context/                # 上下文窗口 + 记忆系统
+│   │   │   ├── context_manager.py  #   FIFO 队列 + 递归摘要压缩 + 压力警告
+│   │   │   ├── memory_extractor.py #   长期记忆提取（Mem0 + MD5/向量去重）
+│   │   │   ├── memory_db.py        #   记忆持久化与向量检索
+│   │   │   ├── hybrid_retriever.py #   被动注入混合检索
+│   │   │   └── recall_store.py     #   短期回忆存储
+│   │   ├── core_memory/            # Core Memory（persona.yaml 人设）
+│   │   ├── dispatch/               # 工具调度器
+│   │   ├── langgraph/              # LangGraph 编排
+│   │   │   ├── supervisor.py       #   总控图：意图分类 → 9 子图路由
+│   │   │   ├── evolution_workbench.py  # 演化分析状态机（12节点3中断）
+│   │   │   ├── literature_qa.py    #   文献问答子图
+│   │   │   ├── comparison.py       #   跨版本对比子图
+│   │   │   └── EVOLUTION_STATE_MACHINE.md
+│   │   ├── llm/                    # LLM Provider 适配（DeepSeek/Anthropic/OpenAI）
+│   │   ├── mcp/
+│   │   │   ├── tools/              # 50+ MCP 工具（检索/标注/演化/对比/地图...）
+│   │   │   └── server.py           # MCP 服务端
+│   │   ├── observability/          # 可观测性
+│   │   │   ├── logger.py           #   三层日志（业务/LLM/工具，按天切分）
+│   │   │   ├── tracer.py           #   全链路 trace（trace_id 串联）
+│   │   │   └── metrics.py          #   运行指标
+│   │   ├── prompts/                # Prompt 模板（YAML，分类器/标注/演化...）
+│   │   ├── rag/                    # RAG 检索
+│   │   │   ├── tag_retriever.py    #   五路召回 + boost 重排
+│   │   │   ├── boost.py            #   IDF 加权 + 硬分组 + summary 双路
+│   │   │   ├── tag_store.py        #   标签词表 + 向量库
+│   │   │   ├── query_tagger.py     #   query 在线打标
+│   │   │   ├── embedder.py         #   embedding（torch + safetensors）
+│   │   │   ├── bm25_retriever.py   #   稀疏检索
+│   │   │   └── tests/              # RAG 回归测试
+│   │   ├── security/               # 鉴权、限流、Token 预算
+│   │   ├── skills/                 # Skill 系统（定义/加载/执行/管道）
+│   │   ├── utils/                  # 通用工具（窗口生成/异步执行器/映射表）
+│   │   ├── agent_loop.py           # ReAct 主循环
+│   │   ├── config.py               # 全局配置
+│   │   └── main.py                 # FastAPI 入口
+│   ├── scripts/                    # 索引迁移、段落修补脚本
+│   ├── requirements.txt
+│   └── pyproject.toml
+│
+├── client/                         # 前端（Vue 3 + Vite + TS）
+│   └── src/
+│       ├── components/             # 组件
+│       │   ├── agent/              #   Agent 对话、思考步骤、上下文标签
+│       │   ├── charts/             #   ECharts 图表（桑基/旭日/热力/力导向...）
+│       │   ├── compare/            #   跨版本对比
+│       │   ├── evolution/          #   演化分析
+│       │   ├── interrupt/          #   人机中断交互（假设选择/母题编辑）
+│       │   ├── layout/             #   三栏布局
+│       │   ├── map/                #   文献地图
+│       │   ├── textreader/         #   文本阅读 + 标注高亮
+│       │   └── ui/                 #   通用 UI
+│       ├── stores/                 # Pinia 状态管理
+│       ├── views/                  # 页面视图
+│       ├── composables/            # 组合式函数（SSE/地图/状态）
+│       └── services/               # API 与 SSE 事件总线
+│
+├── server/                         # 业务后端（Node.js + Fastify）
+│   └── src/
+│       ├── routes/                 # 路由（agent/annotations/auth/literature...）
+│       ├── services/               # 业务服务（文献/分段/用户数据...）
+│       └── middleware/             # 鉴权中间件
+│
+├── rag_eval/                       # RAG 评测与优化
+│   ├── 白蛇传RAG检索优化完整报告.md  # 优化全记录（recall 0.537→0.6518）
+│   ├── RETRIEVAL_RULES.md          # 检索规则（实现唯一依据）
+│   ├── configs/                    # 多模型/多题型评测配置
+│   ├── ground_truth/               # qrels 标注
+│   ├── scripts/                    # 评测数据集生成
+│   └── evaluate.py / full_eval.py  # 评测入口
+│
+├── tests/                          # 集成测试
+│   ├── eval/                       # 记忆系统 7 维评测（d1~d7）
+│   └── annotation_eval/            # 标注流水线评测（L1~L5）
+│
+├── excel_data/                     # 主文献语料（白蛇传文献选集）
+├── assets/demo/                    # 界面截图与演示视频
+├── scripts/                        # 辅助脚本
+└── shared/                         # 共享测试夹具
+```
+
 ## 快速开始
 
 ```bash
