@@ -24,35 +24,53 @@
 
 ![主界面](assets/demo/01-overview.png)
 
+主界面：左侧文献目录、中间原文阅读、右侧 AI Agent 对话，三栏协同工作台。
+
 **全文搜索**
 
 ![全文搜索](assets/demo/02-search.png)
+
+全文搜索：关键词命中按相关度排序展示，右侧 AI 同步归纳该角色的出场演变。
 
 **AI 问答**
 
 ![AI 问答](assets/demo/03-agent-thinking.png)
 
+AI 问答：实时展示意图识别、关键词抽取与 ReAct 检索过程，回答附引用可追溯。
+
 **工具调用**
 
 ![工具调用](assets/demo/04-agent-tools.png)
+
+工具调用：检索、取章等工具调用逐条记录结果与耗时，执行轨迹全程透明。
 
 **智能标注**
 
 ![智能标注](assets/demo/05-annotation-progress.png)
 
+智能标注：AI 标注分步推进，实时显示实体数与当前阶段，可随时停止。
+
 ![标注结果](assets/demo/06-annotation-result.png)
+
+标注结果：全章自动定位 332 个实体并分类高亮，点击可看释义，支持采纳 / 修改 / 删除 / 追问。
 
 **跨版本对比**
 
 ![跨版本对比](assets/demo/07-compare.png)
 
+跨版本对比：两个朝代版本并排对勘，AI 逐字比对差异并生成可导出的对勘报告。
+
 **文献地图**
 
 ![文献地图](assets/demo/08-map.png)
 
+文献地图：故事地点标注在地图上，按图例区分类型，支持切换朝代图层。
+
 **报告库**
 
 ![报告库](assets/demo/09-report.png)
+
+报告库：AI 生成的长报告集中保存，可平台内预览、跳转章节并下载完整 Markdown。
 
 **演化分析**
 
